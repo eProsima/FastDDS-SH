@@ -16,7 +16,7 @@
 
 cmake_minimum_required(VERSION 3.5.0)
 
-project(soss-fastrtps)
+project(soss-dds)
 
 find_package(soss-core REQUIRED)
 
@@ -49,8 +49,8 @@ target_link_libraries(${PROJECT_NAME}
 
 # Install
 soss_install_middleware_plugin(
-    MIDDLEWARE fastrtps
-    TARGET soss-fastrtps
+    MIDDLEWARE dds
+    TARGET soss-dds
     NO_CONFIG
 )
 

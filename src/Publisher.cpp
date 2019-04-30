@@ -20,7 +20,7 @@
 #include <iostream>
 
 namespace soss {
-namespace fastrtps {
+namespace dds {
 
 
 Publisher::Publisher(
@@ -36,12 +36,12 @@ Publisher::Publisher(
 bool Publisher::publish(
         const soss::Message& /* soss_message */)
 {
-    std::cout << "[soss-fiware][publisher]: translate message: soss -> fastrtps "
+    std::cout << "[soss-dds][publisher]: translate message: soss -> dds "
         "(" << topic_name_ << ") " << std::endl;
 
     return true;
 }
 
 
-} // namespace fastrtps
+} // namespace dds
 } // namespace soss

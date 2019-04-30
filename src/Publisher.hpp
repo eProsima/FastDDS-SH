@@ -22,7 +22,7 @@
 #include <soss/SystemHandle.hpp>
 
 namespace soss {
-namespace fastrtps {
+namespace dds {
 
 
 class Publisher : public virtual TopicPublisher
@@ -49,7 +49,7 @@ private:
 };
 
 
-} //namespace fastrtps
+} //namespace dds
 } //namespace soss
 
 #endif // SOSS__FASTRTPS__INTERNAL__PUBLISHER_HPP

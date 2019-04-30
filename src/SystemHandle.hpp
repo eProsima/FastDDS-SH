@@ -27,7 +27,7 @@
 #include <memory>
 
 namespace soss {
-namespace fastrtps {
+namespace dds {
 
 
 class SystemHandle : public virtual TopicSystem
@@ -61,7 +61,7 @@ private:
 };
 
 
-} // namespace fastrtps
+} // namespace dds
 } // namespace soss
 
 

@@ -24,13 +24,13 @@
 #include <thread>
 
 namespace soss {
-namespace fastrtps{
+namespace dds{
 
 bool SystemHandle::configure(
     const RequiredTypes& /* types */,
     const YAML::Node& /* configuration */)
 {
-    std::cout << "[soss-fastrtps]: configured!" << std::endl;
+    std::cout << "[soss-dds]: configured!" << std::endl;
     return true;
 }
 
@@ -52,7 +52,7 @@ bool SystemHandle::subscribe(
     SubscriptionCallback /* callback */,
     const YAML::Node& /* configuration */)
 {
-    std::cout << "[soss-fiware]: subscriber created. "
+    std::cout << "[soss-dds]: subscriber created. "
         "topic: " << topic_name << ". "
         "type: " << message_type << ". "
         << std::endl;
@@ -65,7 +65,7 @@ std::shared_ptr<TopicPublisher> SystemHandle::advertise(
     const std::string& message_type,
     const YAML::Node& /* configuration */)
 {
-    std::cout << "[soss-fiware]: publisher created. "
+    std::cout << "[soss-dds]: publisher created. "
         "topic: " << topic_name << ". "
         "type: " << message_type << ". "
         << std::endl;
@@ -74,7 +74,7 @@ std::shared_ptr<TopicPublisher> SystemHandle::advertise(
 }
 
 
-} // namespace fastrtps
+} // namespace dds
 } // namespace soss
 
-SOSS_REGISTER_SYSTEM("fastrtps", soss::fastrtps::SystemHandle)
+SOSS_REGISTER_SYSTEM("dds", soss::dds::SystemHandle)
