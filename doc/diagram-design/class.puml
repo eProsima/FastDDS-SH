@@ -1,0 +1,49 @@
+@startuml
+
+SystemHandler "0..n" *--> Publisher
+SystemHandler "0..n" *--> Subscriber
+SystemHandler *--> Participant
+
+Participant --> Publisher
+Participant --> Subscriber
+
+Publisher ..> Conversion
+Subscriber ..> Conversion
+
+class SystemHandler {
+    + configure() override
+    + okay() override
+    + spin_once() override
+    + subscribe() override
+    + advertise() override
+}
+
+class Participant {
+    - dds::participant
+    + create_publisher()
+    + create_subscriber()
+    + run()
+}
+
+class Publisher {
+    - topic_name
+    - message_type
+    - dds::Publisher
+    + publish(soss_message)
+}
+
+class Subscriber {
+    - topic_name
+    - message_type
+    - dds::subscriber
+    + subscribe() //check if it needs to exists
+    + receive(dynamic_type_message)
+}
+
+class Conversion << (S,#FF7700) Singleton >> {
+    + dds_message soss_to_dds(soss_message)
+    + soss_message dds_to_soss(dds_message)
+}
+
+@enduml
+
