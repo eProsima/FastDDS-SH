@@ -25,6 +25,7 @@ add_subdirectory(thirdparty/fastrtps)
 
 # Library
 set(SRC
+    src/Publisher.cpp
     src/SystemHandle.cpp
     )
 
