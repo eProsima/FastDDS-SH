@@ -17,8 +17,10 @@
 
 #include "SystemHandle.hpp"
 
-#include <soss/Mix.hpp>
-#include <soss/Search.hpp>
+#include "Participant.hpp"
+
+//#include <soss/Mix.hpp>
+//#include <soss/Search.hpp>
 
 #include <iostream>
 #include <thread>
@@ -26,16 +28,21 @@
 namespace soss {
 namespace dds{
 
+
+SystemHandle::~SystemHandle() = default;
+
 bool SystemHandle::configure(
     const RequiredTypes& /* types */,
     const YAML::Node& /* configuration */)
 {
     std::cout << "[soss-dds]: configured!" << std::endl;
+    //TODO
     return true;
 }
 
 bool SystemHandle::okay() const
 {
+    //TODO
     return true;
 }
 
@@ -43,6 +50,7 @@ bool SystemHandle::spin_once()
 {
     using namespace std::chrono_literals;
     std::this_thread::sleep_for(100ms);
+    //check TODO
     return okay();
 }
 
@@ -57,6 +65,7 @@ bool SystemHandle::subscribe(
         "type: " << message_type << ". "
         << std::endl;
 
+    //TODO
     return true;
 }
 
@@ -70,6 +79,7 @@ std::shared_ptr<TopicPublisher> SystemHandle::advertise(
         "type: " << message_type << ". "
         << std::endl;
 
+    //TODO
     return std::shared_ptr<TopicPublisher>();
 }
 

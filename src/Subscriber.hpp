@@ -15,42 +15,46 @@
  *
 */
 
-#ifndef SOSS__DDS__INTERNAL__PUBLISHER_HPP
-#define SOSS__DDS__INTERNAL__PUBLISHER_HPP
+#ifndef SOSS__DDS__INTERNAL__SUBSCRIBER_HPP
+#define SOSS__DDS__INTERNAL__SUBSCRIBER_HPP
 
-#include <soss/Message.hpp>
 #include <soss/SystemHandle.hpp>
 
 namespace soss {
 namespace dds {
 
 
-class Publisher : public virtual TopicPublisher
+class Participant;
+
+class Subscriber
 {
 public:
-    Publisher(
-            /* fast::Publisher dds_publiser */
+    Subscriber(
+            /* fast::Subscriber dds_subscriber */
             const std::string& topic_name,
-            const std::string& message_type);
+            const std::string& message_type,
+            TopicSubscriberSystem::SubscriptionCallback soss_callback);
 
-    ~Publisher() = default;
+    ~Subscriber() = default;
 
-    Publisher(const Publisher& rhs) = delete;
-    Publisher& operator = (const Publisher& rhs) = delete;
-    Publisher(Publisher&& rhs) = delete;
-    Publisher& operator = (Publisher&& rhs) = delete;
+    Subscriber(const Subscriber& rhs) = delete;
+    Subscriber& operator = (const Subscriber& rhs) = delete;
+    Subscriber(Subscriber&& rhs) = delete;
+    Subscriber& operator = (Subscriber&& rhs) = delete;
 
-    bool publish(
-            const soss::Message& message) override;
+    bool subscribe();
+
+    void receive(const std::string& message); //dynamic type
 
 private:
-    /* fast::Publisher dds_publisher; */
+    /* fast::Subscriber dds_subscriber; */
     const std::string topic_name_;
     const std::string message_type_;
+    TopicSubscriberSystem::SubscriptionCallback soss_callback_;
 };
 
 
-} //namespace dds
-} //namespace soss
+} // namespace dds
+} // namespace soss
 
-#endif // SOSS__DDS__INTERNAL__PUBLISHER_HPP
+#endif // SOSS__DDS__INTERNAL__SUBSCRIBER_HPP

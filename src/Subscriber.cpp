@@ -15,38 +15,44 @@
  *
 */
 
-#include "Publisher.hpp"
+#include "Subscriber.hpp"
 #include "Conversion.hpp"
 
+#include <soss/Message.hpp>
+
+#include <functional>
 #include <iostream>
 
 namespace soss {
 namespace dds {
 
-
-Publisher::Publisher(
-        /* fast::Publisher dds_publisher, */
+Subscriber::Subscriber(
+        /* dds::Subscriber* subscriber */
         const std::string& topic_name,
-        const std::string& message_type)
+        const std::string& message_type,
+        TopicSubscriberSystem::SubscriptionCallback soss_callback)
 
     : topic_name_{topic_name}
     , message_type_{message_type}
+    , soss_callback_{soss_callback}
 {
     //TODO
 }
 
-bool Publisher::publish(
-        const soss::Message& soss_message)
+bool Subscriber::subscribe()
 {
-    std::cout << "[soss-dds][publisher]: translate message: soss -> dds "
+    //TODO: its really necessary this function?
+    return true;
+}
+
+void Subscriber::receive(const std::string& dds_message)
+{
+    std::cout << "[soss-dds][subscriber]: translate message: dds -> soss "
         "(" << topic_name_ << ") " << std::endl;
 
-    //soss::Message dds_message =
-    Conversion::soss_to_dds(soss_message);
+    soss::Message soss_message = Conversion::dds_to_soss(message_type_, dds_message);
 
-    //TODO: send by dds
-
-    return true;
+    soss_callback_(soss_message);
 }
 
 

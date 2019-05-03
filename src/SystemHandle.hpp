@@ -15,11 +15,9 @@
  *
 */
 
-#ifndef SOSS__FASTRTPS__INTERNAL__SYSTEMHANDLE_HPP
-#define SOSS__FASTRTPS__INTERNAL__SYSTEMHANDLE_HPP
+#ifndef SOSS__DDS__INTERNAL__SYSTEMHANDLE_HPP
+#define SOSS__DDS__INTERNAL__SYSTEMHANDLE_HPP
 
-//#include "Subscriber.hpp"
-//#include "Publisher.hpp"
 
 #include <soss/SystemHandle.hpp>
 
@@ -30,11 +28,15 @@ namespace soss {
 namespace dds {
 
 
+class Participant;
+class Publisher;
+class Subscriber;
+
 class SystemHandle : public virtual TopicSystem
 {
 public:
     SystemHandle() = default;
-    virtual ~SystemHandle() override = default;
+    virtual ~SystemHandle() override;
 
     bool configure(
         const RequiredTypes& types,
@@ -56,8 +58,9 @@ public:
         const YAML::Node& configuration) override;
 
 private:
-    //std::vector<std::shared_ptr<Publisher>> publishers_;
-    //std::vector<std::shared_ptr<Subscriber>> subscribers_;
+    std::unique_ptr<Participant> participant_;
+    std::vector<std::shared_ptr<Publisher>> publishers_;
+    std::vector<std::shared_ptr<Subscriber>> subscribers_;
 };
 
 
@@ -65,4 +68,4 @@ private:
 } // namespace soss
 
 
-#endif // SOSS__FASTRTPS__INTERNAL__SYSTEMHANDLE_HPP
+#endif // SOSS__DDS__INTERNAL__SYSTEMHANDLE_HPP
