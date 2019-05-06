@@ -20,6 +20,13 @@
 
 #include <soss/SystemHandle.hpp>
 
+namespace eprosima {
+namespace fastrtps {
+    class Subscriber;
+}
+}
+
+
 namespace soss {
 namespace dds {
 
@@ -28,9 +35,11 @@ class Participant;
 
 class Subscriber
 {
+    friend class Participant;
+
 public:
     Subscriber(
-            /* fast::Subscriber dds_subscriber */
+            eprosima::fastrtps::Participant* dds_participant,
             const std::string& topic_name,
             const std::string& message_type,
             TopicSubscriberSystem::SubscriptionCallback soss_callback);
@@ -42,12 +51,10 @@ public:
     Subscriber(Subscriber&& rhs) = delete;
     Subscriber& operator = (Subscriber&& rhs) = delete;
 
-    bool subscribe();
-
     void receive(const std::string& message); //dynamic type
 
 private:
-    /* fast::Subscriber dds_subscriber; */
+    eprosima::fastrtps::Subscriber* dds_subscriber_;
     const std::string topic_name_;
     const std::string message_type_;
     TopicSubscriberSystem::SubscriptionCallback soss_callback_;

@@ -19,7 +19,7 @@
 
 #include "Participant.hpp"
 
-//#include <soss/Mix.hpp>
+#include <soss/Mix.hpp>
 //#include <soss/Search.hpp>
 
 #include <iostream>
@@ -35,8 +35,10 @@ bool SystemHandle::configure(
     const RequiredTypes& /* types */,
     const YAML::Node& /* configuration */)
 {
+    participant_ = std::make_unique<Participant>();
+
     std::cout << "[soss-dds]: configured!" << std::endl;
-    //TODO
+
     return true;
 }
 

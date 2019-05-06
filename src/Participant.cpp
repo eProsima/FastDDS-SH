@@ -16,31 +16,38 @@
 */
 
 #include "Participant.hpp"
-#include "Publisher.hpp"
-#include "Subscriber.hpp"
+
+#include <fastrtps/attributes/ParticipantAttributes.h>
+#include <fastrtps/Domain.h>
 
 namespace soss {
 namespace dds {
 
 
-Participant::Participant(
-        const std::string& /* xml_file */)
+Participant::Participant()
 {
-    //TODO
+    eprosima::fastrtps::ParticipantAttributes attributes;
+    attributes.rtps.builtin.domainId = 0u;
+    attributes.rtps.setName("soss-dds-participant");
+    dds_participant_ = eprosima::fastrtps::Domain::createParticipant(attributes, &listener_);
+
+    if (nullptr == dds_participant_)
+    {
+        throw DDSMiddlewareException();
+    }
 }
 
-Participant::~Participant() = default;
-
-std::shared_ptr<Publisher> Participant::create_publisher()
+Participant::~Participant()
 {
-    //TODO
-    return std::shared_ptr<Publisher>();
+    eprosima::fastrtps::Domain::removeParticipant(dds_participant_);
+    eprosima::fastrtps::Domain::stopAll(); //check this
 }
 
-std::shared_ptr<Subscriber> Participant::create_subscriber()
+void Participant::Listener::onParticipantDiscovery(
+        eprosima::fastrtps::Participant* /*participant */,
+        eprosima::fastrtps::rtps::ParticipantDiscoveryInfo&& /* info */)
 {
-    //TODO
-    return std::shared_ptr<Subscriber>();
+    std::cout << "Participant discovered!" << std::endl; //TEMP_TRACE
 }
 
 

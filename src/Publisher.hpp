@@ -21,6 +21,8 @@
 #include <soss/Message.hpp>
 #include <soss/SystemHandle.hpp>
 
+#include <fastrtps/publisher/Publisher.h>
+
 namespace soss {
 namespace dds {
 
@@ -29,7 +31,7 @@ class Publisher : public virtual TopicPublisher
 {
 public:
     Publisher(
-            /* fast::Publisher dds_publiser */
+            Participant* dds_participant,
             const std::string& topic_name,
             const std::string& message_type);
 
@@ -44,7 +46,7 @@ public:
             const soss::Message& message) override;
 
 private:
-    /* fast::Publisher dds_publisher; */
+    eprosima::fastrtps::Publisher* dds_publisher_;
     const std::string topic_name_;
     const std::string message_type_;
 };

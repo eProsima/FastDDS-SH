@@ -15,17 +15,25 @@
  *
 */
 
+#include "Participant.hpp"
 #include "Publisher.hpp"
 #include "Conversion.hpp"
 
 #include <iostream>
+
+namespace eprosima {
+namespace fastrtps {
+    class Subscriber;
+}
+}
+
 
 namespace soss {
 namespace dds {
 
 
 Publisher::Publisher(
-        /* fast::Publisher dds_publisher, */
+        Participant* /* participant */,
         const std::string& topic_name,
         const std::string& message_type)
 

@@ -20,6 +20,8 @@
 
 #include <soss/Message.hpp>
 
+#include <fastrtps/subscriber/Subscriber.h>
+
 #include <functional>
 #include <iostream>
 
@@ -27,7 +29,7 @@ namespace soss {
 namespace dds {
 
 Subscriber::Subscriber(
-        /* dds::Subscriber* subscriber */
+        Participant* /* participant */,
         const std::string& topic_name,
         const std::string& message_type,
         TopicSubscriberSystem::SubscriptionCallback soss_callback)
@@ -37,12 +39,6 @@ Subscriber::Subscriber(
     , soss_callback_{soss_callback}
 {
     //TODO
-}
-
-bool Subscriber::subscribe()
-{
-    //TODO: its really necessary this function?
-    return true;
 }
 
 void Subscriber::receive(const std::string& dds_message)

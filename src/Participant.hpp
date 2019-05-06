@@ -18,29 +18,36 @@
 #ifndef SOSS__DDS__INTERNAL__PARTICIPANT_HPP
 #define SOSS__DDS__INTERNAL__PARTICIPANT_HPP
 
+#include "DDSMiddlewareException.hpp"
+
+#include <soss/SystemHandle.hpp>
+
+#include <fastrtps/participant/ParticipantListener.h>
+
 #include <memory>
 
 namespace soss {
 namespace dds {
 
-
-class Publisher;
-class Subscriber;
-
-class Participant {
-
+class Participant
+{
 public:
-    Participant(
-            const std::string& xml_file);
-
+    Participant();
     virtual ~Participant();
 
-    std::shared_ptr<Publisher> create_publisher();
-    std::shared_ptr<Subscriber> create_subscriber();
+    eprosima::fastrtps::Participant* get_implementation() const { return dds_participant_; }
 
-    //something with the listener (as spin_once)
 private:
-    //fast::Participant
+    class Listener : public eprosima::fastrtps::ParticipantListener
+    {
+        void onParticipantDiscovery(
+                eprosima::fastrtps::Participant* participant,
+                eprosima::fastrtps::rtps::ParticipantDiscoveryInfo&& info) override;
+
+    };
+
+    eprosima::fastrtps::Participant* dds_participant_;
+    Listener listener_;
 };
 
 
