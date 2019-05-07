@@ -18,9 +18,8 @@
 #include "SystemHandle.hpp"
 
 #include "Participant.hpp"
-
-#include <soss/Mix.hpp>
-//#include <soss/Search.hpp>
+#include "Publisher.hpp"
+#include "Subscriber.hpp"
 
 #include <iostream>
 #include <thread>
@@ -35,8 +34,15 @@ bool SystemHandle::configure(
     const RequiredTypes& /* types */,
     const YAML::Node& /* configuration */)
 {
-    participant_ = std::make_unique<Participant>();
-
+    try
+    {
+        participant_ = std::make_unique<Participant>();
+    }
+    catch(DDSMiddlewareException& e)
+    {
+        std::cerr << "[soss-dds]: " << e.what() << std::endl;
+        return false;
+    }
     std::cout << "[soss-dds]: configured!" << std::endl;
 
     return true;
@@ -59,16 +65,25 @@ bool SystemHandle::spin_once()
 bool SystemHandle::subscribe(
     const std::string& topic_name,
     const std::string& message_type,
-    SubscriptionCallback /* callback */,
+    SubscriptionCallback callback,
     const YAML::Node& /* configuration */)
 {
-    std::cout << "[soss-dds]: subscriber created. "
-        "topic: " << topic_name << ". "
-        "type: " << message_type << ". "
-        << std::endl;
+    try
+    {
+        auto subscriber = std::make_shared<Subscriber>(participant_.get(), topic_name, message_type, callback);
+        subscribers_.emplace_back(std::move(subscriber));
 
-    //TODO
-    return true;
+        std::cout << "[soss-dds]: subscriber created. "
+            "topic: " << topic_name << ", "
+            "type: " << message_type << std::endl;
+
+        return true;
+    }
+    catch(DDSMiddlewareException& e)
+    {
+        std::cerr << "[soss-dds]: " << e.what() << std::endl;
+        return false;
+    }
 }
 
 std::shared_ptr<TopicPublisher> SystemHandle::advertise(
@@ -76,13 +91,22 @@ std::shared_ptr<TopicPublisher> SystemHandle::advertise(
     const std::string& message_type,
     const YAML::Node& /* configuration */)
 {
-    std::cout << "[soss-dds]: publisher created. "
-        "topic: " << topic_name << ". "
-        "type: " << message_type << ". "
-        << std::endl;
+    try
+    {
+        auto publisher = std::make_shared<Publisher>(participant_.get(), topic_name, message_type);
+        publishers_.emplace_back(std::move(publisher));
 
-    //TODO
-    return std::shared_ptr<TopicPublisher>();
+        std::cout << "[soss-dds]: publisher created. "
+            "topic: " << topic_name << ", "
+            "type: " << message_type << std::endl;
+
+        return publishers_.back();
+    }
+    catch(DDSMiddlewareException& e)
+    {
+        std::cerr << "[soss-dds]: " << e.what() << std::endl;
+        return std::shared_ptr<TopicPublisher>();
+    }
 }
 
 

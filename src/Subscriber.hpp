@@ -18,14 +18,13 @@
 #ifndef SOSS__DDS__INTERNAL__SUBSCRIBER_HPP
 #define SOSS__DDS__INTERNAL__SUBSCRIBER_HPP
 
+#include "Participant.hpp"
+#include "DDSMiddlewareException.hpp"
+
 #include <soss/SystemHandle.hpp>
 
-namespace eprosima {
-namespace fastrtps {
-    class Subscriber;
-}
-}
-
+#include <fastrtps/subscriber/SubscriberListener.h>
+#include <fastrtps/types/DynamicDataPtr.h>
 
 namespace soss {
 namespace dds {
@@ -35,16 +34,14 @@ class Participant;
 
 class Subscriber
 {
-    friend class Participant;
-
 public:
     Subscriber(
-            eprosima::fastrtps::Participant* dds_participant,
+            Participant* participant,
             const std::string& topic_name,
             const std::string& message_type,
             TopicSubscriberSystem::SubscriptionCallback soss_callback);
 
-    ~Subscriber() = default;
+    virtual ~Subscriber();
 
     Subscriber(const Subscriber& rhs) = delete;
     Subscriber& operator = (const Subscriber& rhs) = delete;
@@ -54,9 +51,28 @@ public:
     void receive(const std::string& message); //dynamic type
 
 private:
+
+    class Listener : public eprosima::fastrtps::SubscriberListener
+    {
+        public:
+            virtual ~Listener() override = default;
+
+            void onSubscriptionMatched(
+                    eprosima::fastrtps::Subscriber* sub,
+                    eprosima::fastrtps::rtps::MatchingInfo& info) override;
+
+            void onNewDataMessage(
+                    eprosima::fastrtps::Subscriber* sub) override;
+
+            eprosima::fastrtps::types::DynamicData_ptr dynamic_data_;
+
+    } listener_;
+
     eprosima::fastrtps::Subscriber* dds_subscriber_;
+
     const std::string topic_name_;
     const std::string message_type_;
+
     TopicSubscriberSystem::SubscriptionCallback soss_callback_;
 };
 

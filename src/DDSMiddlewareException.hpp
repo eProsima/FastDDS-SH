@@ -16,7 +16,7 @@
 */
 
 #ifndef SOSS__DDS__INTERNAL__DDSMIDDLEWAREEXCEPTION_HPP
-#define SOSS__DDS__INTERNAL__DDSMIDDLEWAREEXPCETION_HPP
+#define SOSS__DDS__INTERNAL__DDSMIDDLEWAREEXCEPTION_HPP
 
 #include <stdexcept>
 
@@ -27,8 +27,8 @@ namespace dds {
 class DDSMiddlewareException : public std::runtime_error
 {
 public:
-    DDSMiddlewareException()
-        : std::runtime_error("DDS middleware exception")
+    DDSMiddlewareException(const std::string& message)
+        : std::runtime_error(message)
     {
     }
 };

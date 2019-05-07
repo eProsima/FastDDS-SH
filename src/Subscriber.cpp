@@ -20,7 +20,10 @@
 
 #include <soss/Message.hpp>
 
+#include <fastrtps/attributes/SubscriberAttributes.h>
 #include <fastrtps/subscriber/Subscriber.h>
+#include <fastrtps/Domain.h>
+#include <fastrtps/types/DynamicData.h>
 
 #include <functional>
 #include <iostream>
@@ -29,7 +32,7 @@ namespace soss {
 namespace dds {
 
 Subscriber::Subscriber(
-        Participant* /* participant */,
+        Participant* participant,
         const std::string& topic_name,
         const std::string& message_type,
         TopicSubscriberSystem::SubscriptionCallback soss_callback)
@@ -38,7 +41,24 @@ Subscriber::Subscriber(
     , message_type_{message_type}
     , soss_callback_{soss_callback}
 {
-    //TODO
+    eprosima::fastrtps::SubscriberAttributes attributes;
+    attributes.topic.topicKind = eprosima::fastrtps::NO_KEY;
+    attributes.topic.topicName = "hello_dds"; // topic_name;
+    attributes.topic.topicDataType = "strings_255"; //message_type
+
+    dds_subscriber_ = eprosima::fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, &listener_);
+
+    if (nullptr == dds_subscriber_)
+    {
+        throw DDSMiddlewareException("Error creating a subscriber");
+    }
+
+    listener_.dynamic_data_ = participant->create_dynamic_data(/* message_type_ */);
+}
+
+Subscriber::~Subscriber()
+{
+    eprosima::fastrtps::Domain::removeSubscriber(dds_subscriber_);
 }
 
 void Subscriber::receive(const std::string& dds_message)
@@ -49,6 +69,20 @@ void Subscriber::receive(const std::string& dds_message)
     soss::Message soss_message = Conversion::dds_to_soss(message_type_, dds_message);
 
     soss_callback_(soss_message);
+}
+
+void Subscriber::Listener::onSubscriptionMatched(
+        eprosima::fastrtps::Subscriber* /* sub */,
+        eprosima::fastrtps::rtps::MatchingInfo& /* info */)
+{
+    std::cout << "Subscriber matched!" << std::endl; //TEMP_TRACE
+}
+
+void Subscriber::Listener::onNewDataMessage(
+        eprosima::fastrtps::Subscriber* /* sub */)
+{
+    //eprosima::fastrtps::SampleInfo_t m_info;
+    std::cout << "Data message!" << std::endl; //TEMP_TRACE
 }
 
 

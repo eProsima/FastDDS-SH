@@ -18,10 +18,14 @@
 #ifndef SOSS__DDS__INTERNAL__PUBLISHER_HPP
 #define SOSS__DDS__INTERNAL__PUBLISHER_HPP
 
+#include "Participant.hpp"
+#include "DDSMiddlewareException.hpp"
+
 #include <soss/Message.hpp>
 #include <soss/SystemHandle.hpp>
 
-#include <fastrtps/publisher/Publisher.h>
+#include <fastrtps/publisher/PublisherListener.h>
+#include <fastrtps/types/DynamicDataPtr.h>
 
 namespace soss {
 namespace dds {
@@ -31,11 +35,11 @@ class Publisher : public virtual TopicPublisher
 {
 public:
     Publisher(
-            Participant* dds_participant,
+            Participant* participant,
             const std::string& topic_name,
             const std::string& message_type);
 
-    ~Publisher() = default;
+    virtual ~Publisher() override;
 
     Publisher(const Publisher& rhs) = delete;
     Publisher& operator = (const Publisher& rhs) = delete;
@@ -46,7 +50,17 @@ public:
             const soss::Message& message) override;
 
 private:
+    class Listener : public eprosima::fastrtps::PublisherListener
+    {
+        void onPublicationMatched(
+                eprosima::fastrtps::Publisher* pub,
+                eprosima::fastrtps::rtps::MatchingInfo& info) override;
+
+    } listener_;
+
     eprosima::fastrtps::Publisher* dds_publisher_;
+    eprosima::fastrtps::types::DynamicData_ptr dynamic_data_;
+
     const std::string topic_name_;
     const std::string message_type_;
 };

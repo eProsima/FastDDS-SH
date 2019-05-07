@@ -23,6 +23,9 @@
 #include <soss/SystemHandle.hpp>
 
 #include <fastrtps/participant/ParticipantListener.h>
+#include <fastrtps/types/DynamicTypePtr.h>
+#include <fastrtps/types/DynamicDataPtr.h>
+#include <fastrtps/types/DynamicPubSubType.h>
 
 #include <memory>
 
@@ -35,7 +38,8 @@ public:
     Participant();
     virtual ~Participant();
 
-    eprosima::fastrtps::Participant* get_implementation() const { return dds_participant_; }
+    eprosima::fastrtps::Participant* get_dds_participant() const { return dds_participant_; }
+    eprosima::fastrtps::types::DynamicData_ptr create_dynamic_data();
 
 private:
     class Listener : public eprosima::fastrtps::ParticipantListener
@@ -44,10 +48,11 @@ private:
                 eprosima::fastrtps::Participant* participant,
                 eprosima::fastrtps::rtps::ParticipantDiscoveryInfo&& info) override;
 
-    };
+    } listener_;
 
     eprosima::fastrtps::Participant* dds_participant_;
-    Listener listener_;
+    eprosima::fastrtps::types::DynamicType_ptr dynamic_type_;
+    eprosima::fastrtps::types::DynamicPubSubType pub_sub_type_;
 };
 
 

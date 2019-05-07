@@ -27,7 +27,7 @@ add_subdirectory(thirdparty/fastrtps)
 set(SRC
     src/Conversion.cpp
     src/Publisher.cpp
-    #    src/Subscriber.cpp
+    src/Subscriber.cpp
     src/Participant.cpp
     src/SystemHandle.cpp
     )

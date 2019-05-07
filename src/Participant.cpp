@@ -18,7 +18,11 @@
 #include "Participant.hpp"
 
 #include <fastrtps/attributes/ParticipantAttributes.h>
+#include <fastrtps/types/DynamicTypeBuilderFactory.h>
+#include <fastrtps/types/DynamicDataFactory.h>
 #include <fastrtps/Domain.h>
+
+#include <iostream>
 
 namespace soss {
 namespace dds {
@@ -33,18 +37,27 @@ Participant::Participant()
 
     if (nullptr == dds_participant_)
     {
-        throw DDSMiddlewareException();
+        throw DDSMiddlewareException("Error creating a participant");
     }
+
+    dynamic_type_ = eprosima::fastrtps::types::DynamicTypeBuilderFactory::GetInstance()->CreateStringType();
+
+    pub_sub_type_.SetDynamicType(dynamic_type_);
+    eprosima::fastrtps::Domain::registerDynamicType(dds_participant_, &pub_sub_type_);
 }
 
 Participant::~Participant()
 {
     eprosima::fastrtps::Domain::removeParticipant(dds_participant_);
-    eprosima::fastrtps::Domain::stopAll(); //check this
+}
+
+eprosima::fastrtps::types::DynamicData_ptr Participant::create_dynamic_data()
+{
+    return eprosima::fastrtps::types::DynamicDataFactory::GetInstance()->CreateData(dynamic_type_);
 }
 
 void Participant::Listener::onParticipantDiscovery(
-        eprosima::fastrtps::Participant* /*participant */,
+        eprosima::fastrtps::Participant* /* participant */,
         eprosima::fastrtps::rtps::ParticipantDiscoveryInfo&& /* info */)
 {
     std::cout << "Participant discovered!" << std::endl; //TEMP_TRACE
