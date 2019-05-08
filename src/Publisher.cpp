@@ -38,10 +38,12 @@ Publisher::Publisher(
     : topic_name_{topic_name}
     , message_type_{message_type}
 {
+    dynamic_data_ = participant->create_topic_type(message_type).create_dynamic_data();
+
     eprosima::fastrtps::PublisherAttributes attributes;
     attributes.topic.topicKind = eprosima::fastrtps::NO_KEY; //Check this
     attributes.topic.topicName = "hello_dds"; /* topic_name_ */;
-    attributes.topic.topicDataType = "string_struct" /* message_type_ */;
+    attributes.topic.topicDataType = message_type;
 
     dds_publisher_ = eprosima::fastrtps::Domain::createPublisher(participant->get_dds_participant(), attributes, this);
 
@@ -49,8 +51,6 @@ Publisher::Publisher(
     {
         throw DDSMiddlewareException("Error creating a publisher");
     }
-
-    dynamic_data_ = participant->create_dynamic_data(/* message_type_ */);
 }
 
 Publisher::~Publisher()
@@ -64,11 +64,9 @@ bool Publisher::publish(
     std::cout << "[soss-dds][publisher]: translate message: soss -> dds "
         "(" << topic_name_ << ") " << std::endl;
 
-    //std::string dds_message =
-    Conversion::soss_to_dds(soss_message);
+    std::string dds_message = Conversion::soss_to_dds(soss_message);
 
-    dynamic_data_->SetStringValue("hello_dds", 0);
-
+    dynamic_data_->SetStringValue(dds_message, 0);
     dds_publisher_->write(dynamic_data_.get());
 
     return true;

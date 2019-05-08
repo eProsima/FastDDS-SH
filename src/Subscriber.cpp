@@ -43,10 +43,12 @@ Subscriber::Subscriber(
     , message_type_{message_type}
     , soss_callback_{soss_callback}
 {
+    dynamic_data_ = participant->create_topic_type(message_type).create_dynamic_data();
+
     eprosima::fastrtps::SubscriberAttributes attributes;
     attributes.topic.topicKind = eprosima::fastrtps::NO_KEY;
     attributes.topic.topicName = "hello_dds"; // topic_name;
-    attributes.topic.topicDataType = "string_struct"; //message_type
+    attributes.topic.topicDataType = message_type;
 
     dds_subscriber_ = eprosima::fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, this);
 
@@ -54,8 +56,6 @@ Subscriber::Subscriber(
     {
         throw DDSMiddlewareException("Error creating a subscriber");
     }
-
-    dynamic_data_ = participant->create_dynamic_data(/* message_type_ */);
 }
 
 Subscriber::~Subscriber()
@@ -91,8 +91,6 @@ void Subscriber::onNewDataMessage(
         {
             std::string message;
             dynamic_data_->GetStringValue(message, 0);
-
-            std::cout << "data message: " << message << std::endl; //TEMP_TRACE
 
             receive(message);
         }

@@ -4,8 +4,9 @@ SystemHandler "0..n" *--> Publisher
 SystemHandler "0..n" *--> Subscriber
 SystemHandler *--> Participant
 
-Participant --> Publisher
-Participant --> Subscriber
+Participant <-- Publisher
+Participant <-- Subscriber
+Participant "0..n" *--> TopicType
 
 Publisher ..> Conversion
 Subscriber ..> Conversion
@@ -20,23 +21,25 @@ class SystemHandler {
 
 class Participant {
     - dds::participant
-    + create_publisher()
-    + create_subscriber()
-    + run()
+    + create_topic_type(name)
+}
+
+class TopicType {
+    - dds::type
+    + create_dynamic_data()
 }
 
 class Publisher {
+    - dds::Publisher
     - topic_name
     - message_type
-    - dds::Publisher
     + publish(soss_message)
 }
 
 class Subscriber {
+    - dds::subscriber
     - topic_name
     - message_type
-    - dds::subscriber
-    + subscribe() //check if it needs to exists
     + receive(dynamic_type_message)
 }
 

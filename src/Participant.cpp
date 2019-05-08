@@ -34,24 +34,13 @@ Participant::Participant(uint32_t domain)
     eprosima::fastrtps::ParticipantAttributes attributes;
     attributes.rtps.builtin.domainId = domain;
     attributes.rtps.setName("soss-dds-participant");
-    dds_participant_ = eprosima::fastrtps::Domain::createParticipant(attributes, &listener_);
+    dds_participant_ = eprosima::fastrtps::Domain::createParticipant(attributes, this);
 
     if (nullptr == dds_participant_)
     {
         throw DDSMiddlewareException("Error creating a participant");
     }
 
-    eprosima::fastrtps::DynamicTypeBuilder_ptr string_builder
-        = eprosima::fastrtps::DynamicTypeBuilderFactory::GetInstance()->CreateStringBuilder();
-    eprosima::fastrtps::DynamicTypeBuilder_ptr struct_builder
-        = eprosima::fastrtps::DynamicTypeBuilderFactory::GetInstance()->CreateStructBuilder();
-
-    struct_builder->AddMember(0, "message", string_builder.get());
-    struct_builder->SetName("string_struct");
-
-    dynamic_type_ = struct_builder->Build();
-    pub_sub_type_.SetDynamicType(dynamic_type_);
-    eprosima::fastrtps::Domain::registerDynamicType(dds_participant_, &pub_sub_type_);
 }
 
 Participant::~Participant()
@@ -59,12 +48,30 @@ Participant::~Participant()
     eprosima::fastrtps::Domain::removeParticipant(dds_participant_);
 }
 
-eprosima::fastrtps::types::DynamicData_ptr Participant::create_dynamic_data()
+const TopicType& Participant::create_topic_type(const std::string& name)
 {
-    return eprosima::fastrtps::types::DynamicDataFactory::GetInstance()->CreateData(dynamic_type_);
+    auto it = topics_.find(name);
+    if (topics_.end() != it)
+    {
+        return it->second;
+    }
+
+    it = topics_.emplace_hint(it, name, TopicType(name));
+
+    if (!eprosima::fastrtps::Domain::registerDynamicType(dds_participant_, &it->second.get_pub_sub_type()))
+    {
+        throw DDSMiddlewareException("Error registering the dynamic type");
+    }
+
+    return it->second;
 }
 
-void Participant::Listener::onParticipantDiscovery(
+const TopicType& Participant::get_topic_type(const std::string& name) const
+{
+    return topics_.at(name);
+}
+
+void Participant::onParticipantDiscovery(
         eprosima::fastrtps::Participant* /* participant */,
         eprosima::fastrtps::rtps::ParticipantDiscoveryInfo&& /* info */)
 {
