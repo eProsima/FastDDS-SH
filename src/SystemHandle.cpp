@@ -32,19 +32,27 @@ SystemHandle::~SystemHandle() = default;
 
 bool SystemHandle::configure(
     const RequiredTypes& /* types */,
-    const YAML::Node& /* configuration */)
+    const YAML::Node& configuration)
 {
+    if (!configuration["domain"])
+    {
+        std::cerr << "[soss-dds]: configuration must have a domain field." << std::endl;
+        return false;
+    }
+
+    uint32_t domain = configuration["domain"].as<uint32_t>();
+
     try
     {
-        participant_ = std::make_unique<Participant>();
+        participant_ = std::make_unique<Participant>(domain);
     }
     catch(DDSMiddlewareException& e)
     {
         std::cerr << "[soss-dds]: " << e.what() << std::endl;
         return false;
     }
-    std::cout << "[soss-dds]: configured!" << std::endl;
 
+    std::cout << "[soss-dds]: configured!" << std::endl;
     return true;
 }
 
@@ -58,7 +66,6 @@ bool SystemHandle::spin_once()
 {
     using namespace std::chrono_literals;
     std::this_thread::sleep_for(100ms);
-    //check TODO
     return okay();
 }
 

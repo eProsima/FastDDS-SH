@@ -16,6 +16,7 @@
 */
 
 #include "Publisher.hpp"
+#include "Participant.hpp"
 #include "Conversion.hpp"
 
 #include <fastrtps/attributes/PublisherAttributes.h>
@@ -42,7 +43,7 @@ Publisher::Publisher(
     attributes.topic.topicName = "hello_dds"; /* topic_name_ */;
     attributes.topic.topicDataType = "strings_255" /* message_type_ */;
 
-    dds_publisher_ = eprosima::fastrtps::Domain::createPublisher(participant->get_dds_participant(), attributes, &listener_);
+    dds_publisher_ = eprosima::fastrtps::Domain::createPublisher(participant->get_dds_participant(), attributes, this);
 
     if (nullptr == dds_publisher_)
     {
@@ -74,7 +75,7 @@ bool Publisher::publish(
 }
 
 
-void Publisher::Listener::onPublicationMatched(
+void Publisher::onPublicationMatched(
         eprosima::fastrtps::Publisher* /* publisher */,
         eprosima::fastrtps::rtps::MatchingInfo& /* info */)
 {

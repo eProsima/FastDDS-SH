@@ -16,6 +16,7 @@
 */
 
 #include "Subscriber.hpp"
+#include "Participant.hpp"
 #include "Conversion.hpp"
 
 #include <soss/Message.hpp>
@@ -46,14 +47,14 @@ Subscriber::Subscriber(
     attributes.topic.topicName = "hello_dds"; // topic_name;
     attributes.topic.topicDataType = "strings_255"; //message_type
 
-    dds_subscriber_ = eprosima::fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, &listener_);
+    dds_subscriber_ = eprosima::fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, this);
 
     if (nullptr == dds_subscriber_)
     {
         throw DDSMiddlewareException("Error creating a subscriber");
     }
 
-    listener_.dynamic_data_ = participant->create_dynamic_data(/* message_type_ */);
+    dynamic_data_ = participant->create_dynamic_data(/* message_type_ */);
 }
 
 Subscriber::~Subscriber()
@@ -71,18 +72,30 @@ void Subscriber::receive(const std::string& dds_message)
     soss_callback_(soss_message);
 }
 
-void Subscriber::Listener::onSubscriptionMatched(
+void Subscriber::onSubscriptionMatched(
         eprosima::fastrtps::Subscriber* /* sub */,
         eprosima::fastrtps::rtps::MatchingInfo& /* info */)
 {
     std::cout << "Subscriber matched!" << std::endl; //TEMP_TRACE
 }
 
-void Subscriber::Listener::onNewDataMessage(
+void Subscriber::onNewDataMessage(
         eprosima::fastrtps::Subscriber* /* sub */)
 {
-    //eprosima::fastrtps::SampleInfo_t m_info;
     std::cout << "Data message!" << std::endl; //TEMP_TRACE
+    /*
+    eprosima::fastrtps::SampleInfo_t info;
+    if(sub->takeNextData(dynamic_data_, &info))
+    {
+        if(info.sampleKind == ALIVE)
+        {
+            std::string message;
+            dynamic_data_->GetStringValue(message);
+
+            std::cout << "Data message!" << std::endl; //TEMP_TRACE
+        }
+    }
+    */
 }
 
 

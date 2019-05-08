@@ -35,7 +35,7 @@ namespace dds {
 class Participant
 {
 public:
-    Participant();
+    Participant(uint32_t domain);
     virtual ~Participant();
 
     eprosima::fastrtps::Participant* get_dds_participant() const { return dds_participant_; }

@@ -28,10 +28,10 @@ namespace soss {
 namespace dds {
 
 
-Participant::Participant()
+Participant::Participant(uint32_t domain)
 {
     eprosima::fastrtps::ParticipantAttributes attributes;
-    attributes.rtps.builtin.domainId = 0u;
+    attributes.rtps.builtin.domainId = domain;
     attributes.rtps.setName("soss-dds-participant");
     dds_participant_ = eprosima::fastrtps::Domain::createParticipant(attributes, &listener_);
 
