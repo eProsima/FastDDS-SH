@@ -19,6 +19,7 @@
 
 #include <fastrtps/attributes/ParticipantAttributes.h>
 #include <fastrtps/types/DynamicTypeBuilderFactory.h>
+#include <fastrtps/types/DynamicTypeBuilderPtr.h>
 #include <fastrtps/types/DynamicDataFactory.h>
 #include <fastrtps/Domain.h>
 
@@ -40,8 +41,15 @@ Participant::Participant(uint32_t domain)
         throw DDSMiddlewareException("Error creating a participant");
     }
 
-    dynamic_type_ = eprosima::fastrtps::types::DynamicTypeBuilderFactory::GetInstance()->CreateStringType();
+    eprosima::fastrtps::DynamicTypeBuilder_ptr string_builder
+        = eprosima::fastrtps::DynamicTypeBuilderFactory::GetInstance()->CreateStringBuilder();
+    eprosima::fastrtps::DynamicTypeBuilder_ptr struct_builder
+        = eprosima::fastrtps::DynamicTypeBuilderFactory::GetInstance()->CreateStructBuilder();
 
+    struct_builder->AddMember(0, "message", string_builder.get());
+    struct_builder->SetName("string_struct");
+
+    dynamic_type_ = struct_builder->Build();
     pub_sub_type_.SetDynamicType(dynamic_type_);
     eprosima::fastrtps::Domain::registerDynamicType(dds_participant_, &pub_sub_type_);
 }
@@ -60,7 +68,6 @@ void Participant::Listener::onParticipantDiscovery(
         eprosima::fastrtps::Participant* /* participant */,
         eprosima::fastrtps::rtps::ParticipantDiscoveryInfo&& /* info */)
 {
-    std::cout << "Participant discovered!" << std::endl; //TEMP_TRACE
 }
 
 

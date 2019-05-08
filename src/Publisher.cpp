@@ -41,7 +41,7 @@ Publisher::Publisher(
     eprosima::fastrtps::PublisherAttributes attributes;
     attributes.topic.topicKind = eprosima::fastrtps::NO_KEY; //Check this
     attributes.topic.topicName = "hello_dds"; /* topic_name_ */;
-    attributes.topic.topicDataType = "strings_255" /* message_type_ */;
+    attributes.topic.topicDataType = "string_struct" /* message_type_ */;
 
     dds_publisher_ = eprosima::fastrtps::Domain::createPublisher(participant->get_dds_participant(), attributes, this);
 
@@ -67,19 +67,19 @@ bool Publisher::publish(
     //std::string dds_message =
     Conversion::soss_to_dds(soss_message);
 
-    dynamic_data_->SetStringValue("hello_dds");
+    dynamic_data_->SetStringValue("hello_dds", 0);
 
     dds_publisher_->write(dynamic_data_.get());
 
     return true;
 }
 
-
 void Publisher::onPublicationMatched(
         eprosima::fastrtps::Publisher* /* publisher */,
         eprosima::fastrtps::rtps::MatchingInfo& /* info */)
 {
-    std::cout << "Publisher matched!" << std::endl; //TEMP_TRACE
+    std::cout << "[soss-dds][publisher]: matched "
+        "(" << topic_name_ << ") " << std::endl;
 }
 
 
