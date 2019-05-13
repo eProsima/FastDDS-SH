@@ -44,8 +44,7 @@ bool SystemHandle::configure(
 
     uint32_t domain = configuration["domain"].as<uint32_t>();
 
-    dtparser::YAMLP_ret ret = dtparser::YAMLParser::parseYAMLNode(configuration);
-    if (ret != dtparser::YAMLP_ret::YAMLP_OK) //check this
+    if (dtparser::YAMLP_ret::YAMLP_OK != dtparser::YAMLParser::parseYAMLNode(configuration))
     {
         std::cerr << "[soss-dds]: error parsing the dynamic types" << std::endl;
     }
@@ -63,6 +62,9 @@ bool SystemHandle::configure(
         std::cerr << "[soss-dds]: " << e.what() << std::endl;
         return false;
     }
+
+    dtparser::YAMLParser::DeleteInstance(); // TODO: an exception error will not delete the instances
+                                            // (Use RAII in YamlParser could fix it cleanly)
 
     std::cout << "[soss-dds]: configured!" << std::endl;
     return true;

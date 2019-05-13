@@ -3,10 +3,10 @@
 SystemHandler "0..n" *--> Publisher
 SystemHandler "0..n" *--> Subscriber
 SystemHandler *--> Participant
+SystemHandler ..> dtparser
 
 Participant <-- Publisher
 Participant <-- Subscriber
-Participant "0..n" *--> TopicType
 
 Publisher ..> Conversion
 Subscriber ..> Conversion
@@ -21,16 +21,14 @@ class SystemHandler {
 
 class Participant {
     - dds::participant
-    + create_topic_type(name)
-}
-
-class TopicType {
-    - dds::type
-    + create_dynamic_data()
+    - map<dds::dynamic_types>
+    + register_dynamic_type(name)
+    + create_dynamic_data(name)
 }
 
 class Publisher {
     - dds::Publisher
+    - dds::dynamic_data
     - topic_name
     - message_type
     + publish(soss_message)
@@ -38,6 +36,7 @@ class Publisher {
 
 class Subscriber {
     - dds::subscriber
+    - dds::dynamic_data
     - topic_name
     - message_type
     + receive(dynamic_type_message)
@@ -46,6 +45,9 @@ class Subscriber {
 class Conversion << (S,#FF7700) Singleton >> {
     + dds_message soss_to_dds(soss_message)
     + soss_message dds_to_soss(dds_message)
+}
+
+package dtparser {
 }
 
 @enduml
