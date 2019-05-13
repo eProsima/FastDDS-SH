@@ -24,16 +24,21 @@ option (THIRDPARTY "Activate internal build of dependencies" ON)
 add_subdirectory(thirdparty/fastrtps)
 
 # Library
+set(SRC_DTPARSER
+    src/dtparser/DynamicTypeParser.cpp
+    src/dtparser/DynamicTypeParserCommon.cpp
+    src/dtparser/YAMLParser.cpp
+    )
+
 set(SRC
     src/Conversion.cpp
     src/Publisher.cpp
     src/Subscriber.cpp
-    src/TopicType.cpp
     src/Participant.cpp
     src/SystemHandle.cpp
     )
 
-add_library(${PROJECT_NAME} SHARED ${SRC})
+add_library(${PROJECT_NAME} SHARED ${SRC_DTPARSER} ${SRC})
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
 set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)

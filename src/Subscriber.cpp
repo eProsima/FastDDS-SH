@@ -16,7 +16,6 @@
 */
 
 #include "Subscriber.hpp"
-#include "Participant.hpp"
 #include "Conversion.hpp"
 
 #include <soss/Message.hpp>
@@ -43,14 +42,14 @@ Subscriber::Subscriber(
     , message_type_{message_type}
     , soss_callback_{soss_callback}
 {
-    dynamic_data_ = participant->create_topic_type(message_type).create_dynamic_data();
+    dynamic_data_ = participant->create_dynamic_data(message_type);
 
-    eprosima::fastrtps::SubscriberAttributes attributes;
-    attributes.topic.topicKind = eprosima::fastrtps::NO_KEY;
+    fastrtps::SubscriberAttributes attributes;
+    attributes.topic.topicKind = fastrtps::NO_KEY;
     attributes.topic.topicName = "hello_dds"; // topic_name;
     attributes.topic.topicDataType = message_type;
 
-    dds_subscriber_ = eprosima::fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, this);
+    dds_subscriber_ = fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, this);
 
     if (nullptr == dds_subscriber_)
     {
@@ -60,7 +59,7 @@ Subscriber::Subscriber(
 
 Subscriber::~Subscriber()
 {
-    eprosima::fastrtps::Domain::removeSubscriber(dds_subscriber_);
+    fastrtps::Domain::removeSubscriber(dds_subscriber_);
 }
 
 void Subscriber::receive(const std::string& dds_message)
@@ -74,20 +73,21 @@ void Subscriber::receive(const std::string& dds_message)
 }
 
 void Subscriber::onSubscriptionMatched(
-        eprosima::fastrtps::Subscriber* /* sub */,
-        eprosima::fastrtps::rtps::MatchingInfo& /* info */)
+        fastrtps::Subscriber* /* sub */,
+        fastrtps::rtps::MatchingInfo& info)
 {
-    std::cout << "[soss-dds][subscriber]: matched "
-        "(" << topic_name_ << ") " << std::endl;
+    std::string matching = fastrtps::rtps::MatchingStatus::MATCHED_MATCHING == info.status ? "matched" : "unmatched";
+    std::cout << "[soss-dds][subscriber]: " << matching <<
+        " (" << topic_name_ << ") " << std::endl;
 }
 
 void Subscriber::onNewDataMessage(
-        eprosima::fastrtps::Subscriber* /* sub */)
+        fastrtps::Subscriber* /* sub */)
 {
-    eprosima::fastrtps::SampleInfo_t info;
+    fastrtps::SampleInfo_t info;
     if(dds_subscriber_->takeNextData(dynamic_data_.get(), &info))
     {
-        if(eprosima::fastrtps::ALIVE == info.sampleKind)
+        if(fastrtps::ALIVE == info.sampleKind)
         {
             std::string message;
             dynamic_data_->GetStringValue(message, 0);

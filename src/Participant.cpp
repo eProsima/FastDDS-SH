@@ -18,8 +18,6 @@
 #include "Participant.hpp"
 
 #include <fastrtps/attributes/ParticipantAttributes.h>
-#include <fastrtps/types/DynamicTypeBuilderFactory.h>
-#include <fastrtps/types/DynamicTypeBuilderPtr.h>
 #include <fastrtps/types/DynamicDataFactory.h>
 #include <fastrtps/Domain.h>
 
@@ -31,49 +29,54 @@ namespace dds {
 
 Participant::Participant(uint32_t domain)
 {
-    eprosima::fastrtps::ParticipantAttributes attributes;
+    fastrtps::ParticipantAttributes attributes;
     attributes.rtps.builtin.domainId = domain;
     attributes.rtps.setName("soss-dds-participant");
-    dds_participant_ = eprosima::fastrtps::Domain::createParticipant(attributes, this);
+    dds_participant_ = fastrtps::Domain::createParticipant(attributes, this);
 
     if (nullptr == dds_participant_)
     {
         throw DDSMiddlewareException("Error creating a participant");
     }
-
 }
 
 Participant::~Participant()
 {
-    eprosima::fastrtps::Domain::removeParticipant(dds_participant_);
+    fastrtps::Domain::removeParticipant(dds_participant_);
 }
 
-const TopicType& Participant::create_topic_type(const std::string& name)
+void Participant::register_dynamic_type(
+        const std::string& topic_name,
+        fastrtps::types::DynamicTypeBuilder* builder)
 {
-    auto it = topics_.find(name);
-    if (topics_.end() != it)
+    auto pair = topics_.emplace(topic_name, fastrtps::types::DynamicPubSubType(builder->Build()));
+    if (!pair.second)
     {
-        return it->second;
+        throw DDSMiddlewareException("Error creating a dynamic type: already exists");
     }
 
-    it = topics_.emplace_hint(it, name, TopicType(name));
-
-    if (!eprosima::fastrtps::Domain::registerDynamicType(dds_participant_, &it->second.get_pub_sub_type()))
+    if (!fastrtps::Domain::registerDynamicType(dds_participant_, &pair.first->second))
     {
         throw DDSMiddlewareException("Error registering the dynamic type");
     }
-
-    return it->second;
 }
 
-const TopicType& Participant::get_topic_type(const std::string& name) const
+fastrtps::types::DynamicData_ptr Participant::create_dynamic_data(
+        const std::string& topic_name) const
 {
-    return topics_.at(name);
+    auto it = topics_.find(topic_name);
+    if (topics_.end() == it)
+    {
+        throw DDSMiddlewareException("Error creating a dynamic data: dynamic type not defined");
+    }
+
+    const fastrtps::types::DynamicType_ptr& dynamic_type_ = it->second.GetDynamicType();
+    return fastrtps::types::DynamicDataFactory::GetInstance()->CreateData(dynamic_type_);
 }
 
 void Participant::onParticipantDiscovery(
-        eprosima::fastrtps::Participant* /* participant */,
-        eprosima::fastrtps::rtps::ParticipantDiscoveryInfo&& /* info */)
+        fastrtps::Participant* /* participant */,
+        fastrtps::rtps::ParticipantDiscoveryInfo&& /* info */)
 {
 }
 

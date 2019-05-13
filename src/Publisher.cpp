@@ -16,7 +16,6 @@
 */
 
 #include "Publisher.hpp"
-#include "Participant.hpp"
 #include "Conversion.hpp"
 
 #include <fastrtps/attributes/PublisherAttributes.h>
@@ -38,14 +37,14 @@ Publisher::Publisher(
     : topic_name_{topic_name}
     , message_type_{message_type}
 {
-    dynamic_data_ = participant->create_topic_type(message_type).create_dynamic_data();
+    dynamic_data_ = participant->create_dynamic_data(message_type);
 
-    eprosima::fastrtps::PublisherAttributes attributes;
-    attributes.topic.topicKind = eprosima::fastrtps::NO_KEY; //Check this
+    fastrtps::PublisherAttributes attributes;
+    attributes.topic.topicKind = fastrtps::NO_KEY; //Check this
     attributes.topic.topicName = "hello_dds"; /* topic_name_ */;
     attributes.topic.topicDataType = message_type;
 
-    dds_publisher_ = eprosima::fastrtps::Domain::createPublisher(participant->get_dds_participant(), attributes, this);
+    dds_publisher_ = fastrtps::Domain::createPublisher(participant->get_dds_participant(), attributes, this);
 
     if (nullptr == dds_publisher_)
     {
@@ -55,7 +54,7 @@ Publisher::Publisher(
 
 Publisher::~Publisher()
 {
-    eprosima::fastrtps::Domain::removePublisher(dds_publisher_);
+    fastrtps::Domain::removePublisher(dds_publisher_);
 }
 
 bool Publisher::publish(
@@ -73,11 +72,12 @@ bool Publisher::publish(
 }
 
 void Publisher::onPublicationMatched(
-        eprosima::fastrtps::Publisher* /* publisher */,
-        eprosima::fastrtps::rtps::MatchingInfo& /* info */)
+        fastrtps::Publisher* /* publisher */,
+        fastrtps::rtps::MatchingInfo& info)
 {
-    std::cout << "[soss-dds][publisher]: matched "
-        "(" << topic_name_ << ") " << std::endl;
+    std::string matching = fastrtps::rtps::MatchingStatus::MATCHED_MATCHING == info.status ? "matched" : "unmatched";
+    std::cout << "[soss-dds][publisher]: " << matching <<
+        " (" << topic_name_ << ") " << std::endl;
 }
 
 

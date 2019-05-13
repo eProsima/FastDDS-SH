@@ -21,6 +21,8 @@
 #include "Publisher.hpp"
 #include "Subscriber.hpp"
 
+#include "dtparser/YAMLParser.hpp"
+
 #include <iostream>
 #include <thread>
 
@@ -34,17 +36,27 @@ bool SystemHandle::configure(
     const RequiredTypes& /* types */,
     const YAML::Node& configuration)
 {
-    if (!configuration["domain"])
+    if (!configuration["domain"] || !configuration["dynamic types"])
     {
-        std::cerr << "[soss-dds]: configuration must have a domain field." << std::endl;
+        std::cerr << "[soss-dds]: configuration must have a domain field and the topic file path." << std::endl;
         return false;
     }
 
     uint32_t domain = configuration["domain"].as<uint32_t>();
 
+    dtparser::YAMLP_ret ret = dtparser::YAMLParser::parseYAMLNode(configuration);
+    if (ret != dtparser::YAMLP_ret::YAMLP_OK) //check this
+    {
+        std::cerr << "[soss-dds]: error parsing the dynamic types" << std::endl;
+    }
+
     try
     {
         participant_ = std::make_unique<Participant>(domain);
+        for(auto&& builder: dtparser::YAMLParser::get_types_map())
+        {
+            participant_->register_dynamic_type(builder.first, builder.second);
+        }
     }
     catch(DDSMiddlewareException& e)
     {

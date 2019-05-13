@@ -19,35 +19,41 @@
 #define SOSS__DDS__INTERNAL__PARTICIPANT_HPP
 
 #include "DDSMiddlewareException.hpp"
-#include "TopicType.hpp"
-
-#include <soss/SystemHandle.hpp>
 
 #include <fastrtps/participant/ParticipantListener.h>
+#include <fastrtps/types/DynamicTypeBuilder.h>
+#include <fastrtps/types/DynamicDataPtr.h>
+#include <fastrtps/types/DynamicPubSubType.h>
 
 #include <map>
 
 namespace soss {
 namespace dds {
 
-class Participant : private eprosima::fastrtps::ParticipantListener
+using namespace eprosima;
+
+class Participant : private fastrtps::ParticipantListener
 {
 public:
     Participant(uint32_t domain);
     virtual ~Participant();
 
-    eprosima::fastrtps::Participant* get_dds_participant() const { return dds_participant_; }
+    fastrtps::Participant* get_dds_participant() const { return dds_participant_; }
 
-    const TopicType& create_topic_type(const std::string& name /*, TODO: idl definition */);
-    const TopicType& get_topic_type(const std::string& name) const;
+    void register_dynamic_type(
+            const std::string& name,
+            fastrtps::types::DynamicTypeBuilder* builder);
+
+    fastrtps::types::DynamicData_ptr create_dynamic_data(
+            const std::string& name) const;
 
 private:
     void onParticipantDiscovery(
-            eprosima::fastrtps::Participant* participant,
-            eprosima::fastrtps::rtps::ParticipantDiscoveryInfo&& info) override;
+            fastrtps::Participant* participant,
+            fastrtps::rtps::ParticipantDiscoveryInfo&& info) override;
 
-    eprosima::fastrtps::Participant* dds_participant_;
-    std::map<std::string, TopicType> topics_;
+    fastrtps::Participant* dds_participant_;
+    std::map<std::string, fastrtps::types::DynamicPubSubType> topics_;
 };
 
 
