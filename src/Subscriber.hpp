@@ -48,7 +48,7 @@ public:
     Subscriber(Subscriber&& rhs) = delete;
     Subscriber& operator = (Subscriber&& rhs) = delete;
 
-    void receive(const std::string& message); //dynamic type
+    void receive(const fastrtps::types::DynamicData_ptr dds_message);
 
 private:
     void onSubscriptionMatched(

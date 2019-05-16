@@ -60,12 +60,13 @@ Publisher::~Publisher()
 bool Publisher::publish(
         const soss::Message& soss_message)
 {
+    bool success = true;
+
     std::cout << "[soss-dds][publisher]: translate message: soss -> dds "
         "(" << topic_name_ << ") " << std::endl;
 
-    std::string dds_message = Conversion::soss_to_dds(soss_message);
+    success += Conversion::soss_to_dds(soss_message, dynamic_data_);
 
-    dynamic_data_->SetStringValue(dds_message, 0);
     dds_publisher_->write(dynamic_data_.get());
 
     return true;
