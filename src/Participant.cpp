@@ -49,15 +49,23 @@ void Participant::register_dynamic_type(
         const std::string& topic_name,
         fastrtps::types::DynamicTypeBuilder* builder)
 {
-    auto pair = topics_.emplace(topic_name, fastrtps::types::DynamicPubSubType(builder->Build()));
-    if (!pair.second)
+    fastrtps::types::DynamicType_ptr dtptr = builder->Build();
+    if(dtptr != nullptr)
     {
-        throw DDSMiddlewareException("Error creating a dynamic type: already exists");
-    }
+        auto pair = topics_.emplace(topic_name, fastrtps::types::DynamicPubSubType(dtptr));
+        if (!pair.second)
+        {
+            throw DDSMiddlewareException("Error creating a dynamic type: already exists");
+        }
 
-    if (!fastrtps::Domain::registerDynamicType(dds_participant_, &pair.first->second))
+        if (!fastrtps::Domain::registerDynamicType(dds_participant_, &pair.first->second))
+        {
+            throw DDSMiddlewareException("Error registering the dynamic type");
+        }
+    }
+    else
     {
-        throw DDSMiddlewareException("Error registering the dynamic type");
+        throw DDSMiddlewareException("Error Building the dynamic type.");
     }
 }
 
