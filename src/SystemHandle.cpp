@@ -54,6 +54,7 @@ bool SystemHandle::configure(
         participant_ = std::make_unique<Participant>(domain);
         for(auto&& builder: dtparser::YAMLParser::get_types_map())
         {
+            //std::cout << builder.first << std::endl; //DELETE
             participant_->register_dynamic_type(builder.first, builder.second);
         }
     }
