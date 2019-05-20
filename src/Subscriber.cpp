@@ -69,9 +69,16 @@ void Subscriber::receive(const fastrtps::types::DynamicData_ptr dds_message)
 
     soss::Message soss_message;
 
-    Conversion::dds_to_soss(message_type_, dds_message, soss_message);
+    bool success = Conversion::dds_to_soss(message_type_, dds_message, soss_message);
 
-    soss_callback_(soss_message);
+    if (success)
+    {
+        soss_callback_(soss_message);
+    }
+    else
+    {
+        std::cerr << "Error converting message from soss message to dynamic types." << std::endl;
+    }
 }
 
 void Subscriber::onSubscriptionMatched(

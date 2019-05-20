@@ -60,16 +60,23 @@ Publisher::~Publisher()
 bool Publisher::publish(
         const soss::Message& soss_message)
 {
-    bool success = true;
+    bool success = false;
 
     std::cout << "[soss-dds][publisher]: translate message: soss -> dds "
         "(" << topic_name_ << ") " << std::endl;
 
-    success += Conversion::soss_to_dds(soss_message, dynamic_data_);
+    success = Conversion::soss_to_dds(soss_message, dynamic_data_);
 
-    dds_publisher_->write(dynamic_data_.get());
+    if (success)
+    {
+        success = dds_publisher_->write(dynamic_data_.get());
+    }
+    else
+    {
+        std::cerr << "Error converting message from dynamic types to soss message." << std::endl;
+    }
 
-    return true;
+    return success;
 }
 
 void Publisher::onPublicationMatched(

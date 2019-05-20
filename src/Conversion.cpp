@@ -102,18 +102,6 @@ bool Conversion::soss_to_dds(
     return true;
 }
 
-//template <typename T>
-//using
-
-//std::map<types::TypeKind, std::function<void(types::DynamicData_ptr, )>> f_map;
-
-//template <typename T>
-//void set_field(soss::Field& field, types::TypeKind type, uint32_t id, types::DynamicData_ptr input)
-//{
-//    T value;
-
-//}
-
 bool Conversion::dds_to_soss(
         const std::string type,
         const types::DynamicData_ptr input,
@@ -139,92 +127,77 @@ bool Conversion::dds_to_soss(
 
             if (type == types::TK_BOOLEAN)
             {
-                bool value;
-                input->GetBoolValue(value, id);
+                bool value = input->GetBoolValue(id);
                 field.set<bool>(std::move(value));
             }
             else if (type == types::TK_BYTE)
             {
-                u_char value;
-                input->GetByteValue(value, id);
+                u_char value = input->GetByteValue(id);
                 field.set<u_char>(std::move(value));
             }
             else if (type == types::TK_INT16)
             {
-                int16_t value;
-                input->GetInt16Value(value, id);
+                int16_t value = input->GetInt16Value(id);
                 field.set<int16_t>(std::move(value));
             }
             else if (type == types::TK_INT32)
             {
-                int32_t value;
-                input->GetInt32Value(value, id);
+                int32_t value = input->GetInt32Value(id);
                 field.set<int32_t>(std::move(value));
             }
             else if (type == types::TK_INT64)
             {
-                int64_t value;
-                input->GetInt64Value(value, id);
+                int64_t value = input->GetInt64Value(id);
                 field.set<int64_t>(std::move(value));
             }
             else if (type == types::TK_UINT16)
             {
-                uint16_t value;
-                input->GetUint16Value(value, id);
+                uint16_t value = input->GetUint16Value(id);
                 field.set<uint16_t>(std::move(value));
             }
             else if (type == types::TK_UINT32)
             {
-                uint32_t value;
-                input->GetUint32Value(value, id);
+                uint32_t value = input->GetUint32Value(id);
                 field.set<uint32_t>(std::move(value));
             }
             else if (type == types::TK_UINT64)
             {
-                uint64_t value;
-                input->GetUint64Value(value, id);
+                uint64_t value = input->GetUint64Value(id);
                 field.set<uint64_t>(std::move(value));
             }
             else if (type == types::TK_FLOAT32)
             {
-                float value;
-                input->GetFloat32Value(value, id);
+                float value = input->GetFloat32Value(id);
                 field.set<float>(std::move(value));
             }
             else if (type == types::TK_FLOAT64)
             {
-                double value;
-                input->GetFloat64Value(value, id);
+                double value = input->GetFloat64Value(id);
                 field.set<double>(std::move(value));
             }
             else if (type == types::TK_FLOAT128)
             {
-                long double value;
-                input->GetFloat128Value(value, id);
+                long double value = input->GetFloat128Value(id);
                 field.set<long double>(std::move(value));
             }
             else if (type == types::TK_CHAR8)
             {
-                char value;
-                input->GetChar8Value(value, id);
+                char value = input->GetChar8Value(id);
                 field.set<char>(std::move(value));
             }
             else if (type == types::TK_CHAR16)
             {
-                wchar_t value;
-                input->GetChar16Value(value, id);
+                wchar_t value = input->GetChar16Value(id);
                 field.set<wchar_t>(std::move(value));
             }
             else if (type == types::TK_STRING8)
             {
-                std::string value;
-                input->GetStringValue(value, id);
+                std::string value = input->GetStringValue(id);
                 field.set<std::string>(std::move(value));
             }
             else if (type == types::TK_STRING16)
             {
-                std::wstring value;
-                input->GetWstringValue(value, id);
+                std::wstring value = input->GetWstringValue(id);
                 field.set<std::wstring>(std::move(value));
             }
             else
