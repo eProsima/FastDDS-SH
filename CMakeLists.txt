@@ -19,9 +19,15 @@ cmake_minimum_required(VERSION 3.5.0)
 project(soss-dds)
 
 find_package(soss-core REQUIRED)
+find_package(fastrtps QUIET)
 
-option (THIRDPARTY "Activate internal build of dependencies" ON)
-add_subdirectory(thirdparty/fastrtps)
+if(fastrtps_DIR)
+    message(STATUS "Found a fastrtps")
+else()
+    message(STATUS "Using the fastrtps thirdparty")
+    option (THIRDPARTY "Activate internal build of dependencies" ON)
+    add_subdirectory(thirdparty/fastrtps)
+endif()
 
 # Library
 set(SRC_DTPARSER
