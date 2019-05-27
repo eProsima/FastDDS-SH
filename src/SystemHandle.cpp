@@ -29,6 +29,22 @@
 namespace soss {
 namespace dds{
 
+namespace {
+
+// This function patches the problem of dynamic types, which do not admit '/' in their type name.
+std::string transform_type(const std::string& message_type)
+{
+    std::string type = message_type;
+
+    for (size_t i = type.find('/'); i != std::string::npos; i = type.find('/', i))
+    {
+        type.replace(i, 1, "__");
+    }
+
+    return type;
+}
+
+}
 
 SystemHandle::~SystemHandle() = default;
 
@@ -36,13 +52,11 @@ bool SystemHandle::configure(
     const RequiredTypes& /* types */,
     const YAML::Node& configuration)
 {
-    if (!configuration["domain"] || !configuration["dynamic types"])
+    if (!configuration["dynamic types"])
     {
-        std::cerr << "[soss-dds]: configuration must have a domain field and the topic file path." << std::endl;
+        std::cerr << "[soss-dds]: Configuration must have a 'dynamic types' field." << std::endl;
         return false;
     }
-
-    uint32_t domain = configuration["domain"].as<uint32_t>();
 
     if (dtparser::YAMLP_ret::YAMLP_OK != dtparser::YAMLParser::parseYAMLNode(configuration))
     {
@@ -51,10 +65,17 @@ bool SystemHandle::configure(
 
     try
     {
-        participant_ = std::make_unique<Participant>(domain);
+        if (configuration["participant"])
+        {
+            participant_ = std::make_unique<Participant>(configuration["participant"]);
+        }
+        else
+        {
+            // User didn't specify a config file for the participant, load defaults.
+            participant_ = std::make_unique<Participant>();
+        }
         for(auto&& builder: dtparser::YAMLParser::get_types_map())
         {
-            //std::cout << builder.first << std::endl; //DELETE
             participant_->register_dynamic_type(builder.first, builder.second);
         }
     }
@@ -92,7 +113,9 @@ bool SystemHandle::subscribe(
 {
     try
     {
-        auto subscriber = std::make_shared<Subscriber>(participant_.get(), topic_name, message_type, callback);
+        auto subscriber = std::make_shared<Subscriber>(
+            participant_.get(), topic_name, transform_type(message_type), callback);
+
         subscribers_.emplace_back(std::move(subscriber));
 
         std::cout << "[soss-dds]: subscriber created. "
@@ -115,7 +138,7 @@ std::shared_ptr<TopicPublisher> SystemHandle::advertise(
 {
     try
     {
-        auto publisher = std::make_shared<Publisher>(participant_.get(), topic_name, message_type);
+        auto publisher = std::make_shared<Publisher>(participant_.get(), topic_name, transform_type(message_type));
         publishers_.emplace_back(std::move(publisher));
 
         std::cout << "[soss-dds]: publisher created. "

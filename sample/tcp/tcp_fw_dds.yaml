@@ -1,0 +1,24 @@
+systems:
+    dds:
+      type: dds
+      dynamic types:
+        struct std_msgs__String:
+          string: "data"
+      participant:
+        file_path: src/dds/sample/tcp/config.xml
+        profile_name: soss_profile_server
+
+    fiware: 
+      type: fiware
+      host: "192.168.1.59"
+      port: 1026
+      subscription_host: "192.168.1.47"
+      subscription_port: 1028
+
+routes:
+    fiware_to_dds: { from: fiware, to: dds }
+    dds_to_fiware: { from: dds, to: fiware }
+
+topics:
+    hello_ros2: { type: "std_msgs/String", route: fiware_to_dds }
+    hello_fiware: { type: "std_msgs/String", route: dds_to_fiware }

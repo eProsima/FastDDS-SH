@@ -20,19 +20,42 @@
 #include <fastrtps/attributes/ParticipantAttributes.h>
 #include <fastrtps/types/DynamicDataFactory.h>
 #include <fastrtps/Domain.h>
+#include "fastrtps/xmlparser/XMLProfileManager.h"
+#include <fastrtps/transport/UDPv4TransportDescriptor.h>
 
 #include <iostream>
 
 namespace soss {
 namespace dds {
 
-
-Participant::Participant(uint32_t domain)
+Participant::Participant()
 {
-    fastrtps::ParticipantAttributes attributes;
-    attributes.rtps.builtin.domainId = domain;
-    attributes.rtps.setName("soss-dds-participant");
-    dds_participant_ = fastrtps::Domain::createParticipant(attributes, this);
+    std::cout << "[soss-dds]: Warning. Participant not provided in configuration file. " <<
+                 "A UDP default participant will be created." << std::endl;
+
+    dds_participant_ = fastrtps::Domain::createParticipant(fastrtps::ParticipantAttributes());
+}
+
+Participant::Participant(const YAML::Node& config)
+{
+    using eprosima::fastrtps::xmlparser::XMLP_ret;
+    using eprosima::fastrtps::xmlparser::XMLProfileManager;
+
+    if (!config.IsMap() || !config["file_path"] || !config["profile_name"])
+    {
+        std::string err_msg = "The node 'Participant' in the configuration must be a map containing two keys: "
+                              "'file_path' and 'profile_name'. ";
+        throw DDSMiddlewareException(err_msg);
+    }
+
+    std::string file_path = config["file_path"].as<std::string>();
+    if (XMLP_ret::XML_OK != XMLProfileManager::loadXMLFile(file_path))
+    {
+        throw DDSMiddlewareException("Error loading xml file");
+    }
+
+    std::string profile_name = config["profile_name"].as<std::string>();
+    dds_participant_ = fastrtps::Domain::createParticipant(profile_name);
 
     if (nullptr == dds_participant_)
     {

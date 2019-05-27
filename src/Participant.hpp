@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2018 Open Source Robotics Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,8 @@
 #include <fastrtps/types/DynamicDataPtr.h>
 #include <fastrtps/types/DynamicPubSubType.h>
 
+#include <yaml-cpp/yaml.h>
+
 #include <map>
 
 namespace soss {
@@ -35,7 +37,8 @@ using namespace eprosima;
 class Participant : private fastrtps::ParticipantListener
 {
 public:
-    Participant(uint32_t domain);
+    Participant(); // Constructor for creating a participant with default values (UDP).
+    Participant(const YAML::Node& config);
     virtual ~Participant();
 
     fastrtps::Participant* get_dds_participant() const { return dds_participant_; }

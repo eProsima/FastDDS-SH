@@ -46,7 +46,7 @@ Subscriber::Subscriber(
 
     fastrtps::SubscriberAttributes attributes;
     attributes.topic.topicKind = fastrtps::NO_KEY;
-    attributes.topic.topicName = "hello_dds"; // topic_name;
+    attributes.topic.topicName = topic_name;
     attributes.topic.topicDataType = message_type;
 
     dds_subscriber_ = fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, this);

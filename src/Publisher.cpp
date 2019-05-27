@@ -41,7 +41,7 @@ Publisher::Publisher(
 
     fastrtps::PublisherAttributes attributes;
     attributes.topic.topicKind = fastrtps::NO_KEY; //Check this
-    attributes.topic.topicName = "hello_dds"; /* topic_name_ */;
+    attributes.topic.topicName = topic_name_;
     attributes.topic.topicDataType = message_type;
 
     dds_publisher_ = fastrtps::Domain::createPublisher(participant->get_dds_participant(), attributes, this);
