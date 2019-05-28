@@ -71,9 +71,12 @@ bool SystemHandle::configure(
         }
         else
         {
-            // User didn't specify a config file for the participant, load defaults.
+            std::cout << "[soss-dds]: participant not provided in configuration file. " <<
+                "UDP default participant will be created." << std::endl;
+
             participant_ = std::make_unique<Participant>();
         }
+
         for(auto&& builder: dtparser::YAMLParser::get_types_map())
         {
             participant_->register_dynamic_type(builder.first, builder.second);

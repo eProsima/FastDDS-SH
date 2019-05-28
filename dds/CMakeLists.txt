@@ -19,6 +19,9 @@ cmake_minimum_required(VERSION 3.5.0)
 project(soss-dds)
 
 find_package(soss-core REQUIRED)
+
+########################################################################
+# Find Asio
 find_package(fastrtps QUIET)
 
 if(fastrtps_DIR)
@@ -29,6 +32,7 @@ else()
     add_subdirectory(thirdparty/fastrtps)
 endif()
 
+########################################################################
 # Library
 set(SRC_DTPARSER
     src/dtparser/DynamicTypeParser.cpp
@@ -46,15 +50,22 @@ set(SRC
 
 add_library(${PROJECT_NAME} SHARED ${SRC_DTPARSER} ${SRC})
 
-set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
-set_property(TARGET ${PROJECT_NAME} PROPERTY POSITION_INDEPENDENT_CODE ON)
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+        CXX_STANDARD 14
+        POSITION_INDEPENDENT_CODE ON
+#        INSTALL_RPATH_USE_LINK_PATH TRUE
+)
 
-target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wextra -Wpedantic)
+target_compile_options(${PROJECT_NAME}
+    PRIVATE
+        -Werror -Wall -Wextra -Wpedantic
+)
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         include
-    )
+)
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
@@ -62,10 +73,10 @@ target_link_libraries(${PROJECT_NAME}
         fastrtps
 )
 
-# Install
+########################################################################
+# Installation
 soss_install_middleware_plugin(
     MIDDLEWARE dds
     TARGET soss-dds
-    NO_CONFIG
 )
 

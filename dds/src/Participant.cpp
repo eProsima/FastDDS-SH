@@ -30,10 +30,8 @@ namespace dds {
 
 Participant::Participant()
 {
-    std::cout << "[soss-dds]: Warning. Participant not provided in configuration file. " <<
-                 "A UDP default participant will be created." << std::endl;
-
-    dds_participant_ = fastrtps::Domain::createParticipant(fastrtps::ParticipantAttributes());
+    fastrtps::ParticipantAttributes attributes;
+    dds_participant_ = fastrtps::Domain::createParticipant(attributes);
 }
 
 Participant::Participant(const YAML::Node& config)
