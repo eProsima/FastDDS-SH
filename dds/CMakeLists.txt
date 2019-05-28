@@ -54,7 +54,6 @@ set_target_properties(${PROJECT_NAME}
     PROPERTIES
         CXX_STANDARD 14
         POSITION_INDEPENDENT_CODE ON
-#        INSTALL_RPATH_USE_LINK_PATH TRUE
 )
 
 target_compile_options(${PROJECT_NAME}
