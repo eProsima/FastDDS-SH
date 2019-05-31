@@ -159,7 +159,7 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
 
         SECTION("tcp tunnel")
         {
-            const std::string config_file = "../../src/eprosima/soss/dds/dds-test/resources/tcp_config.xml";
+            const std::string config_file = "resources/tcp_config.xml";
             const std::string client_to_server_topic = "client_to_server_topic";
             const std::string server_to_client_topic = "server_to_client_topic";
 

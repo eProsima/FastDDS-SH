@@ -50,4 +50,9 @@ target_link_libraries(${PROJECT_NAME}
         soss::mock
 )
 
+
+file(COPY ${PROJECT_SOURCE_DIR}/resources/tcp_config.xml
+    DESTINATION ${PROJECT_BINARY_DIR}/resources
+    )
+
 catch_discover_tests(${PROJECT_NAME})
