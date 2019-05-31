@@ -5,10 +5,10 @@ systems:
         struct std_msgs__String:
           string: "data"
       participant:
-        filep_path: src/dds/sample/tcp/config.xml
+        file_path: src/eprosima/soss/dds/dds/sample/tcp/config.xml
         profile_name: soss_profile_client
 
-    ros2: 
+    ros2:
       type: ros2
 
 routes:

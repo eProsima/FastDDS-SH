@@ -24,7 +24,7 @@
             </userTransports>
             <builtin>
                 <leaseAnnouncement>
-                    <sec>3</sec>
+                    <sec>1</sec>
                 </leaseAnnouncement>
             </builtin>
             <useBuiltinTransports>false</useBuiltinTransports>

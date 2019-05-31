@@ -25,14 +25,21 @@
 #include <iomanip>
 #include <ctime>
 
+using namespace std::chrono_literals;
+
 std::string gen_config_yaml(
         const std::string& topic_type,
-        const std::string& topic_name,
         const std::string& topic_sent,
         const std::string& topic_recv,
-        const std::string& dds_config_file_path = "",
-        const std::string& dds_profile_name = "")
+        const std::string& topic_mapped,
+        const std::string& dds_config_file_path,
+        const std::string& dds_profile_name)
 {
+    std::string remap = "";
+    if (topic_mapped != "") {
+        remap = ", remap: {dds: \"" + topic_mapped + "\" }";
+    }
+
     std::string s;
     s += "systems:\n";
     s += "    dds:\n";
@@ -43,7 +50,7 @@ std::string gen_config_yaml(
     if (dds_config_file_path != "")
     {
         s += "        participant:\n";
-        s += "            filep_path: " + dds_config_file_path + "\n";
+        s += "            file_path: " + dds_config_file_path + "\n";
         s += "            profile_name: " + dds_profile_name + "\n";
     }
 
@@ -54,38 +61,57 @@ std::string gen_config_yaml(
     s += "    dds_to_mock: { from: dds, to: mock }\n";
 
     s += "topics:\n";
-    s += "    " + topic_sent + ": { type: \"" + topic_type + "\", route: mock_to_dds, \
-                    remap: {dds: \"" + topic_name + "\" } }\n";
-    s += "    " + topic_recv + ": { type: \"" + topic_type + "\", route: dds_to_mock, \
-                    remap: {dds: \"" + topic_name + "\" } }\n";
+    s += "    " + topic_sent + ": { type: \"" + topic_type + "\", route: mock_to_dds" + remap + "}\n";
+    s += "    " + topic_recv + ": { type: \"" + topic_type + "\", route: dds_to_mock" + remap + "}\n";
     return s;
 }
 
-soss::Message roundtrip(
-        const std::string& topic_name,
+soss::InstanceHandle create_instance(
         const std::string& topic_type,
-        const soss::Message& message)
+        const std::string& topic_sent,
+        const std::string& topic_recv,
+        bool  remap,
+        const std::string& config_file,
+        const std::string& profile_name)
 {
-    using namespace std::chrono_literals;
+    const std::string topic_name_mapped = (remap) ? topic_sent + topic_recv : "";
 
-    const std::string topic_sent = "mock_to_dds_topic";
-    const std::string topic_recv = "dds_to_mock_topic";
+    std::string config_yaml = gen_config_yaml(
+            topic_type,
+            topic_sent,
+            topic_recv,
+            topic_name_mapped,
+            config_file,
+            profile_name);
 
-    std::string config_yaml = gen_config_yaml(topic_type, topic_name, topic_sent, topic_recv);
+    std::cout << "====================================================================================" << std::endl;
+    std::cout << "                                 Current YAML file" << std::endl;
+    std::cout << "------------------------------------------------------------------------------------" << std::endl;
+    std::cout << config_yaml << std::endl;
+    std::cout << "====================================================================================" << std::endl;
+
     const YAML::Node config_node = YAML::Load(config_yaml);
-    soss::InstanceHandle soss_handle = soss::run_instance(config_node);
-    REQUIRE(soss_handle);
+    soss::InstanceHandle instance = soss::run_instance(config_node);
+    REQUIRE(instance);
 
     std::this_thread::sleep_for(1s); // wait publisher and subscriber matching
 
+    return instance;
+}
+
+soss::Message roundtrip(
+        const std::string& topic_sent,
+        const std::string& topic_recv,
+        const soss::Message& message)
+{
     soss::mock::publish_message(topic_sent, message);
 
     std::promise<soss::Message> receive_msg_promise;
     REQUIRE(soss::mock::subscribe(
             topic_recv,
-            [&](const soss::Message& msg_from_dds)
+            [&](const soss::Message& msg_to_recv)
     {
-        receive_msg_promise.set_value(msg_from_dds);
+        receive_msg_promise.set_value(msg_to_recv);
     }));
 
     auto receive_msg_future = receive_msg_promise.get_future();
@@ -98,7 +124,6 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
 {
     SECTION("basic-type")
     {
-        const std::string topic_name = "dds_mock_test_basic";
         const std::string topic_type = "dds_test_string";
 
         auto t = std::time(nullptr);
@@ -108,30 +133,70 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
         std::string message_data = "mock test message at " + ss.str();
         std::cout << "[test]: message id: " << ss.str() << std::endl;
 
-        soss::Message msg_to_dds;
-        msg_to_dds.type = topic_type;
-        msg_to_dds.data["data"] = soss::Convert<std::string>::make_soss_field(message_data);
+        soss::Message msg_to_sent;
+        msg_to_sent.type = topic_type;
+        msg_to_sent.data["data"] = soss::Convert<std::string>::make_soss_field(message_data);
 
         SECTION("udp")
         {
-            soss::Message msg_from_dds = roundtrip(
-                    topic_name,
+            const std::string topic_sent = "mock_to_dds_topic";
+            const std::string topic_recv = "dds_to_mock_topic";
+            soss::InstanceHandle instance = create_instance(
                     topic_type,
-                    msg_to_dds);
+                    topic_sent,
+                    topic_recv,
+                    true,
+                    "",
+                    "");
 
-            REQUIRE(message_data == *msg_from_dds.data.at("data").cast<std::string>());
-            REQUIRE(msg_to_dds.type == msg_from_dds.type);
+            // Road: [mock -> dds -> dds -> mock]
+            soss::Message msg_to_recv = roundtrip(topic_sent, topic_recv, msg_to_sent);
+
+            REQUIRE(*msg_to_sent.data.at("data").cast<std::string>() == *msg_to_recv.data.at("data").cast<std::string>());
+            REQUIRE(msg_to_sent.type == msg_to_recv.type);
+            REQUIRE(0 == instance.quit().wait_for(1s));
         }
 
-        /*SECTION("tcp")//Not implemented yet
+        SECTION("tcp tunnel")
         {
-            soss::Message msg_from_dds = roundtrip(
-                    topic_name,
-                    topic_type,
-                    msg_to_dds);
+            const std::string config_file = "../../src/eprosima/soss/dds/dds-test/resources/tcp_config.xml";
+            const std::string client_to_server_topic = "client_to_server_topic";
+            const std::string server_to_client_topic = "server_to_client_topic";
 
-            REQUIRE(message_data == *msg_from_dds.data.at("data").cast<std::string>());
-            REQUIRE(msg_to_dds.type == msg_from_dds.type);
-        }*/
+            const std::string profile_name_server = "soss_profile_server";
+            soss::InstanceHandle server_instance = create_instance(
+                    topic_type,
+                    server_to_client_topic,
+                    client_to_server_topic,
+                    false,
+                    config_file,
+                    profile_name_server);
+
+            const std::string profile_name_client = "soss_profile_client";
+            soss::InstanceHandle client_instance = create_instance(
+                    topic_type,
+                    client_to_server_topic,
+                    server_to_client_topic,
+                    false,
+                    config_file,
+                    profile_name_client);
+
+            std::this_thread::sleep_for(2s); // wait publisher and subscriber matching
+            soss::Message msg_to_recv;
+
+            // Road: [mock -> dds-client] -> [dds-server -> mock]
+            msg_to_recv = roundtrip(client_to_server_topic, client_to_server_topic, msg_to_sent);
+            REQUIRE(*msg_to_sent.data.at("data").cast<std::string>() == *msg_to_recv.data.at("data").cast<std::string>());
+            REQUIRE(msg_to_sent.type == msg_to_recv.type);
+
+            // Road: [mock <- dds-client] <- [dds-server <- mock]
+            msg_to_recv = roundtrip(server_to_client_topic, server_to_client_topic, msg_to_sent);
+            REQUIRE(*msg_to_sent.data.at("data").cast<std::string>() == *msg_to_recv.data.at("data").cast<std::string>());
+            REQUIRE(msg_to_sent.type == msg_to_recv.type);
+
+            REQUIRE(0 == client_instance.quit().wait_for(1s));
+            REQUIRE(0 == server_instance.quit().wait_for(1s));
+        }
     }
 }
+
