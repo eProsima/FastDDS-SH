@@ -79,3 +79,9 @@ soss_install_middleware_plugin(
     TARGET soss-dds
 )
 
+install(
+    FILES ${PROJECT_SOURCE_DIR}/sample/tcp/config.xml
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/../sample/tcp
+    COMPONENT soss-dds
+    )
+

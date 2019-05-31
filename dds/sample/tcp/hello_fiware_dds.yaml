@@ -5,7 +5,7 @@ systems:
         struct std_msgs__String:
           string: "data"
       participant:
-        file_path: src/eprosima/soss/dds/dds/sample/tcp/config.xml
+        file_path: "install/soss-dds/sample/tcp/config.xml"
         profile_name: soss_profile_server
 
     fiware:
