@@ -41,6 +41,7 @@ Subscriber::Subscriber(
     : topic_name_{topic_name}
     , message_type_{message_type}
     , soss_callback_{soss_callback}
+    , reception_threads_{}
 {
     dynamic_data_ = participant->create_dynamic_data(message_type);
 
@@ -59,6 +60,15 @@ Subscriber::Subscriber(
 
 Subscriber::~Subscriber()
 {
+    std::cout << "[soss-dds][subscriber]: waiting current processing messages..." << std::endl;
+    for (std::thread& thread: reception_threads_)
+    {
+        if (thread.joinable())
+        {
+            thread.join();
+        }
+    }
+
     fastrtps::Domain::removeSubscriber(dds_subscriber_);
 }
 
@@ -93,12 +103,13 @@ void Subscriber::onSubscriptionMatched(
 void Subscriber::onNewDataMessage(
         fastrtps::Subscriber* /* sub */)
 {
+    using namespace std::placeholders;
     fastrtps::SampleInfo_t info;
-    if(dds_subscriber_->takeNextData(dynamic_data_.get(), &info))
+    if (dds_subscriber_->takeNextData(dynamic_data_.get(), &info))
     {
-        if(fastrtps::ALIVE == info.sampleKind)
+        if (fastrtps::ALIVE == info.sampleKind)
         {
-            receive(dynamic_data_);
+            reception_threads_.emplace_back(std::thread(&Subscriber::receive, this, dynamic_data_));
         }
     }
 }

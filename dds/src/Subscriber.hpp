@@ -26,6 +26,8 @@
 #include <fastrtps/subscriber/SubscriberListener.h>
 #include <fastrtps/types/DynamicDataPtr.h>
 
+#include <thread>
+
 namespace soss {
 namespace dds {
 
@@ -65,6 +67,7 @@ private:
     const std::string message_type_;
 
     TopicSubscriberSystem::SubscriptionCallback soss_callback_;
+    std::vector<std::thread> reception_threads_;
 };
 
 
