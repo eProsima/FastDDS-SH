@@ -23,6 +23,8 @@
 
 #include "dtparser/YAMLParser.hpp"
 
+#include <fastrtps/Domain.h>
+
 #include <iostream>
 #include <thread>
 
@@ -58,10 +60,6 @@ bool SystemHandle::configure(
         return false;
     }
 
-    if (dtparser::YAMLP_ret::YAMLP_OK != dtparser::YAMLParser::parseYAMLNode(configuration))
-    {
-        std::cerr << "[soss-dds]: error parsing the dynamic types" << std::endl;
-    }
 
     try
     {
@@ -77,9 +75,17 @@ bool SystemHandle::configure(
             participant_ = std::make_unique<Participant>();
         }
 
-        for(auto&& builder: dtparser::YAMLParser::get_types_map())
+        dtparser::RegisterCallback callback =
+            [=](std::string name, p_dynamictypebuilder_t builder)
         {
-            participant_->register_dynamic_type(builder.first, builder.second);
+            participant_->register_dynamic_type(name, builder);
+        };
+
+        dtparser::YAMLParser::set_callback(callback);
+
+        if (dtparser::YAMLP_ret::YAMLP_OK != dtparser::YAMLParser::parseYAMLNode(configuration))
+        {
+            std::cerr << "[soss-dds]: error parsing the dynamic types" << std::endl;
         }
     }
     catch(DDSMiddlewareException& e)

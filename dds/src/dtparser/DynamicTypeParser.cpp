@@ -22,6 +22,7 @@ namespace dds {
 namespace dtparser {
 
 p_dynamictype_map_t DynamicTypeParser::data_types_;
+std::vector<RegisterCallback> DynamicTypeParser::participant_callbacks_;
 
 static void dimensionsToArrayBounds(const std::string& dimensions, std::vector<uint32_t>& bounds)
 {
@@ -333,9 +334,15 @@ PARSER_ret DynamicTypeParser::create_dynamic_types()
         }
         else
         {
+            // Register dynamic type in participant.
+            for (auto callback : participant_callbacks_)
+            {
+                callback(name, dynamic_type_builder);
+            }
             data_types_[name] = dynamic_type_builder;
         }
     }
+    intermediate_types_.clear(); //Needed because of combination of static/non static members.
 
     if (unknown_types_.size() != 0)
     {
@@ -395,6 +402,12 @@ p_dynamictype_map_t DynamicTypeParser::get_types_map()
     return data_types_;
 }
 
+void DynamicTypeParser::set_callback(RegisterCallback callback)
+{
+    participant_callbacks_.push_back(callback);
+    return;
+}
+
 eprosima::fastrtps::types::DynamicPubSubType* DynamicTypeParser::CreateDynamicPubSubType(const std::string& typeName)
 {
     p_dynamictype_map_t m_dynamictypes = dtparser::DynamicTypeParser::get_types_map();
@@ -412,6 +425,7 @@ void DynamicTypeParser::DeleteInstance()
         DynamicTypeBuilderFactory::GetInstance()->DeleteBuilder(pair.second);
     }
     data_types_.clear();
+    participant_callbacks_.clear();
 }
 
 } /* namespace dtparser */

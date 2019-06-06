@@ -255,6 +255,11 @@ YAMLP_ret YAMLParser::create_dynamic_types()
     }
 }
 
+void YAMLParser::set_callback(RegisterCallback callback)
+{
+    dtparse_.set_callback(callback);
+}
+
 p_dynamictypebuilder_t YAMLParser::get_type_by_name(const std::string& t_name)
 {
     return dtparse_.get_dt_by_name(t_name);
@@ -272,7 +277,7 @@ eprosima::fastrtps::types::DynamicPubSubType* YAMLParser::CreateDynamicPubSubTyp
 
 void YAMLParser::DeleteInstance()
 {
-    dtparser::DynamicTypeParser::DeleteInstance();
+    DynamicTypeParser::DeleteInstance();
 }
 
 } // namespace dtparser

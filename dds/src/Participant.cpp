@@ -63,6 +63,11 @@ Participant::Participant(const YAML::Node& config)
 
 Participant::~Participant()
 {
+    for (auto topic : topics_)
+    {
+        fastrtps::Domain::unregisterType(dds_participant_, topic.first.c_str());
+    }
+    topics_.clear();
     fastrtps::Domain::removeParticipant(dds_participant_);
 }
 
@@ -76,12 +81,18 @@ void Participant::register_dynamic_type(
         auto pair = topics_.emplace(topic_name, fastrtps::types::DynamicPubSubType(dtptr));
         if (!pair.second)
         {
-            throw DDSMiddlewareException("Error creating a dynamic type: already exists");
+            // ToDo: this shouldn't throw an error if the type that is already created is equal
+            // to the one we wanted to create.
+            std::stringstream ss;
+            ss << "Error creating dynamic type '" << pair.first->second.getName() << "'. Type already exists.";
+            throw DDSMiddlewareException(ss.str());
         }
 
-        if (!fastrtps::Domain::registerDynamicType(dds_participant_, &pair.first->second))
+        if (!fastrtps::Domain::registerType(dds_participant_, &pair.first->second))
         {
-            throw DDSMiddlewareException("Error registering the dynamic type");
+            std::stringstream ss;
+            ss << "Error registering dynamic type '" << pair.first->second.getName() << "'.";
+            throw DDSMiddlewareException(ss.str());
         }
     }
     else
@@ -96,7 +107,9 @@ fastrtps::types::DynamicData_ptr Participant::create_dynamic_data(
     auto it = topics_.find(topic_name);
     if (topics_.end() == it)
     {
-        throw DDSMiddlewareException("Error creating a dynamic data: dynamic type not defined");
+        std::stringstream ss;
+        ss << "Error creating dynamic data: dynamic type " << topic_name << " not defined";
+        throw DDSMiddlewareException(ss.str());
     }
 
     const fastrtps::types::DynamicType_ptr& dynamic_type_ = it->second.GetDynamicType();

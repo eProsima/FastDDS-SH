@@ -42,6 +42,7 @@ typedef eprosima::fastrtps::types::DynamicTypeBuilderFactory    DynamicTypeBuild
 typedef std::map<std::string, p_dynamictypebuilder_t> p_dynamictype_map_t;
 
 namespace dtparser{
+typedef std::function<void(std::string, p_dynamictypebuilder_t)> RegisterCallback;
 
 /**
  * Enum class PARSER_ret, used to provide a strongly typed result from the operations within this module.
@@ -145,11 +146,13 @@ public:
     static p_dynamictypebuilder_t get_dt_by_name(const std::string& sName);
     static p_dynamictype_map_t get_types_map();
     static eprosima::fastrtps::types::DynamicPubSubType* CreateDynamicPubSubType(const std::string& typeName);
+    static void set_callback(RegisterCallback);
     static void DeleteInstance();
 private:
     std::vector<base_ptr> intermediate_types_;
     std::vector<base_ptr> unknown_types_;
     static p_dynamictype_map_t data_types_;
+    static std::vector<RegisterCallback> participant_callbacks_;
 };
 
 } // namespace dtparser

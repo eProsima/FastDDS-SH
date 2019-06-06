@@ -1,0 +1,51 @@
+systems:
+    dds:
+      type: dds
+      dynamic types:
+        struct stamp: 
+          int32: "sec"
+          uint32: "nanosec"
+        struct std_msgs__Header:
+          string: "frame_id"
+          stamp: "stamp"
+        struct Point:
+          float64: "x"
+          float64: "y"
+          float64: "z"
+        struct Quaternion:
+          float64: "x"
+          float64: "y"
+          float64: "z"
+          float64: "w"
+        struct geometry_msgs__Pose:
+          Point: "position"
+          Quaternion: "orientation"
+        struct std_msgs__String:
+          string: "data"
+
+    ros2: 
+      type: ros2
+
+routes:
+    ros2_to_dds: { from: ros2, to: dds }
+    dds_to_ros2: { from: dds, to: ros2 }
+
+topics:
+    hello_dds_pose: 
+      type: "geometry_msgs/Pose"
+      route: ros2_to_dds
+
+    hello_ros2_pose:
+      type: "geometry_msgs/Pose"
+      route: dds_to_ros2
+      remap: {dds: hello_dds_pose}
+
+    hello_dds_header:
+      type: "std_msgs/Header"
+      route: ros2_to_dds
+
+    hello_ros2_header:
+      type: "std_msgs/Header"
+      route: dds_to_ros2
+      remap: {dds: hello_dds_header}
+

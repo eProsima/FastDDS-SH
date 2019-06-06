@@ -65,7 +65,7 @@ bool Publisher::publish(
     std::cout << "[soss-dds][publisher]: translate message: soss -> dds "
         "(" << topic_name_ << ") " << std::endl;
 
-    success = Conversion::soss_to_dds(soss_message, dynamic_data_);
+    success = Conversion::soss_to_dds(soss_message, dynamic_data_.get());
 
     if (success)
     {

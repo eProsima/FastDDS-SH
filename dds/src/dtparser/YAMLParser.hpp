@@ -56,6 +56,7 @@ public:
     static p_dynamictype_map_t get_types_map();
     static YAMLP_ret loadYAMLFile(const std::string&);
     static YAMLP_ret parseYAMLNode(const YAML::Node&);
+    static void set_callback(RegisterCallback);
     static eprosima::fastrtps::types::DynamicPubSubType* CreateDynamicPubSubType(const std::string&);
     static void DeleteInstance();
 private:

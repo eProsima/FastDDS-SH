@@ -69,6 +69,8 @@ Subscriber::~Subscriber()
         }
     }
 
+    std::cout << "[soss-dds][subscriber]: wait finished." << std::endl;
+
     fastrtps::Domain::removeSubscriber(dds_subscriber_);
 }
 
@@ -79,7 +81,7 @@ void Subscriber::receive(const fastrtps::types::DynamicData_ptr dds_message)
 
     soss::Message soss_message;
 
-    bool success = Conversion::dds_to_soss(message_type_, dds_message, soss_message);
+    bool success = Conversion::dds_to_soss(message_type_, dds_message.get(), soss_message);
 
     if (success)
     {
