@@ -1,0 +1,78 @@
+@startuml
+actor other_sh
+actor core
+participant SystemHandle
+participant Participant
+participant Publisher
+participant Subscriber
+participant Conversion
+participant dtparser
+entity dds
+
+== initialization ==
+core -> SystemHandle: configure
+activate SystemHandle
+SystemHandle -> Participant: __init__()
+SystemHandle -> dtparser: load()
+activate dtparser
+SystemHandle <-- dtparser: dynamic_types
+deactivate dtparser
+SystemHandle -> Participant: register_dynamic_type()
+activate Participant
+Participant -> Participant: register_type()
+SystemHandle <-- Participant: status
+deactivate Participant
+core <-- SystemHandle: status
+deactivate SystemHandle
+
+core -> SystemHandle: advertise
+activate SystemHandle
+SystemHandle -> Publisher: __init__()
+core <-- SystemHandle: TopicPublisher
+deactivate SystemHandle
+
+core -> SystemHandle: subscribe
+activate SystemHandle
+SystemHandle -> Subscriber: __init__()
+core <-- SystemHandle: status
+deactivate SystemHandle
+
+core -> SystemHandle: spin_once
+activate SystemHandle
+core <-- SystemHandle: status
+deactivate SystemHandle
+
+== to dds ==
+other_sh -> Publisher: publish()
+activate Publisher
+Publisher -> Conversion: soss_to_dds()
+activate Conversion
+Publisher <-- Conversion: dds_topic
+deactivate Conversion
+Publisher -[#0000FF]> dds: send_to_dds()
+other_sh <-- Publisher: status
+deactivate Publisher
+
+== from dds ==
+dds -[#0000FF]> Subscriber: receive_from_dds()
+activate Subscriber
+Subscriber -> Conversion: dds_to_soss()
+activate Conversion
+Subscriber <-- Conversion: soss_topic
+deactivate Conversion
+Subscriber -> other_sh: soss_subscription_cb
+deactivate Subscriber
+
+== destruction ==
+core -> SystemHandle: __destroy__()
+activate SystemHandle
+SystemHandle -> Subscriber: __destroy__()
+SystemHandle -> Publisher: __destroy__()
+SystemHandle -> Participant: __destroy__()
+activate Participant
+Participant -> Participant: unregister_type()
+deactivate Participant
+deactivate SystemHandle
+
+@enduml
+
