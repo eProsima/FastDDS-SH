@@ -7,12 +7,12 @@
 TODO
 
 ## Proyect layout:
+- `Dockerfile`: Dockerfile with a system already configured
 - `dds`: main system handler
     - `src` folder: contains the implementation of *soss-dds* library.
     - `doc` folder: contains the design and user documentation.
     - `sample` folder: contains a *.yaml* file example and utils for running *soss-dds* easily.
     - `utils` folder: contains scripts and utilities.
-    - `dockerfiles` folder: contains dockerfiles with an already system configuration.
 - `dds-test`: system handler for testing the `dds` system handler.
     - `src` folder: contains the test sources
     - `resources` folder: contains the *yaml* configurations for the tests.
