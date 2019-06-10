@@ -1,8 +1,8 @@
-#soss-dds
+# soss-dds
 
 System handle to connect [*SOSS*][soss] to *eProsima*'s open-source implementation of the [DDS protocol][dds], [Fast-RTPS][fast].
 
-##Installation
+## Installation
 
 1. [Create a colcon workspace](https://index.ros.org/doc/ros2/Tutorials/Colcon-Tutorial/#create-a-workspace).
 2. Clone the soss project into the source subfolder.
@@ -25,7 +25,7 @@ System handle to connect [*SOSS*][soss] to *eProsima*'s open-source implementati
 6. In the workspace folder, execute colcon: `colcon build --packages-up-to soss-dds`.
 7. Source the current environment: `source install/local_setup.bash`.
 
-##Usage
+## Usage
 
 This system handle is mainly used to connect any system with the DDS protocol.
 
@@ -37,7 +37,7 @@ If we take as an example the communication between ROS2 and FIWARE, the communic
 
 ![](dds/doc/images/ROS2_TCP_tunnel.png)
 
-###Configuration
+### Configuration
 
 SOSS must be configured with a YAML file, which tells the program everything it needs to know in order to establish the connection between two or more systems that the user wants. 
 For example, if a simple string message wants to be exchanged between two ROS2 systems through a TCP tunnel, the configuration files for the two different SOSS instances that that tunnel must have should look as follows.
@@ -79,7 +79,7 @@ On the other hand, `participant` map tells the dds system handle where it can fi
 
 The `participant` map is optional, and if it is not given, the dds system handle will create a default UDP profile.
 
-###YAML dynamic types
+### YAML dynamic types
 
 *eProsima*'s *dtparser* can create dynamic types from a YAML map, allowing the user to define new dynamic types for each run without the need of rebuilding the project.
 
@@ -151,7 +151,7 @@ topics:
 
 Notice how in the definition of the dynamic types, the structure "stamp" is used as a member in the structure "std_msgs__Header", and is defined just before the nested structure. The order is not actually important, so the type "stamp" could have been defined after "std_msgs__Header".
 
-###Connect DDS with ROS2
+### Connect DDS with ROS2
 
 0. Source the soss environment (as in the installation step)
 1. Run soss (with the sample configuration): `soss src/dds/dds/sample/tcp/hello_dds_ros2.yaml`
@@ -159,9 +159,9 @@ Notice how in the definition of the dynamic types, the structure "stamp" is used
 - Also, you can have a look to the [internal design](dds/doc/design.md)
 - For a fast usage, you can use the [dockerfile](Dockerfile)
 
-##Changelog
+## Changelog
 
-###v0.1.0
+### v0.1.0
 
 - DDS communication in both directions based on topic
 - TCP tunnel support
@@ -170,3 +170,4 @@ Notice how in the definition of the dynamic types, the structure "stamp" is used
  [fast]: https://github.com/eProsima/Fast-RTPS
  [soss]: https://github.com/osrf/soss
  [dds]: https://en.wikipedia.org/wiki/Data_Distribution_Service
+ 
