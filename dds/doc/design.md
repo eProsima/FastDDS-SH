@@ -7,7 +7,7 @@
 ![](http://www.plantuml.com/plantuml/png/hLN1Yjmm3BtxAmozj8U1deVEicrXwR7GtaenZgtT4MJiO2k1zEihjvE9Od3O3jtBEibxqjEJfNdCP1EDbrvzYfq-FEYFFJhGHts6le_g4OBdZolAEef9Hpf3ClbyVNGnWHeOWGu76qX_cpF1vOiDljz--BgUj-_7hiVCGRTXnYwxX5tr-dCC4wICCMnUU-Adp5W8X3HhxxDIfvF6W8Isnr-McA9F9rNqbbgbp2DN4PxnPKnGgiB94cpha0_CbhKSjJ4bZJ5ltzMucwwZxgFr35Z2huetb0-7W-3uETWBEaFp05bvQ91RkXAy87zEHiQH6cH7nBaPQ0bGIzwYCraQLxbLdk9_uLGDg4Yr_ussMJy1XywlRDjwrMJJMfA-nm7TZV6lql9oVrydJTntgUt_sfK732O6rz9qPpAUCufbvCfyBUkXidluUvItRxNsTcAIc73E77Cs50t75am14TIYMtAPOwYqa8NlCmy_thpdlwUddm-5nMaX-3NjKb7984kIjjGL5K-UKxmihfH_CetiTW87E84f-AfIWLFhKRWaAZLiLiCboQrjOjQkJrNUnOmhyNhB1sAaSPqC8QGNDpnaIgFRNyF6_875kTpzkmP7ydUdNmBtjxk0th4xnr1lpyPYR8tNyZkir6y0)
 
 ## Proyect layout:
-- `Dockerfile`: Dockerfile with a system already configured
+- `Dockerfile`: Dockerfile with a system already configured with ROS2
 - `dds`: main system handler
     - `src` folder: contains the implementation of *soss-dds* library.
     - `doc` folder: contains the design and user documentation.
