@@ -8,7 +8,7 @@ Installation
 1. Create a colcon workspace (create a folder for the workspace and a subfolder for the sources).
 2. Clone the soss project into the subfolder (tag: `master`).
 3. Clone this project into the subfolder (with `--recursive` option).
-4. Clone the soss-ros2 plugin into the subfolder. <!-- ToDo: Add link to soss-ros2 -->:
+4. Clone the soss-ros2 plugin (or any other plugin needed) into the subfolder. <!-- ToDo: Add link to soss-ros2 -->:
 
     The workspace layout should look like this:
     ```
