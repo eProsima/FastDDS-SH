@@ -71,7 +71,7 @@ For the DDS system handle, the user must give two extra YAML maps which are “d
 
 On one hand, the dynamic types map tells the DDS system handle how a certain type is mapped. This is necessary to convert the type from a soss message, which is the type used inside soss, to a dynamic type, which is the type used in DDS. This conversion is done dynamically at runtime.
 
-To have a guide on how dynamic types are defined in YAML files, see the [YAML dynamic types] section.
+To have a guide on how dynamic types are defined in YAML files, see the [YAML dynamic types](#yaml-dynamic-types) section.
 
 The dynamic types standard does not allow certain characters in its names. For this reason, if a type defined in the topics section of the configuration file has in its name a `/`, the dds system handle will map that character into two underscores. That's why the type inside the dynamic types map is std_msgs__String, while the type inside the topics section is std_msgs/String. This is something important to notice when connecting to ROS2, because in ROS2 most of the types have a `/` in their names. Also, notice that in DDS the type will be published with two underscores.
 
