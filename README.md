@@ -8,7 +8,6 @@ To install this package into a workspace already containing SOSS, just clone thi
     git clone git@github.com:eProsima/SOSS-DDS.git
     (in the root of the workspace) colcon build --packages-up-to soss-dds
     ```
-
 ## Use case - Connecting with ROS2
 
 1. [Create a colcon workspace](https://index.ros.org/doc/ros2/Tutorials/Colcon-Tutorial/#create-a-workspace).
@@ -175,12 +174,9 @@ topics:
 
 Notice how in the definition of the dynamic types, the structure "stamp" is used as a member in the structure "std_msgs__Header", and is defined just before the nested structure. The order is not actually important, so the type "stamp" could have been defined after "std_msgs__Header".
 
-### Connect DDS with ROS2
+### More information
 
-0. Source the soss environment (as in the installation step)
-1. Run soss (with the sample configuration): `soss src/dds/dds/sample/tcp/hello_dds_ros2.yaml`
-
-- Also, you can have a look to the [internal design](dds/doc/design.md)
+- You can have a look to the [internal design](dds/doc/design.md)
 - For a fast usage, you can use the [dockerfile](Dockerfile)
 
 ## Changelog
