@@ -3,27 +3,51 @@
 System handle to connect [*SOSS*][soss] to *eProsima*'s open-source implementation of the [DDS protocol][dds], [Fast-RTPS][fast].
 
 ## Installation
+To install this package into a workspace already containing SOSS, just clone this repository into the sources directory and build it:
+    ```
+    git clone git@github.com:eProsima/SOSS-DDS.git
+    (in the root of the workspace) colcon build --packages-up-to soss-dds
+    ```
+
+## Use case - Connecting with ROS2
 
 1. [Create a colcon workspace](https://index.ros.org/doc/ros2/Tutorials/Colcon-Tutorial/#create-a-workspace).
 2. Clone the soss project into the source subfolder.
+    ```
+    git clone git@github.com:osrf/soss_v2.git
+    ```
+
 3. Clone this project into the subfolder.
-4. Clone the soss-ros2 plugin (or any other plugin needed) into the subfolder. <!-- ToDo: Add link to soss-ros2 -->:
+    ```
+    git clone git@github.com:eProsima/SOSS-DDS.git
+    ```
 
     The workspace layout should look like this:
     ```
         soss_wp
         └── src 
             ├── soss
-            |   └── ... (soss project subfolders)
-            ├── soss-ros2 (repo)
+            │   └── ... (other soss project subfolders)
+            │   └── packages
+            │       └── soss-ros2 (ROS2 system handle)
             └── soss-dds (repo)
                     ├── dds (soss-dds colcon pkg)
                     └── dds-test (soss-dds-test colcon pkg)
     ```
 
 5. Source a colcon environment in which ROS2 has been built (soss-ros2 uses rclcpp package).
-6. In the workspace folder, execute colcon: `colcon build --packages-up-to soss-dds`.
-7. Source the current environment: `source install/local_setup.bash`.
+    ```
+    source path/to/ros2/ws/install/local_setup.bash
+    ```
+
+6. In the workspace folder, execute colcon:
+    ```
+    colcon build --packages-up-to soss-dds soss-ros2
+    ```
+7. Source the current environment
+    ```
+    source install/local_setup.bash
+    ```
 
 ## Usage
 
