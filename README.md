@@ -86,13 +86,22 @@ To see how general SOSS systems, users and topics are configured, please refer t
 
 For the DDS system handle the user must add two extra YAML maps to the configuration file, which are “dynamic types” and “participant”, as seen above.
 
-On one hand, the dynamic types map tells the DDS system handle how a certain type is mapped. This is necessary to convert the type from a soss message, which is the type used inside soss, to a dynamic type, which is the type used in DDS. This conversion is done dynamically at runtime.
+On one hand, the dynamic types map tells the DDS system handle how a certain type is mapped. 
+This is necessary to convert the type from a soss message, which is the type used inside soss, to a dynamic type, which is the type used in DDS. 
+This conversion is done dynamically at runtime.
 
 To have a guide on how dynamic types are defined in YAML files, see the [YAML dynamic types](#yaml-dynamic-types) section.
 
-*The dynamic types standard does not allow certain characters in its names*. For this reason, if a type defined in the topics section of the configuration file has in its name a `/`, the dds system handle will map that character into two underscores. That's why the type inside the dynamic types map is std_msgs__String, while the type inside the topics section is std_msgs/String. This is *something important to notice when connecting to ROS2*, because in ROS2 most of the types have a `/` in their names. Also, notice that *in the DDS system, the message will be published with a type name with two underscores instead of slashes*.
+*The dynamic types standard does not allow certain characters in its names*. 
+For this reason, if a type defined in the topics section of the configuration file has in its name a `/`, the dds system handle will map that character into two underscores. 
+That's why the type inside the dynamic types map is std_msgs__String, while the type inside the topics section is std_msgs/String. This is *something important to notice when connecting to ROS2*, because in ROS2 most of the types have a `/` in their names. 
+Also, notice that *in the DDS system, the message will be published with a type name with two underscores instead of slashes*.
 
-On the other hand, `participant` map tells the dds system handle where it can find the configuration file for the DDS profle, and what profile must be used from the many that can be defined in that XML. This profile is used to set the DDS quality of services' parameters. A guide on how this XML files are configured can be found in [Fast-RTPS' documentation](https://fast-rtps.docs.eprosima.com/en/v1.7.2/xmlprofiles.html). An example of an XML configuration file can be found [in this repository](dds/sample/tcp/config.xml). Notice that this example file has two participant profiles defined in it, one to be used in the client side and other for the server side, so the YAML file used to configure SOSS in the server computer must change the profile_name in the example above from "soss_profile_client" to "soss_profile_server".
+On the other hand, `participant` map tells the dds system handle where it can find the configuration file for the DDS profle, and what profile must be used from the many that can be defined in that XML. 
+This profile is used to set the DDS quality of services' parameters. 
+A guide on how this XML files are configured can be found in [Fast-RTPS' documentation](https://fast-rtps.docs.eprosima.com/en/v1.7.2/xmlprofiles.html). 
+An example of an XML configuration file can be found [in this repository](dds/sample/tcp/config.xml). 
+Notice that this example file has two participant profiles defined in it, one to be used in the client side and other for the server side, so the YAML file used to configure SOSS in the server computer must change the profile_name in the example above from "soss_profile_client" to "soss_profile_server".
 
 The `participant` map is optional, and if it is not given, the dds system handle will create a default UDP profile that can communicate in a LAN.
 
@@ -113,7 +122,8 @@ The main 'type' for the general dynamic type must be a struct, as soss messages 
 The name for each type can be whatever the user wants, with the two following rules:
 
 1. The name can not have spaces in it.
-1. The name must be formed only by letters, numbers and underscores. Remember that the system handle will map each `/` for `__`, as mentioned in the configuration section, to allow an easy connection with ROS2 types.
+1. The name must be formed only by letters, numbers and underscores. 
+Remember that the system handle will map each `/` for `__`, as mentioned in the configuration section, to allow an easy connection with ROS2 types.
 
 Each of the members of the dynamic type can be defined just by its type and name, such as `int32: "my_integer"`.
 
@@ -134,7 +144,8 @@ Each of the members of the dynamic type can be defined just by its type and name
 - float128
 - string
 
-The dynamic types parser also allow nested structures. To create a nested structure, there must be a definition of the basic structure and a reference to the basic structure in the member of the nested structure, using the name of the simple structure. 
+The dynamic types parser also allow nested structures. 
+To create a nested structure, there must be a definition of the basic structure and a reference to the basic structure in the member of the nested structure, using the name of the simple structure. 
 
 The following is an example of a full configuration file that uses the ROS2 nested type [std_msgs/Header](http://docs.ros.org/melodic/api/std_msgs/html/msg/Header.html):
 
@@ -166,13 +177,16 @@ topics:
       route: dds_to_ros2
 ```
 
-Notice how in the definition of the dynamic types, the structure "stamp" is used as a member type in the structure "std_msgs__Header", and is defined just before the nested structure. The order is not actually important, so the type "stamp" could have been defined after "std_msgs__Header".
+Notice how in the definition of the dynamic types, the structure "stamp" is used as a member type in the structure "std_msgs__Header", and is defined just before the nested structure. 
+The order is not actually important, so the type "stamp" could have been defined after "std_msgs__Header".
 
 ### TCP tunnel
 
-Besides connecting any system to DDS, this system handle can also be used to create a TCP tunnel connecting two SOSS instances. That way, a user can connect two ROS2 systems through TCP, or connect any system supported by soss with other system that is not in its LAN.
+Besides connecting any system to DDS, this system handle can also be used to create a TCP tunnel connecting two SOSS instances. 
+That way, a user can connect two ROS2 systems through TCP, or connect any system supported by soss with other system that is not in its LAN.
 
-For the TCP tunnel, two instances of SOSS are going to be used, one in each of the computers that are going to be communicated. Each of those instances will have a system handle for the system they want to communicate in the WAN network, and other to communicate with Fast-RTPS' DDS implementation. 
+For the TCP tunnel, two instances of SOSS are going to be used, one in each of the computers that are going to be communicated. 
+Each of those instances will have a system handle for the system they want to communicate in the WAN network, and other to communicate with Fast-RTPS' DDS implementation. 
 
 If we take as an example the communication between ROS2 and FIWARE, the communication scheme will look like this:
 
