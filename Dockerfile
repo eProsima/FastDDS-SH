@@ -41,6 +41,6 @@ RUN . /opt/ros/crystal/setup.sh && \
 # Prepare environment
 WORKDIR /root
 RUN cp soss_wp/src/dds/dds/sample/udp/hello_dds_ros2.yaml .
-#RUN rm -rf soss_wp
+RUN rm -rf soss_wp
 
 ENTRYPOINT . /opt/soss/setup.sh && echo "[NOTE] Write: 'soss hello_dds_ros2.yaml' to test soss with ros2 and DDS." && bash
