@@ -10,7 +10,7 @@ To install this package into a workspace already containing SOSS, just clone thi
 
     (in the root of the workspace) colcon build --packages-up-to soss-dds
     ```
-## Use case - Connecting with ROS2
+## Example - Connecting with ROS2
 
 1. [Create a colcon workspace](https://index.ros.org/doc/ros2/Tutorials/Colcon-Tutorial/#create-a-workspace).
 2. Clone the soss project into the source subfolder.
@@ -57,7 +57,8 @@ This system handle is mainly used to connect any system with the DDS protocol.
 ### Configuration
 
 SOSS must be configured with a YAML file, which tells the program everything it needs to know in order to establish the connection between two or more systems that the user wants. 
-For example, if a simple string message wants to be exchanged between two ROS2 systems through a [TCP tunnel](#tcp-tunnel), the configuration files for the two different SOSS instances that that tunnel must have should look as follows.
+For example, if a simple string message wants to be exchanged between two ROS2 systems through a [TCP tunnel](#tcp-tunnel), 
+the configuration files for the two different SOSS instances which that tunnel must have should look as follows:
 
 ```YAML
 systems:
@@ -103,7 +104,7 @@ A guide on how this XML files are configured can be found in [Fast-RTPS' documen
 An example of an XML configuration file can be found [in this repository](dds/sample/tcp/config.xml). 
 Notice that this example file has two participant profiles defined in it, one to be used in the client side and other for the server side, so the YAML file used to configure SOSS in the server computer must change the profile_name in the example above from "soss_profile_client" to "soss_profile_server".
 
-The `participant` map is optional, and if it is not given, the dds system handle will create a default UDP profile that can communicate in a LAN.
+The `participant` map is optional, and if it is not given, the dds system handle will create a default UDP profile.
 
 ### YAML dynamic types
 
