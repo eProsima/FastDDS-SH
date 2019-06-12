@@ -4,8 +4,10 @@ System handle to connect [*SOSS*][soss] to *eProsima*'s open-source implementati
 
 ## Installation
 To install this package into a workspace already containing SOSS, just clone this repository into the sources directory and build it:
+
     ```
     git clone git@github.com:eProsima/SOSS-DDS.git
+
     (in the root of the workspace) colcon build --packages-up-to soss-dds
     ```
 ## Use case - Connecting with ROS2
@@ -52,18 +54,10 @@ To install this package into a workspace already containing SOSS, just clone thi
 
 This system handle is mainly used to connect any system with the DDS protocol.
 
-Also, it can be used to create a TCP tunnel connecting two SOSS instances. That way, a user can connect two ROS2 systems through TCP, or connect any system supported by soss with other system that is not in its LAN.
-
-For the TCP tunnel, two instances of SOSS are going to be used, one in each of the computers that are going to be communicated. Each of those instances will have a system handle for the system they want to communicate in the WAN network, and other to communicate with Fast-RTPS' DDS implementation. 
-
-If we take as an example the communication between ROS2 and FIWARE, the communication scheme will look like this:
-
-![](dds/doc/images/ROS2_TCP_tunnel.png)
-
 ### Configuration
 
 SOSS must be configured with a YAML file, which tells the program everything it needs to know in order to establish the connection between two or more systems that the user wants. 
-For example, if a simple string message wants to be exchanged between two ROS2 systems through a TCP tunnel, the configuration files for the two different SOSS instances that that tunnel must have should look as follows.
+For example, if a simple string message wants to be exchanged between two ROS2 systems through a [TCP tunnel](#tcp-tunnel), the configuration files for the two different SOSS instances that that tunnel must have should look as follows.
 
 ```YAML
 systems:
@@ -88,19 +82,19 @@ topics:
     hello_fiware: { type: "std_msgs/String", route: ros2_to_dds }
 ```
 
-To see how general SOSS systems, users and topics are configured, please refer to SOSS' documentation.
+To see how general SOSS systems, users and topics are configured, please refer to [SOSS' documentation][soss].
 
-For the DDS system handle, the user must give two extra YAML maps which are “dynamic types” and “participant”, as seen above.
+For the DDS system handle the user must add two extra YAML maps to the configuration file, which are “dynamic types” and “participant”, as seen above.
 
 On one hand, the dynamic types map tells the DDS system handle how a certain type is mapped. This is necessary to convert the type from a soss message, which is the type used inside soss, to a dynamic type, which is the type used in DDS. This conversion is done dynamically at runtime.
 
 To have a guide on how dynamic types are defined in YAML files, see the [YAML dynamic types](#yaml-dynamic-types) section.
 
-The dynamic types standard does not allow certain characters in its names. For this reason, if a type defined in the topics section of the configuration file has in its name a `/`, the dds system handle will map that character into two underscores. That's why the type inside the dynamic types map is std_msgs__String, while the type inside the topics section is std_msgs/String. This is something important to notice when connecting to ROS2, because in ROS2 most of the types have a `/` in their names. Also, notice that in DDS the type will be published with two underscores.
+*The dynamic types standard does not allow certain characters in its names*. For this reason, if a type defined in the topics section of the configuration file has in its name a `/`, the dds system handle will map that character into two underscores. That's why the type inside the dynamic types map is std_msgs__String, while the type inside the topics section is std_msgs/String. This is *something important to notice when connecting to ROS2*, because in ROS2 most of the types have a `/` in their names. Also, notice that *in the DDS system, the message will be published with a type name with two underscores instead of slashes*.
 
 On the other hand, `participant` map tells the dds system handle where it can find the configuration file for the DDS profle, and what profile must be used from the many that can be defined in that XML. This profile is used to set the DDS quality of services' parameters. A guide on how this XML files are configured can be found in [Fast-RTPS' documentation](https://fast-rtps.docs.eprosima.com/en/v1.7.2/xmlprofiles.html). An example of an XML configuration file can be found [in this repository](dds/sample/tcp/config.xml). Notice that this example file has two participant profiles defined in it, one to be used in the client side and other for the server side, so the YAML file used to configure SOSS in the server computer must change the profile_name in the example above from "soss_profile_client" to "soss_profile_server".
 
-The `participant` map is optional, and if it is not given, the dds system handle will create a default UDP profile.
+The `participant` map is optional, and if it is not given, the dds system handle will create a default UDP profile that can communicate in a LAN.
 
 ### YAML dynamic types
 
@@ -121,7 +115,7 @@ The name for each type can be whatever the user wants, with the two following ru
 1. The name can not have spaces in it.
 1. The name must be formed only by letters, numbers and underscores. Remember that the system handle will map each `/` for `__`, as mentioned in the configuration section, to allow an easy connection with ROS2 types.
 
-Each of the members of the dynamic type can have its own type and name. Each member is defined just by its type and name, such as `int32: "my_integer"`.
+Each of the members of the dynamic type can be defined just by its type and name, such as `int32: "my_integer"`.
 
 *eProsima*'s *dtparser* supports the following basic types:
 
@@ -142,7 +136,7 @@ Each of the members of the dynamic type can have its own type and name. Each mem
 
 The dynamic types parser also allow nested structures. To create a nested structure, there must be a definition of the basic structure and a reference to the basic structure in the member of the nested structure, using the name of the simple structure. 
 
-The following is an example of a full configuration file that uses the ROS2 nested type std_msgs/Header:
+The following is an example of a full configuration file that uses the ROS2 nested type [std_msgs/Header](http://docs.ros.org/melodic/api/std_msgs/html/msg/Header.html):
 
 ```YAML
 systems:
@@ -172,11 +166,21 @@ topics:
       route: dds_to_ros2
 ```
 
-Notice how in the definition of the dynamic types, the structure "stamp" is used as a member in the structure "std_msgs__Header", and is defined just before the nested structure. The order is not actually important, so the type "stamp" could have been defined after "std_msgs__Header".
+Notice how in the definition of the dynamic types, the structure "stamp" is used as a member type in the structure "std_msgs__Header", and is defined just before the nested structure. The order is not actually important, so the type "stamp" could have been defined after "std_msgs__Header".
+
+### TCP tunnel
+
+Besides connecting any system to DDS, this system handle can also be used to create a TCP tunnel connecting two SOSS instances. That way, a user can connect two ROS2 systems through TCP, or connect any system supported by soss with other system that is not in its LAN.
+
+For the TCP tunnel, two instances of SOSS are going to be used, one in each of the computers that are going to be communicated. Each of those instances will have a system handle for the system they want to communicate in the WAN network, and other to communicate with Fast-RTPS' DDS implementation. 
+
+If we take as an example the communication between ROS2 and FIWARE, the communication scheme will look like this:
+
+![](dds/doc/images/ROS2_TCP_tunnel.png)
 
 ### More information
 
-- You can have a look to the [internal design](dds/doc/design.md)
+- You can have a look at the [internal design](dds/doc/design.md)
 - For a fast usage, you can use the [dockerfile](Dockerfile)
 
 ## Changelog
@@ -188,7 +192,7 @@ Notice how in the definition of the dynamic types, the structure "stamp" is used
 - Integration tests
 
  [fast]: https://github.com/eProsima/Fast-RTPS
- [soss]: https://github.com/osrf/soss
+ [soss]: https://github.com/osrf/soss_v2
  [dds]: https://en.wikipedia.org/wiki/Data_Distribution_Service
 
 ---
