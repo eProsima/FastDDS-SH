@@ -3,6 +3,7 @@
 System handle to connect [*SOSS*][soss] to *eProsima*'s open-source implementation of the [DDS protocol][dds], [Fast-RTPS][fast].
 
 ## Installation
+
 To install this package into a workspace already containing SOSS, just clone this repository into the sources directory and build it:
 ```
 $ cd <soss workspace folder>
@@ -58,15 +59,17 @@ $ colcon build --packages-up-to soss-dds
 ## Usage
 
 This system handle is mainly used to connect any system with the DDS protocol.
-Exists two main usages of this *SOSS DDS plugin`:
-- Connection through *UDP* to a DDS cloud
-- Used as a tunnel through TCP between two SOSS systems. See [TCP tunnel](#tcp-tunnel) for more information.
+There are two communication modes of *SOSS DDS plugin`:
+- Connection through *UDP* to a DDS cloud.
+- Connection through *TCP* to others DDS participants.
+This could be used as a tunnel between two SOSS.
+See [TCP tunnel](#tcp-tunnel) for more information.
 
 ### Configuration
 
 SOSS must be configured with a YAML file, which tells the program everything it needs to know
 in order to establish the connection between two or more systems that the user wants.
-An example of YAML configuration file that connect ROS2 to DDS could be the following:
+An example of a YAML configuration file to connect ROS2 to DDS could be the following:
 
 ```YAML
 systems:
@@ -93,31 +96,34 @@ topics:
 
 To see how general SOSS systems, users and topics are configured, please refer to [SOSS' documentation][soss].
 
-For the DDS system handle the user must add two extra YAML maps to the configuration file, which are “dynamic types” and “participant”, as seen above.
+For the DDS system handle the user must add two extra YAML maps to the configuration file as seen above,
+which are `dynamic types` and `participant`:
 
-On one hand, the dynamic types map tells the DDS system handle how a certain type is mapped.
-This is necessary to convert the type from a soss message, which is the type used inside soss, to a dynamic type, which is the type used in DDS.
+* The `dynamic types` map tells the DDS system handle how a certain type is mapped.
+This is necessary to convert the type from a *soss message*, which is the type used inside soss,
+to a *dynamic type*, which is the type used in DDS.
 This conversion is done dynamically at runtime.
-
 To have a guide on how dynamic types are defined in YAML files, see the [YAML dynamic types](#yaml-dynamic-types) section.
 
-*The dynamic types standard does not allow certain characters in its names*.
-For this reason, if a type defined in the topics section of the configuration file has in its name a `/`, the dds system handle will map that character into two underscores.
+  **The dynamic types standard does not allow certain characters in its names**.
+For this reason, if a type defined in the topics section of the configuration file has in its name a `/`,
+the dds system handle will map that character into two underscores.
 That's why the type inside the dynamic types map is `std_msgs__String`, while the type inside the topics section is `std_msgs/String`.
-This is *something important to notice when connecting to ROS2*, because in ROS2 most of the types have a `/` in their names.
-Also, notice that *in the DDS system, the message will be published with a type name with two underscores instead of slashes*.
+This is **something important to notice when connecting to ROS2**, because in ROS2 most of the types have a `/` in their names.
+Also, notice that **in the DDS system, the message will be published with a type name with two underscores instead of a slash**.
 
-On the other hand, `participant` map tells the dds system handle where it can find the configuration file for the DDS profle,
-and what profile must be used from the many that can be defined in that XML. //link
+* The `participant` map *(optional)* tells to the dds system handle where it can find the configuration file for the DDS profle,
+and what profile must be used from the many that can be defined in that XML.
 This profile is used to set the DDS quality of services' parameters.
-A guide on how this XML files are configured can be found in [Fast-RTPS' documentation](https://fast-rtps.docs.eprosima.com/en/v1.7.2/xmlprofiles.html).
+A guide on how this XML files are configured can be found in
+[Fast-RTPS' documentation](https://fast-rtps.docs.eprosima.com/en/v1.7.2/xmlprofiles.html).
 An example of an XML configuration file can be found [in this repository](dds/sample/tcp/config.xml).
 Notice that this example file has two participant profiles defined in it,
 one to be used in the client side and other for the server side,
 so the YAML file used to configure SOSS in the server computer must change the `profile_name` in the example above
 from `soss_profile_client` to `soss_profile_server`.
 
-The `participant` map is optional, and if it is not given, the dds system handle will create a default UDP profile.
+  The `participant` map is optional. If it is not given, the dds system handle will create a default UDP profile.
 
 ### YAML dynamic types
 
@@ -197,10 +203,14 @@ The order is not actually important, so the type "stamp" could have been defined
 ### TCP tunnel
 
 Besides connecting any system to DDS, this system handle can also be used to create a TCP tunnel connecting two SOSS instances.
-That way, a user can connect two ROS2 systems through TCP, or connect any system supported by soss with other system that is not in its LAN.
+That way, a user can connect two ROS2 systems through TCP,
+or connect any system supported by soss with other system that is not in its LAN.
 
 For the TCP tunnel, two instances of SOSS are going to be used, one in each of the computers that are going to be communicated.
-Each of those instances will have a system handle for the system they want to communicate in the WAN network, and other to communicate with Fast-RTPS' DDS implementation.
+Each of those instances will have a system handle for the system they want to communicate in the WAN network,
+and other to communicate with Fast-RTPS' DDS implementation.
+
+You can see the YAML's configuration files related to TCP tunnel configuration in the [sample folder](dds/sample/tcp).
 
 If we take as an example the communication between ROS2 and FIWARE, the communication scheme will look like this:
 
