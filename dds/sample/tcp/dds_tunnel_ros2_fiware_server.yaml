@@ -4,13 +4,14 @@ systems:
       dynamic types:
         struct std_msgs__String:
           string: "data"
+      participant:
+        file_path: "install/soss-dds/sample/tcp/config.xml"
+        profile_name: soss_profile_server
 
-    fiware: 
+    fiware:
       type: fiware
       host: "192.168.1.59"
       port: 1026
-      subscription_host: "192.168.1.47"
-      subscription_port: 1028
 
 routes:
     fiware_to_dds: { from: fiware, to: dds }

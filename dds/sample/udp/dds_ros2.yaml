@@ -5,7 +5,7 @@ systems:
         struct std_msgs__String:
           string: "data"
 
-    ros2: 
+    ros2:
       type: ros2
 
 routes:
@@ -14,4 +14,4 @@ routes:
 
 topics:
     hello_ros2: { type: "std_msgs/String", route: dds_to_ros2 }
-    hello_fiware: { type: "std_msgs/String", route: ros2_to_dds }
+    hello_dds: { type: "std_msgs/String", route: ros2_to_dds }

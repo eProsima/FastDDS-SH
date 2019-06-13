@@ -22,7 +22,7 @@ class SystemHandler {
 class Participant {
     - dds::participant
     - map<dds::dynamic_types>
-    + register_dynamic_type(name)
+    + register_dynamic_type(name, builder)
     + create_dynamic_data(name)
 }
 
