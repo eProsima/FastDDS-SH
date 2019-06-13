@@ -20,7 +20,6 @@
 
 #include "DDSMiddlewareException.hpp"
 #include <fastrtps/types/DynamicData.h>
-#include <fastrtps/types/MemberDescriptor.h>
 #include <soss/Message.hpp>
 
 namespace soss {

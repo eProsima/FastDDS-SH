@@ -18,6 +18,35 @@
 #include "Conversion.hpp"
 #include <sstream>
 #include <soss/utilities.hpp>
+#include <fastrtps/types/MemberDescriptor.h>
+
+using eprosima::fastrtps::types::ResponseCode;
+using eprosima::fastrtps::types::MemberDescriptor;
+using eprosima::fastrtps::types::MemberId;
+
+// Due to a problem with Fast-RTPS library, which by now does not export the "GetDescriptor" funciton for windows,
+// this workaround is needed in order to access the protected member "mDescriptors".
+// This problem will be solved in future fixes, but for now this workaround is the only way of introspecting
+// dynamic types in windows.
+class DynamicDataSOSS : public eprosima::fastrtps::types::DynamicData
+{
+public:
+    ResponseCode GetDescriptorSOSS(MemberDescriptor& value, MemberId id) const
+    {
+        auto it = mDescriptors.find(id);
+        if (it != mDescriptors.end())
+        {
+            value.CopyFrom(it->second);
+            return ResponseCode::RETCODE_OK;
+        }
+        else
+        {
+            std::cerr << "Error getting MemberDescriptor. MemberId not found." << std::endl;
+            return ResponseCode::RETCODE_BAD_PARAMETER;
+        }
+    }
+};
+
 
 namespace soss {
 namespace dds {
@@ -33,8 +62,9 @@ bool Conversion::soss_to_dds(
         types::ResponseCode ret = types::RETCODE_ERROR;
 
         types::MemberDescriptor descriptor;
+        DynamicDataSOSS* dd_soss = static_cast<DynamicDataSOSS*>(output);
         uint32_t id = output->GetMemberIdByName(soss_name);
-        output->GetDescriptor(descriptor, id);
+        ret = dd_soss->GetDescriptorSOSS(descriptor, id);
 
         types::TypeKind dds_type = descriptor.GetKind();
 
@@ -170,7 +200,8 @@ bool Conversion::dds_to_soss(
         {
             soss::Field field;
 
-            ret = input->GetDescriptor(descriptor, id);
+            DynamicDataSOSS* dd_soss = static_cast<DynamicDataSOSS*>(input);
+            ret = dd_soss->GetDescriptorSOSS(descriptor, id);
 
             if (ret == types::RETCODE_OK)
             {
