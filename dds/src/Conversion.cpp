@@ -36,8 +36,7 @@ public:
         auto it = mDescriptors.find(id);
         if (it != mDescriptors.end())
         {
-            value.CopyFrom(it->second);
-            return ResponseCode::RETCODE_OK;
+            return value.CopyFrom(it->second);
         }
         else
         {
