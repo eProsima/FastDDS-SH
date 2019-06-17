@@ -24,7 +24,7 @@ using eprosima::fastrtps::types::ResponseCode;
 using eprosima::fastrtps::types::MemberDescriptor;
 using eprosima::fastrtps::types::MemberId;
 
-// Due to a problem with Fast-RTPS library, which by now does not export the "GetDescriptor" funciton for windows,
+// Due to a problem with Fast-RTPS library, which by now does not export the "GetDescriptor" function for windows,
 // this workaround is needed in order to access the protected member "mDescriptors".
 // This problem will be solved in future fixes, but for now this workaround is the only way of introspecting
 // dynamic types in windows.
