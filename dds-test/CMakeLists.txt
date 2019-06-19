@@ -20,6 +20,7 @@ project(soss-dds-test)
 
 find_package(soss-dds REQUIRED)
 find_package(soss-mock REQUIRED)
+find_package(yaml-cpp)
 
 include(CTest)
 include(${PROJECT_SOURCE_DIR}/thirdparty/catch2/cmake/Catch.cmake)
@@ -35,10 +36,12 @@ set_target_properties(${PROJECT_NAME}
         POSITION_INDEPENDENT_CODE ON
 )
 
+if (UNIX AND NOT APPLE)
 target_compile_options(${PROJECT_NAME}
     PRIVATE
         -Werror -Wall -Wextra -Wpedantic
 )
+endif()
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
@@ -48,6 +51,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         soss::mock
+        yaml-cpp
 )
 
 

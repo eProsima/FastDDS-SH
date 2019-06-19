@@ -20,6 +20,7 @@
 
 
 #include <soss/SystemHandle.hpp>
+#include <soss/Soss_export.hpp>
 
 #include <vector>
 #include <memory>
@@ -32,7 +33,7 @@ class Participant;
 class Publisher;
 class Subscriber;
 
-class SystemHandle : public virtual TopicSystem
+class SYSTEM_HANDLE_EXPORT SystemHandle : public virtual TopicSystem
 {
 public:
     SystemHandle() = default;

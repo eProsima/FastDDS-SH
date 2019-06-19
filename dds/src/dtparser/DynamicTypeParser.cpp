@@ -33,7 +33,7 @@ static void dimensionsToArrayBounds(const std::string& dimensions, std::vector<u
 
     while (std::getline(ss, item, ','))
     {
-        bounds.push_back((uint)std::stoi(item));
+        bounds.push_back((uint32_t)std::stoi(item));
     }
 }
 
