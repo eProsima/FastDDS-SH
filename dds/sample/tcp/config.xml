@@ -45,6 +45,9 @@
                         </tcpv4>
                     </locator>
                 </initialPeersList>
+                <leaseAnnouncement>
+                    <sec>1</sec>
+                </leaseAnnouncement>
             </builtin>
             <useBuiltinTransports>false</useBuiltinTransports>
         </rtps>
