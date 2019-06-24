@@ -39,66 +39,66 @@ static void dimensionsToArrayBounds(const std::string& dimensions, std::vector<u
 
 static p_dynamictypebuilder_t getDiscriminatorTypeBuilder(const std::string &disc)
 {
-    DynamicTypeBuilderFactory* factory = DynamicTypeBuilderFactory::GetInstance();
+    DynamicTypeBuilderFactory* factory = DynamicTypeBuilderFactory::get_instance();
     if (disc.compare(BOOLEAN) == 0)
     {
-        return factory->CreateBoolBuilder();
+        return factory->create_bool_builder();
     }
     else if (disc.compare(TBYTE) == 0)
     {
-        return factory->CreateByteBuilder();
+        return factory->create_byte_builder();
     }
     else if (disc.compare(SHORT) == 0)
     {
-        return factory->CreateInt16Builder();
+        return factory->create_int16_builder();
     }
     else if (disc.compare(LONG) == 0)
     {
-        return factory->CreateInt32Builder();
+        return factory->create_int32_builder();
     }
     else if (disc.compare(LONGLONG) == 0)
     {
-        return factory->CreateInt64Builder();
+        return factory->create_int64_builder();
     }
     else if (disc.compare(USHORT) == 0)
     {
-        return factory->CreateUint16Builder();
+        return factory->create_uint16_builder();
     }
     else if (disc.compare(ULONG) == 0)
     {
-        return factory->CreateUint32Builder();
+        return factory->create_uint32_builder();
     }
     else if (disc.compare(ULONGLONG) == 0)
     {
-        return factory->CreateUint64Builder();
+        return factory->create_uint64_builder();
     }
     else if (disc.compare(FLOAT) == 0)
     {
-        return factory->CreateFloat32Builder();
+        return factory->create_float32_builder();
     }
     else if (disc.compare(DOUBLE) == 0)
     {
-        return factory->CreateFloat64Builder();
+        return factory->create_float64_builder();
     }
     else if (disc.compare(LONGDOUBLE) == 0)
     {
-        return factory->CreateFloat128Builder();
+        return factory->create_float128_builder();
     }
     else if (disc.compare(CHAR) == 0)
     {
-        return factory->CreateChar8Builder();
+        return factory->create_char8_builder();
     }
     else if (disc.compare(WCHAR) == 0)
     {
-        return factory->CreateChar16Builder();
+        return factory->create_char16_builder();
     }
     else if (disc.compare(STRING) == 0)
     {
-        return factory->CreateStringBuilder();
+        return factory->create_string_builder();
     }
     else if (disc.compare(WSTRING) == 0)
     {
-        return factory->CreateWstringBuilder();
+        return factory->create_wstring_builder();
     }
     return DynamicTypeParser::get_dt_by_name(disc);
 }
@@ -128,17 +128,17 @@ PARSER_ret Base::to_dynamic(std::string& name, p_dynamictypebuilder_t& memberBui
     else if (type().compare(STRING) == 0 ||
              type().compare(WSTRING) == 0)
     {
-        DynamicTypeBuilderFactory* factory = DynamicTypeBuilderFactory::GetInstance();
+        DynamicTypeBuilderFactory* factory = DynamicTypeBuilderFactory::get_instance();
         if (properties() == nullptr ||
             properties()->type().compare(STR_MAXLENGTH) != 0)
         {
             if (type().compare(STRING) == 0)
             {
-                memberBuilder = factory->CreateStringBuilder();
+                memberBuilder = factory->create_string_builder();
             }
             else
             {
-                memberBuilder = factory->CreateWstringBuilder();
+                memberBuilder = factory->create_wstring_builder();
             }
         }
         else
@@ -147,11 +147,11 @@ PARSER_ret Base::to_dynamic(std::string& name, p_dynamictypebuilder_t& memberBui
 
             if (type().compare(STRING) == 0)
             {
-                memberBuilder = factory->CreateStringBuilder(bound);
+                memberBuilder = factory->create_string_builder(bound);
             }
             else
             {
-                memberBuilder = factory->CreateWstringBuilder(bound);
+                memberBuilder = factory->create_wstring_builder(bound);
             }
         }
     }
@@ -179,11 +179,11 @@ PARSER_ret Base::to_dynamic(std::string& name, p_dynamictypebuilder_t& memberBui
     }
     else if (isArray)
     {
-        DynamicTypeBuilderFactory* factory = DynamicTypeBuilderFactory::GetInstance();
+        DynamicTypeBuilderFactory* factory = DynamicTypeBuilderFactory::get_instance();
         p_dynamictypebuilder_t innerBuilder = std::move(memberBuilder);
         std::vector<uint32_t> bounds;
         dimensionsToArrayBounds(properties()->name(), bounds);
-        memberBuilder = factory->CreateArrayBuilder(innerBuilder, bounds);
+        memberBuilder = factory->create_array_builder(innerBuilder, bounds);
     }
 
     return ret;
@@ -200,11 +200,11 @@ PARSER_ret Structure::to_dynamic(std::string& name, p_dynamictypebuilder_t& type
 
     if (this->type().compare(STRUCT) == 0)
     {
-        typeBuilder = DynamicTypeBuilderFactory::GetInstance()->CreateStructBuilder();
+        typeBuilder = DynamicTypeBuilderFactory::get_instance()->create_struct_builder();
     }
     else if (this->type().compare(ENUM) == 0)
     {
-        typeBuilder = DynamicTypeBuilderFactory::GetInstance()->CreateEnumBuilder();
+        typeBuilder = DynamicTypeBuilderFactory::get_instance()->create_enum_builder();
     }
     else
     {
@@ -212,7 +212,7 @@ PARSER_ret Structure::to_dynamic(std::string& name, p_dynamictypebuilder_t& type
         return PARSER_ret::PARSER_ERROR;
     }
 
-    typeBuilder->SetName(this->name());
+    typeBuilder->set_name(this->name());
     uint32_t mId = 0;
 
     if (this->type().compare(STRUCT) == 0)
@@ -228,7 +228,7 @@ PARSER_ret Structure::to_dynamic(std::string& name, p_dynamictypebuilder_t& type
             }
             else
             {
-                typeBuilder->AddMember(mId++, member_name, mType);
+                typeBuilder->add_member(mId++, member_name, mType);
                 // ToDo: Add labels.
             }
         }
@@ -256,7 +256,7 @@ PARSER_ret Structure::to_dynamic(std::string& name, p_dynamictypebuilder_t& type
             {
                 mId = (uint32_t)std::stoi(value);
             }
-            typeBuilder->AddEmptyMember(mId++, member_name);
+            typeBuilder->add_empty_member(mId++, member_name);
         }
     }
 
@@ -290,7 +290,7 @@ PARSER_ret SimpleValue::to_dynamic(std::string& name, p_dynamictypebuilder_t& ty
 
         if (ret == PARSER_ret::PARSER_OK)
         {
-            typeBuilder = DynamicTypeBuilderFactory::GetInstance()->CreateAliasBuilder(valueBuilder, name);
+            typeBuilder = DynamicTypeBuilderFactory::get_instance()->create_alias_builder(valueBuilder, name);
             if (typeBuilder == nullptr)
             {
                 ret = PARSER_ret::PARSER_ERROR;
@@ -413,7 +413,7 @@ eprosima::fastrtps::types::DynamicPubSubType* DynamicTypeParser::CreateDynamicPu
     p_dynamictype_map_t m_dynamictypes = dtparser::DynamicTypeParser::get_types_map();
     if (m_dynamictypes.find(typeName) != m_dynamictypes.end())
     {
-        return new eprosima::fastrtps::types::DynamicPubSubType(m_dynamictypes[typeName]->Build());
+        return new eprosima::fastrtps::types::DynamicPubSubType(m_dynamictypes[typeName]->build());
     }
     return nullptr;
 }
@@ -422,7 +422,7 @@ void DynamicTypeParser::DeleteInstance()
 {
     for (auto pair : data_types_)
     {
-        DynamicTypeBuilderFactory::GetInstance()->DeleteBuilder(pair.second);
+        DynamicTypeBuilderFactory::get_instance()->delete_builder(pair.second);
     }
     data_types_.clear();
     participant_callbacks_.clear();

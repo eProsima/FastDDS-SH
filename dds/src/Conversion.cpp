@@ -33,10 +33,10 @@ class DynamicDataSOSS : public eprosima::fastrtps::types::DynamicData
 public:
     ResponseCode GetDescriptorSOSS(MemberDescriptor& value, MemberId id) const
     {
-        auto it = mDescriptors.find(id);
-        if (it != mDescriptors.end())
+        auto it = descriptors_.find(id);
+        if (it != descriptors_.end())
         {
-            return value.CopyFrom(it->second);
+            return value.copy_from(it->second);
         }
         else
         {
@@ -62,98 +62,98 @@ bool Conversion::soss_to_dds(
 
         types::MemberDescriptor descriptor;
         DynamicDataSOSS* dd_soss = static_cast<DynamicDataSOSS*>(output);
-        uint32_t id = output->GetMemberIdByName(soss_name);
+        uint32_t id = output->get_member_id_by_name(soss_name);
         ret = dd_soss->GetDescriptorSOSS(descriptor, id);
 
-        types::TypeKind dds_type = descriptor.GetKind();
+        types::TypeKind dds_type = descriptor.get_kind();
 
         if (dds_type == types::TK_BOOLEAN)
         {
             bool val;
             soss::Convert<bool>::from_soss_field(it, val);
-            ret = output->SetBoolValue(val, id);
+            ret = output->set_bool_value(val, id);
         }
         else if (dds_type == types::TK_BYTE)
         {
             uint8_t val;
             soss::Convert<uint8_t>::from_soss_field(it, val);
-            ret = output->SetByteValue(val, id);
+            ret = output->set_byte_value(val, id);
         }
         else if (dds_type == types::TK_UINT16)
         {
             uint16_t val;
             soss::Convert<uint16_t>::from_soss_field(it, val);
-            ret = output->SetUint16Value(val, id);
+            ret = output->set_uint16_value(val, id);
         }
         else if (dds_type == types::TK_UINT32)
         {
             uint32_t val;
             soss::Convert<uint32_t>::from_soss_field(it, val);
-            ret = output->SetUint32Value(val, id);
+            ret = output->set_uint32_value(val, id);
         }
         else if (dds_type == types::TK_UINT64)
         {
             uint64_t val;
             soss::Convert<uint64_t>::from_soss_field(it, val);
-            ret = output->SetUint64Value(val, id);
+            ret = output->set_uint64_value(val, id);
         }
         else if (dds_type == types::TK_INT16)
         {
             int16_t val;
             soss::Convert<int16_t>::from_soss_field(it, val);
-            ret = output->SetInt16Value(val, id);
+            ret = output->set_int16_value(val, id);
         }
         else if (dds_type == types::TK_INT32)
         {
             int32_t val;
             soss::Convert<int32_t>::from_soss_field(it, val);
-            ret = output->SetInt32Value(val, id);
+            ret = output->set_int32_value(val, id);
         }
         else if (dds_type == types::TK_INT64)
         {
             int64_t val;
             soss::Convert<int64_t>::from_soss_field(it, val);
-            ret = output->SetInt64Value(val, id);
+            ret = output->set_int64_value(val, id);
         }
         else if (dds_type == types::TK_FLOAT32)
         {
             float val;
             soss::Convert<float>::from_soss_field(it, val);
-            ret = output->SetFloat32Value(val, id);
+            ret = output->set_float32_value(val, id);
         }
         else if (dds_type == types::TK_FLOAT64)
         {
             double val;
             soss::Convert<double>::from_soss_field(it, val);
-            ret = output->SetFloat64Value(val, id);
+            ret = output->set_float64_value(val, id);
         }
         else if (dds_type == types::TK_FLOAT128)
         {
             long double val;
             soss::Convert<long double>::from_soss_field(it, val);
-            ret = output->SetFloat128Value(val, id);
+            ret = output->set_float128_value(val, id);
         }
         else if (dds_type == types::TK_CHAR8)
         {
             char val;
             soss::Convert<char>::from_soss_field(it, val);
-            ret = output->SetChar8Value(val, id);
+            ret = output->set_char8_value(val, id);
         }
         else if (dds_type == types::TK_CHAR16)
         {
             wchar_t val;
             soss::Convert<wchar_t>::from_soss_field(it, val);
-            ret = output->SetChar16Value(val, id);
+            ret = output->set_char16_value(val, id);
         }
         else if (dds_type == types::TK_STRING8)
         {
             std::string val;
             soss::Convert<std::string>::from_soss_field(it, val);
-            ret = output->SetStringValue(val, id);
+            ret = output->set_string_value(val, id);
         }
         else if (dds_type == types::TK_STRUCTURE)
         {
-            types::DynamicData* nested_msg_dds = output->LoanValue(id);
+            types::DynamicData* nested_msg_dds = output->loan_value(id);
             if (nested_msg_dds != nullptr)
             {
                 const soss::Message* nested_msg_soss = it->second.cast<soss::Message>();
@@ -163,14 +163,14 @@ bool Conversion::soss_to_dds(
                     ret = types::RETCODE_OK;
                 }
 
-                output->ReturnLoanedValue(nested_msg_dds);
+                output->return_loaned_value(nested_msg_dds);
             }
         }
 
         if (ret != types::RETCODE_OK)
         {
             std::stringstream ss;
-            ss << "Error parsing from soss message '" << output->GetName() << "' in member '" << soss_name << "'. ";
+            ss << "Error parsing from soss message '" << output->get_name() << "' in member '" << soss_name << "'. ";
             ss << "Error code: " << ret << ".";
             throw DDSMiddlewareException(ss.str());
         }
@@ -192,7 +192,7 @@ bool Conversion::dds_to_soss(
 
     while (id != MEMBER_ID_INVALID)
     {
-        id = input->GetMemberIdAtIndex(i);
+        id = input->get_member_id_at_index(i);
         types::ResponseCode ret = types::RETCODE_ERROR;
 
         if (id != MEMBER_ID_INVALID)
@@ -204,115 +204,115 @@ bool Conversion::dds_to_soss(
 
             if (ret == types::RETCODE_OK)
             {
-                types::TypeKind member_type = descriptor.GetKind();
+                types::TypeKind member_type = descriptor.get_kind();
 
                 if (member_type == types::TK_BOOLEAN)
                 {
                     bool value;
-                    ret = input->GetBoolValue(value, id);
+                    ret = input->get_bool_value(value, id);
                     field.set<bool>(std::move(value));
                 }
                 else if (member_type == types::TK_BYTE)
                 {
                     uint8_t value;
-                    ret = input->GetByteValue(value, id);
+                    ret = input->get_byte_value(value, id);
                     field.set<uint8_t>(std::move(value));
                 }
                 else if (member_type == types::TK_INT16)
                 {
                     int16_t value;
-                    ret = input->GetInt16Value(value, id);
+                    ret = input->get_int16_value(value, id);
                     field.set<int64_t>(std::move(value));
                 }
                 else if (member_type == types::TK_INT32)
                 {
                     int32_t value;
-                    ret = input->GetInt32Value(value, id);
+                    ret = input->get_int32_value(value, id);
                     field.set<int64_t>(std::move(value));
                 }
                 else if (member_type == types::TK_INT64)
                 {
                     int64_t value;
-                    ret = input->GetInt64Value(value, id);
+                    ret = input->get_int64_value(value, id);
                     field.set<int64_t>(std::move(value));
                 }
                 else if (member_type == types::TK_UINT16)
                 {
                     uint16_t value;
-                    ret = input->GetUint16Value(value, id);
+                    ret = input->get_uint16_value(value, id);
                     field.set<uint64_t>(std::move(value));
                 }
                 else if (member_type == types::TK_UINT32)
                 {
                     uint32_t value;
-                    ret = input->GetUint32Value(value, id);
+                    ret = input->get_uint32_value(value, id);
                     field.set<uint64_t>(std::move(value));
                 }
                 else if (member_type == types::TK_UINT64)
                 {
                     uint64_t value;
-                    ret = input->GetUint64Value(value, id);
+                    ret = input->get_uint64_value(value, id);
                     field.set<uint64_t>(std::move(value));
                 }
                 else if (member_type == types::TK_FLOAT32)
                 {
                     float value;
-                    ret = input->GetFloat32Value(value, id);
+                    ret = input->get_float32_value(value, id);
                     field.set<double>(static_cast<double>(std::move(value)));
                 }
                 else if (member_type == types::TK_FLOAT64)
                 {
                     double value;
-                    ret = input->GetFloat64Value(value, id);
+                    ret = input->get_float64_value(value, id);
                     field.set<double>(std::move(value));
                 }
                 else if (member_type == types::TK_FLOAT128)
                 {
                     long double value;
-                    ret = input->GetFloat128Value(value, id);
+                    ret = input->get_float128_value(value, id);
                     field.set<double>(static_cast<double>(std::move(value)));
                 }
                 else if (member_type == types::TK_CHAR8)
                 {
                     char value;
-                    ret = input->GetChar8Value(value, id);
+                    ret = input->get_char8_value(value, id);
                     field.set<char>(std::move(value));
                 }
                 else if (member_type == types::TK_CHAR16)
                 {
                     wchar_t value;
-                    ret = input->GetChar16Value(value, id);
+                    ret = input->get_char16_value(value, id);
                     field.set<wchar_t>(std::move(value));
                 }
                 else if (member_type == types::TK_STRING8)
                 {
                     std::string value;
-                    ret = input->GetStringValue(value, id);
+                    ret = input->get_string_value(value, id);
                     field.set<std::string>(std::move(value));
                 }
                 else if (member_type == types::TK_STRING16)
                 {
                     std::wstring value;
-                    ret = input->GetWstringValue(value, id);
+                    ret = input->get_wstring_value(value, id);
                     field.set<std::wstring>(std::move(value));
                 }
                 else if (member_type == types::TK_STRUCTURE)
                 {
-                    types::DynamicData* nested_msg_dds = input->LoanValue(id);
+                    types::DynamicData* nested_msg_dds = input->loan_value(id);
                     soss::Message nested_msg_soss;
 
                     if (nested_msg_dds != nullptr)
                     {
-                        if (dds_to_soss(nested_msg_dds->GetName(), nested_msg_dds, nested_msg_soss))
+                        if (dds_to_soss(nested_msg_dds->get_name(), nested_msg_dds, nested_msg_soss))
                         {
                             ret = types::RETCODE_OK;
                         }
-                        input->ReturnLoanedValue(nested_msg_dds);
+                        input->return_loaned_value(nested_msg_dds);
                     }
 
                     if (ret == types::RETCODE_OK)
                     {
-                        output.data[descriptor.GetName()] = soss::make_field<soss::Message>(nested_msg_soss);
+                        output.data[descriptor.get_name()] = soss::make_field<soss::Message>(nested_msg_soss);
                     }
                 }
                 else
@@ -323,7 +323,7 @@ bool Conversion::dds_to_soss(
                 if (ret == types::RETCODE_OK &&
                     member_type != types::TK_STRUCTURE)
                 {
-                    output.data[descriptor.GetName()] = std::move(field);
+                    output.data[descriptor.get_name()] = std::move(field);
                 }
 
                 i++;
@@ -332,7 +332,7 @@ bool Conversion::dds_to_soss(
             if (ret != types::RETCODE_OK)
             {
                 std::stringstream ss;
-                ss << "Error parsing from dynamic type '" << input->GetName();
+                ss << "Error parsing from dynamic type '" << input->get_name();
                 ss << "Error code: " << ret << ".";
                 throw DDSMiddlewareException(ss.str());
             }

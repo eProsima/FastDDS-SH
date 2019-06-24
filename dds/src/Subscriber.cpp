@@ -46,7 +46,7 @@ Subscriber::Subscriber(
     dynamic_data_ = participant->create_dynamic_data(message_type);
 
     fastrtps::SubscriberAttributes attributes;
-    attributes.topic.topicKind = fastrtps::NO_KEY;
+    attributes.topic.topicKind = fastrtps::rtps::NO_KEY;
     attributes.topic.topicName = topic_name;
     attributes.topic.topicDataType = message_type;
 
@@ -109,7 +109,7 @@ void Subscriber::onNewDataMessage(
     fastrtps::SampleInfo_t info;
     if (dds_subscriber_->takeNextData(dynamic_data_.get(), &info))
     {
-        if (fastrtps::ALIVE == info.sampleKind)
+        if (fastrtps::rtps::ALIVE == info.sampleKind)
         {
             reception_threads_.emplace_back(std::thread(&Subscriber::receive, this, dynamic_data_));
         }
