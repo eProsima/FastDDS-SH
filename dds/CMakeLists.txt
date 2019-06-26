@@ -69,7 +69,7 @@ target_include_directories(${PROJECT_NAME}
         include
 )
 
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME}
     PRIVATE
         soss::core
         fastrtps
