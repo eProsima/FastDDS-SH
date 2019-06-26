@@ -20,7 +20,9 @@ project(soss-dds-test)
 
 find_package(soss-dds REQUIRED)
 find_package(soss-mock REQUIRED)
-find_package(yaml-cpp)
+if(WIN32)
+    find_package(yaml-cpp)
+endif()
 
 include(CTest)
 include(${PROJECT_SOURCE_DIR}/thirdparty/catch2/cmake/Catch.cmake)
