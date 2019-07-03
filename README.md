@@ -8,7 +8,7 @@ System handle to connect [*SOSS*][soss] to *eProsima*'s open-source implementati
 To install this package into a workspace already containing SOSS, just clone this repository into the sources directory and build it:
 ```
 $ cd <soss workspace folder>
-$ git clone git@github.com:eProsima/SOSS-DDS.git src/soss-dds
+$ git clone https://github.com/eProsima/SOSS-DDS.git src/soss-dds
 $ colcon build --packages-up-to soss-dds
 ```
 
@@ -21,12 +21,12 @@ $ colcon build --packages-up-to soss-dds
 
 2. Clone the soss project into the source subfolder.
     ```
-    $ git clone git@github.com:osrf/soss_v2.git src/soss
+    $ git clone https://github.com/osrf/soss_v2.git src/soss
     ```
 
 3. Clone this project into the subfolder.
     ```
-    $ git clone git@github.com:eProsima/SOSS-DDS.git src/soss-dds
+    $ git clone https://github.com/eProsima/SOSS-DDS.git src/soss-dds
     ```
 
     The workspace layout should look like this:
