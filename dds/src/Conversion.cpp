@@ -19,9 +19,6 @@
 #include <sstream>
 #include <soss/utilities.hpp>
 #include <fastrtps/types/MemberDescriptor.h>
-#if WIN32
-#include <Windows.h>
-#endif
 
 using eprosima::fastrtps::types::ResponseCode;
 using eprosima::fastrtps::types::MemberDescriptor;
