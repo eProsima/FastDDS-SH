@@ -28,6 +28,11 @@
 namespace soss {
 namespace dds {
 
+#if 8 == FASTRTPS_VERSION_MINOR
+using fastrtps::rtps::NO_KEY;
+#else
+using fastrtps::NO_KEY;
+#endif
 
 Publisher::Publisher(
         Participant* participant,
@@ -40,7 +45,7 @@ Publisher::Publisher(
     dynamic_data_ = participant->create_dynamic_data(message_type);
 
     fastrtps::PublisherAttributes attributes;
-    attributes.topic.topicKind = fastrtps::rtps::NO_KEY; //Check this
+    attributes.topic.topicKind = NO_KEY; //Check this
     attributes.topic.topicName = topic_name_;
     attributes.topic.topicDataType = message_type;
 

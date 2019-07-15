@@ -75,7 +75,12 @@ void Participant::register_dynamic_type(
         const std::string& topic_name,
         fastrtps::types::DynamicTypeBuilder* builder)
 {
+#if 8 == FASTRTPS_VERSION_MINOR
     fastrtps::types::DynamicType_ptr dtptr = builder->build();
+#else
+    fastrtps::types::DynamicType_ptr dtptr = builder->Build();
+#endif
+
     if(dtptr != nullptr)
     {
         auto pair = topics_.emplace(topic_name, fastrtps::types::DynamicPubSubType(dtptr));
@@ -113,7 +118,11 @@ fastrtps::types::DynamicData_ptr Participant::create_dynamic_data(
     }
 
     const fastrtps::types::DynamicType_ptr& dynamic_type_ = it->second.GetDynamicType();
+#if 8 == FASTRTPS_VERSION_MINOR
     return fastrtps::types::DynamicDataFactory::get_instance()->create_data(dynamic_type_);
+#else
+    return fastrtps::types::DynamicDataFactory::GetInstance()->CreateData(dynamic_type_);
+#endif
 }
 
 void Participant::onParticipantDiscovery(
