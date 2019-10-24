@@ -19,6 +19,9 @@ cmake_minimum_required(VERSION 3.5.0)
 project(soss-dds)
 
 find_package(soss-core REQUIRED)
+if(WIN32)
+    find_package(yaml-cpp)
+endif()
 
 ########################################################################
 # Find Asio
@@ -58,7 +61,7 @@ set_target_properties(${PROJECT_NAME}
 
 target_compile_options(${PROJECT_NAME}
     PRIVATE
-        -Werror -Wall -Wextra -Wpedantic
+        $<$<CXX_COMPILER_ID:GNU>:-Werror -Wall -Wextra -Wpedantic>
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -70,6 +73,7 @@ target_link_libraries(${PROJECT_NAME}
     PRIVATE
         soss::core
         fastrtps
+        $<$<PLATFORM_ID:Windows>:yaml-cpp>
 )
 
 ########################################################################

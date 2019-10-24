@@ -75,8 +75,8 @@ bool Conversion::soss_to_dds(
         }
         else if (dds_type == types::TK_BYTE)
         {
-            u_char val;
-            soss::Convert<u_char>::from_soss_field(it, val);
+            uint8_t val;
+            soss::Convert<uint8_t>::from_soss_field(it, val);
             ret = output->SetByteValue(val, id);
         }
         else if (dds_type == types::TK_UINT16)
@@ -214,9 +214,9 @@ bool Conversion::dds_to_soss(
                 }
                 else if (member_type == types::TK_BYTE)
                 {
-                    u_char value;
+                    uint8_t value;
                     ret = input->GetByteValue(value, id);
-                    field.set<u_char>(std::move(value));
+                    field.set<uint8_t>(std::move(value));
                 }
                 else if (member_type == types::TK_INT16)
                 {

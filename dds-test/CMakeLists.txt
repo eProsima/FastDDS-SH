@@ -20,6 +20,9 @@ project(soss-dds-test)
 
 find_package(soss-dds REQUIRED)
 find_package(soss-mock REQUIRED)
+if(WIN32)
+    find_package(yaml-cpp)
+endif()
 
 include(CTest)
 include(${PROJECT_SOURCE_DIR}/thirdparty/catch2/cmake/Catch.cmake)
@@ -37,7 +40,7 @@ set_target_properties(${PROJECT_NAME}
 
 target_compile_options(${PROJECT_NAME}
     PRIVATE
-        -Werror -Wall -Wextra -Wpedantic
+        $<$<CXX_COMPILER_ID:GNU>:-Werror -Wall -Wextra -Wpedantic>
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -48,6 +51,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         soss::mock
+        $<$<PLATFORM_ID:Windows>:yaml-cpp>
 )
 
 
