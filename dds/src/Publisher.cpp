@@ -21,18 +21,13 @@
 #include <fastrtps/attributes/PublisherAttributes.h>
 #include <fastrtps/publisher/Publisher.h>
 #include <fastrtps/Domain.h>
-#include <fastrtps/types/DynamicData.h>
 
 #include <iostream>
 
+using namespace eprosima;
+
 namespace soss {
 namespace dds {
-
-#if 8 == FASTRTPS_VERSION_MINOR
-using fastrtps::rtps::NO_KEY;
-#else
-using fastrtps::NO_KEY;
-#endif
 
 Publisher::Publisher(
         Participant* participant,
@@ -70,7 +65,7 @@ bool Publisher::publish(
     std::cout << "[soss-dds][publisher]: translate message: soss -> dds "
         "(" << topic_name_ << ") " << std::endl;
 
-    success = Conversion::soss_to_dds(soss_message, dynamic_data_.get());
+    success = Conversion::soss_to_dds(soss_message, static_cast<DynamicData*>(dynamic_data_.get()));
 
     if (success)
     {

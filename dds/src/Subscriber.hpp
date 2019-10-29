@@ -13,30 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #ifndef SOSS__DDS__INTERNAL__SUBSCRIBER_HPP
 #define SOSS__DDS__INTERNAL__SUBSCRIBER_HPP
 
 #include "DDSMiddlewareException.hpp"
 #include "Participant.hpp"
+#include "DynamicTypeAdapter.hpp"
 
 #include <soss/SystemHandle.hpp>
 
 #include <fastrtps/subscriber/SubscriberListener.h>
-#include <fastrtps/types/DynamicDataPtr.h>
 
 #include <thread>
 
 namespace soss {
 namespace dds {
 
-
 class Participant;
 
-class Subscriber : private fastrtps::SubscriberListener
+class Subscriber : private eprosima::fastrtps::SubscriberListener
 {
 public:
+
     Subscriber(
             Participant* participant,
             const std::string& topic_name,
@@ -45,23 +45,34 @@ public:
 
     virtual ~Subscriber();
 
-    Subscriber(const Subscriber& rhs) = delete;
-    Subscriber& operator = (const Subscriber& rhs) = delete;
-    Subscriber(Subscriber&& rhs) = delete;
-    Subscriber& operator = (Subscriber&& rhs) = delete;
+    Subscriber(
+            const Subscriber& rhs) = delete;
 
-    void receive(const fastrtps::types::DynamicData_ptr dds_message);
+    Subscriber& operator = (
+            const Subscriber& rhs) = delete;
+
+
+    Subscriber(
+            Subscriber&& rhs) = delete;
+
+
+    Subscriber& operator = (
+            Subscriber&& rhs) = delete;
+
+    void receive(
+            const DynamicData_ptr dds_message);
 
 private:
+
     void onSubscriptionMatched(
-            fastrtps::Subscriber* sub,
-            fastrtps::rtps::MatchingInfo& info) override;
+            eprosima::fastrtps::Subscriber* sub,
+            eprosima::fastrtps::rtps::MatchingInfo& info) override;
 
     void onNewDataMessage(
-            fastrtps::Subscriber* sub) override;
+            eprosima::fastrtps::Subscriber* sub) override;
 
-    fastrtps::Subscriber* dds_subscriber_;
-    fastrtps::types::DynamicData_ptr dynamic_data_;
+    eprosima::fastrtps::Subscriber* dds_subscriber_;
+    DynamicData_ptr dynamic_data_;
 
     const std::string topic_name_;
     const std::string message_type_;

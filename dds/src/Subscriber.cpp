@@ -24,21 +24,14 @@
 #include <fastrtps/subscriber/Subscriber.h>
 #include <fastrtps/subscriber/SampleInfo.h>
 #include <fastrtps/Domain.h>
-#include <fastrtps/types/DynamicData.h>
 
 #include <functional>
 #include <iostream>
 
+using namespace eprosima;
+
 namespace soss {
 namespace dds {
-
-#if 8 == FASTRTPS_VERSION_MINOR
-using fastrtps::rtps::NO_KEY;
-using fastrtps::rtps::ALIVE;
-#else
-using fastrtps::NO_KEY;
-using fastrtps::ALIVE;
-#endif
 
 Subscriber::Subscriber(
         Participant* participant,
@@ -89,7 +82,7 @@ void Subscriber::receive(const fastrtps::types::DynamicData_ptr dds_message)
 
     soss::Message soss_message;
 
-    bool success = Conversion::dds_to_soss(message_type_, dds_message.get(), soss_message);
+    bool success = Conversion::dds_to_soss(message_type_, static_cast<DynamicData*>(dds_message.get()), soss_message);
 
     if (success)
     {

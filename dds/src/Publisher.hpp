@@ -13,29 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #ifndef SOSS__DDS__INTERNAL__PUBLISHER_HPP
 #define SOSS__DDS__INTERNAL__PUBLISHER_HPP
 
 #include "DDSMiddlewareException.hpp"
 #include "Participant.hpp"
+#include "DynamicTypeAdapter.hpp"
 
 #include <soss/Message.hpp>
 #include <soss/SystemHandle.hpp>
 
 #include <fastrtps/publisher/PublisherListener.h>
-#include <fastrtps/types/DynamicDataPtr.h>
 
 namespace soss {
 namespace dds {
 
-
 class Participant;
 
-class Publisher : public virtual TopicPublisher, private fastrtps::PublisherListener
+class Publisher : public virtual TopicPublisher, private eprosima::fastrtps::PublisherListener
 {
 public:
+
     Publisher(
             Participant* participant,
             const std::string& topic_name,
@@ -43,21 +43,29 @@ public:
 
     virtual ~Publisher() override;
 
-    Publisher(const Publisher& rhs) = delete;
-    Publisher& operator = (const Publisher& rhs) = delete;
-    Publisher(Publisher&& rhs) = delete;
-    Publisher& operator = (Publisher&& rhs) = delete;
+    Publisher(
+            const Publisher& rhs) = delete;
+
+    Publisher& operator = (
+            const Publisher& rhs) = delete;
+
+    Publisher(
+            Publisher&& rhs) = delete;
+
+    Publisher& operator = (
+            Publisher&& rhs) = delete;
 
     bool publish(
             const soss::Message& message) override;
 
 private:
-    void onPublicationMatched(
-            fastrtps::Publisher* pub,
-            fastrtps::rtps::MatchingInfo& info) override;
 
-    fastrtps::Publisher* dds_publisher_;
-    fastrtps::types::DynamicData_ptr dynamic_data_;
+    void onPublicationMatched(
+            eprosima::fastrtps::Publisher* pub,
+            eprosima::fastrtps::rtps::MatchingInfo& info) override;
+
+    eprosima::fastrtps::Publisher* dds_publisher_;
+    DynamicData_ptr dynamic_data_;
 
     const std::string topic_name_;
     const std::string message_type_;
