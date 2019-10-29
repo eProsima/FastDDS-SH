@@ -35,7 +35,7 @@ namespace dds {
 
 using DynamicData_ptr = eprosima::fastrtps::types::DynamicData_ptr;
 
-#if 1 >= FASTRTPS_VERSION_MAJOR && 8 == FASTRTPS_VERSION_MINOR
+#if 1 < FASTRTPS_VERSION_MAJOR || (1 == FASTRTPS_VERSION_MAJOR && 8 <= FASTRTPS_VERSION_MINOR)
 
 using eprosima::fastrtps::rtps::NO_KEY;
 using eprosima::fastrtps::rtps::ALIVE;
