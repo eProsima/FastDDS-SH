@@ -24,10 +24,11 @@
 #include <fastrtps/subscriber/Subscriber.h>
 #include <fastrtps/subscriber/SampleInfo.h>
 #include <fastrtps/Domain.h>
-#include <fastrtps/types/DynamicData.h>
 
 #include <functional>
 #include <iostream>
+
+using namespace eprosima;
 
 namespace soss {
 namespace dds {
@@ -46,7 +47,7 @@ Subscriber::Subscriber(
     dynamic_data_ = participant->create_dynamic_data(message_type);
 
     fastrtps::SubscriberAttributes attributes;
-    attributes.topic.topicKind = fastrtps::NO_KEY;
+    attributes.topic.topicKind = NO_KEY;
     attributes.topic.topicName = topic_name;
     attributes.topic.topicDataType = message_type;
 
@@ -81,7 +82,7 @@ void Subscriber::receive(const fastrtps::types::DynamicData_ptr dds_message)
 
     soss::Message soss_message;
 
-    bool success = Conversion::dds_to_soss(message_type_, dds_message.get(), soss_message);
+    bool success = Conversion::dds_to_soss(message_type_, static_cast<DynamicData*>(dds_message.get()), soss_message);
 
     if (success)
     {
@@ -109,7 +110,7 @@ void Subscriber::onNewDataMessage(
     fastrtps::SampleInfo_t info;
     if (dds_subscriber_->takeNextData(dynamic_data_.get(), &info))
     {
-        if (fastrtps::ALIVE == info.sampleKind)
+        if (ALIVE == info.sampleKind)
         {
             reception_threads_.emplace_back(std::thread(&Subscriber::receive, this, dynamic_data_));
         }

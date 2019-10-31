@@ -21,13 +21,9 @@
 #define base_ptr dtparser::Base*
 
 #include "DynamicTypeParserCommon.hpp"
+#include "../DynamicTypeAdapter.hpp"
 
 #include <fastrtps/TopicDataType.h>
-#include <fastrtps/types/DynamicTypeBuilder.h>
-#include <fastrtps/types/DynamicTypeBuilderPtr.h>
-#include <fastrtps/types/DynamicTypeBuilderFactory.h>
-#include <fastrtps/types/DynamicTypeMember.h>
-#include <fastrtps/types/DynamicPubSubType.h>
 
 #include <iostream>
 #include <sstream>
@@ -37,8 +33,7 @@
 namespace soss {
 namespace dds {
 
-typedef eprosima::fastrtps::types::DynamicTypeBuilder*          p_dynamictypebuilder_t;
-typedef eprosima::fastrtps::types::DynamicTypeBuilderFactory    DynamicTypeBuilderFactory;
+typedef DynamicTypeBuilder*          p_dynamictypebuilder_t;
 typedef std::map<std::string, p_dynamictypebuilder_t> p_dynamictype_map_t;
 
 namespace dtparser{

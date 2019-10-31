@@ -19,23 +19,20 @@
 #define SOSS__DDS__INTERNAL__CONVERSION_HPP
 
 #include "DDSMiddlewareException.hpp"
-#include <fastrtps/types/DynamicData.h>
+#include "DynamicTypeAdapter.hpp"
 #include <soss/Message.hpp>
 
 namespace soss {
 namespace dds {
 
-namespace types = eprosima::fastrtps::types;
-
 struct Conversion {
-
 
     static bool soss_to_dds(
             const soss::Message& input,
-            types::DynamicData* output);
+            DynamicData* output);
     static bool dds_to_soss(
             const std::string type,
-            types::DynamicData *input,
+            DynamicData *input,
             soss::Message& output);
 
 private:
