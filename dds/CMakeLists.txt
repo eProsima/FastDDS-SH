@@ -24,16 +24,8 @@ if(WIN32)
 endif()
 
 ########################################################################
-# Find Asio
-find_package(fastrtps QUIET)
-
-if(fastrtps_DIR)
-    message(STATUS "Found a fastrtps")
-else()
-    message(STATUS "Using the fastrtps thirdparty")
-    option (THIRDPARTY "Activate internal build of dependencies" ON)
-    add_subdirectory(thirdparty/fastrtps)
-endif()
+# Find FastRTPS
+find_package(fastrtps REQUIRED)
 
 ########################################################################
 # Library

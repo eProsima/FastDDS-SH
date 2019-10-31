@@ -1,3 +1,0 @@
-[submodule "dds/thirdparty/fastrtps"]
-	path = dds/thirdparty/fastrtps
-	url = git@github.com:eProsima/Fast-RTPS.git
