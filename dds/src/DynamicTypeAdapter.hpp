@@ -154,11 +154,6 @@ public:
         return eprosima::fastrtps::types::DynamicData::Equals(other);
     }
 
-    inline eprosima::fastrtps::types::TypeKind get_kind() const
-    {
-        return eprosima::fastrtps::types::DynamicData::GetKind();
-    }
-
     uint32_t get_item_count() const
     {
         return eprosima::fastrtps::types::DynamicData::GetItemCount();
