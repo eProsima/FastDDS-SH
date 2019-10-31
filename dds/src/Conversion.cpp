@@ -27,148 +27,109 @@ namespace dds {
 using namespace eprosima::fastrtps;
 
 bool Conversion::soss_to_dds(
-        const ::xtypes::DynamicData& /*input*/,
-        DynamicData* /*output*/)
+        const ::xtypes::DynamicData& input,
+        DynamicData* output)
 {
-    /*
-    for (auto it = input.data.begin(); it != input.data.end() ;it++)
-    {
-        std::string soss_name = it->first;
-        std::string soss_type = it->second.type();
-        ResponseCode ret = types::RETCODE_ERROR;
-
-        MemberDescriptor descriptor;
-        DynamicDataSOSS* dd_soss = static_cast<DynamicDataSOSS*>(output);
-        uint32_t id = output->get_member_id_by_name(soss_name);
-        ret = dd_soss->GetDescriptorSOSS(descriptor, id);
-
-        types::TypeKind dds_type = descriptor.get_kind();
-
-        if (dds_type == types::TK_BOOLEAN)
-        {
-            bool val;
-            soss::Convert<bool>::from_soss_field(it, val);
-            ret = output->set_bool_value(val, id);
-        }
-        else if (dds_type == types::TK_BYTE)
-        {
-            uint8_t val;
-            soss::Convert<uint8_t>::from_soss_field(it, val);
-            ret = output->set_byte_value(val, id);
-        }
-        else if (dds_type == types::TK_UINT16)
-        {
-            uint16_t val;
-            soss::Convert<uint16_t>::from_soss_field(it, val);
-            ret = output->set_uint16_value(val, id);
-        }
-        else if (dds_type == types::TK_UINT32)
-        {
-            uint32_t val;
-            soss::Convert<uint32_t>::from_soss_field(it, val);
-            ret = output->set_uint32_value(val, id);
-        }
-        else if (dds_type == types::TK_UINT64)
-        {
-            uint64_t val;
-            soss::Convert<uint64_t>::from_soss_field(it, val);
-            ret = output->set_uint64_value(val, id);
-        }
-        else if (dds_type == types::TK_INT16)
-        {
-            int16_t val;
-            soss::Convert<int16_t>::from_soss_field(it, val);
-            ret = output->set_int16_value(val, id);
-        }
-        else if (dds_type == types::TK_INT32)
-        {
-            int32_t val;
-            soss::Convert<int32_t>::from_soss_field(it, val);
-            ret = output->set_int32_value(val, id);
-        }
-        else if (dds_type == types::TK_INT64)
-        {
-            int64_t val;
-            soss::Convert<int64_t>::from_soss_field(it, val);
-            ret = output->set_int64_value(val, id);
-        }
-        else if (dds_type == types::TK_FLOAT32)
-        {
-            float val;
-            soss::Convert<float>::from_soss_field(it, val);
-            ret = output->set_float32_value(val, id);
-        }
-        else if (dds_type == types::TK_FLOAT64)
-        {
-            double val;
-            soss::Convert<double>::from_soss_field(it, val);
-            ret = output->set_float64_value(val, id);
-        }
-        else if (dds_type == types::TK_FLOAT128)
-        {
-            long double val;
-            soss::Convert<long double>::from_soss_field(it, val);
-            ret = output->set_float128_value(val, id);
-        }
-        else if (dds_type == types::TK_CHAR8)
-        {
-            char val;
-            soss::Convert<char>::from_soss_field(it, val);
-            ret = output->set_char8_value(val, id);
-        }
-        else if (dds_type == types::TK_CHAR16)
-        {
-            wchar_t val;
-            soss::Convert<wchar_t>::from_soss_field(it, val);
-            ret = output->set_char16_value(val, id);
-        }
-        else if (dds_type == types::TK_STRING8)
-        {
-            std::string val;
-            soss::Convert<std::string>::from_soss_field(it, val);
-            ret = output->set_string_value(val, id);
-        }
-        else if (dds_type == types::TK_STRUCTURE)
-        {
-            DynamicData* nested_msg_dds = output->loan_value(id);
-            if (nested_msg_dds != nullptr)
-            {
-                const soss::Message* nested_msg_soss = it->second.cast<soss::Message>();
-
-                if (soss_to_dds(*nested_msg_soss, nested_msg_dds))
+    std::stringstream ss;
+    input.for_each([&output, &ss](const ::xtypes::DynamicData::ReadableNode& node)
+       {
+           switch (node.data().type().kind())
+           {
+                case ::xtypes::TypeKind::CHAR_8_TYPE:
+                    output->set_char8_value(node.data().value<char>());
+                    break;
+                case ::xtypes::TypeKind::CHAR_16_TYPE:
+                    output->set_char16_value(node.data().value<char32_t>());
+                    break;
+                case ::xtypes::TypeKind::UINT_8_TYPE:
+                    output->set_uint8_value(node.data().value<uint8_t>());
+                    break;
+                case ::xtypes::TypeKind::INT_16_TYPE:
+                    output->set_int16_value(node.data().value<int16_t>());
+                    break;
+                case ::xtypes::TypeKind::UINT_16_TYPE:
+                    output->set_uint16_value(node.data().value<uint16_t>());
+                    break;
+                case ::xtypes::TypeKind::INT_32_TYPE:
+                    output->set_int32_value(node.data().value<int32_t>());
+                    break;
+                case ::xtypes::TypeKind::UINT_32_TYPE:
+                    output->set_uint32_value(node.data().value<uint32_t>());
+                    break;
+                case ::xtypes::TypeKind::INT_64_TYPE:
+                    output->set_int64_value(node.data().value<int64_t>());
+                    break;
+                case ::xtypes::TypeKind::UINT_64_TYPE:
+                    output->set_uint64_value(node.data().value<uint64_t>());
+                    break;
+                case ::xtypes::TypeKind::FLOAT_32_TYPE:
+                    output->set_float32_value(node.data().value<float>());
+                    break;
+                case ::xtypes::TypeKind::FLOAT_64_TYPE:
+                    output->set_float64_value(node.data().value<double>());
+                    break;
+                case ::xtypes::TypeKind::FLOAT_128_TYPE:
+                    output->set_float128_value(node.data().value<long double>());
+                    break;
+                case ::xtypes::TypeKind::STRING_TYPE:
+                    output->set_string_value(node.data().value<std::string>());
+                    break;
+                case ::xtypes::TypeKind::WSTRING_TYPE:
                 {
-                    ret = types::RETCODE_OK;
+                    output->set_wstring_value(node.data().value<std::wstring>());
+                    break;
                 }
+                case ::xtypes::TypeKind::ARRAY_TYPE:
+                    // TODO Implement
+                    ss << "Array type unsupported. Type: " << node.type().name();
+                    throw DDSMiddlewareException(ss.str());
+                    break;
+                case ::xtypes::TypeKind::SEQUENCE_TYPE:
+                    // TODO Implement
+                    ss << "Sequence type unsupported. Type: " << node.type().name();
+                    throw DDSMiddlewareException(ss.str());
+                    break;
+                case ::xtypes::TypeKind::STRUCTURE_TYPE:
+                {
+                    uint32_t id = output->get_member_id_by_name(node.from_member()->name());
+                    DynamicData* nested_msg_dds = output->loan_value(id);
+                    if (nested_msg_dds != nullptr)
+                    {
+                        ::xtypes::DynamicData nested_msg_soss = node.data();
 
-                output->return_loaned_value(nested_msg_dds);
-            }
-        }
+                        if (soss_to_dds(nested_msg_soss, nested_msg_dds))
+                        {
+                            //ret = types::RETCODE_OK;
+                        }
 
-        if (ret != types::RETCODE_OK)
-        {
-            std::stringstream ss;
-            ss << "Error parsing from soss message '" << output->get_name() << "' in member '" << soss_name << "'. ";
-            ss << "Error code: " << ret << ".";
-            throw DDSMiddlewareException(ss.str());
-        }
-    }
+                        output->return_loaned_value(nested_msg_dds);
+                    }
+                    else
+                    {
+                        ss << "Cannot find member " << node.from_member()->name() << " in type " << node.type().name();
+                        throw DDSMiddlewareException(ss.str());
+                    }
+                    break;
+                }
+                default:
+                    ss << "Unsupported type: " << node.type().name();
+                    throw DDSMiddlewareException(ss.str());
+
+           }
+       });
 
     return true;
-    */
-    return false;
 }
 
 bool Conversion::dds_to_soss(
         const std::string /*type*/,
-        DynamicData* /*input*/,
-        ::xtypes::DynamicData& /*output*/)
+        DynamicData* input,
+        ::xtypes::DynamicData& output)
 {
-    /*
+    std::stringstream ss;
     uint32_t id = 0;
     uint32_t i = 0;
     MemberDescriptor descriptor;
-
-    output.type = type;
 
     while (id != MEMBER_ID_INVALID)
     {
@@ -177,8 +138,6 @@ bool Conversion::dds_to_soss(
 
         if (id != MEMBER_ID_INVALID)
         {
-            soss::Field field;
-
             DynamicDataSOSS* dd_soss = static_cast<DynamicDataSOSS*>(input);
             ret = dd_soss->GetDescriptorSOSS(descriptor, id);
 
@@ -190,96 +149,104 @@ bool Conversion::dds_to_soss(
                 {
                     bool value;
                     ret = input->get_bool_value(value, id);
-                    field.set<bool>(std::move(value));
+                    output.value<bool>(value);
                 }
                 else if (member_type == types::TK_BYTE)
                 {
                     uint8_t value;
                     ret = input->get_byte_value(value, id);
-                    field.set<uint8_t>(std::move(value));
+                    output.value<uint8_t>(value);
                 }
                 else if (member_type == types::TK_INT16)
                 {
                     int16_t value;
                     ret = input->get_int16_value(value, id);
-                    field.set<int64_t>(std::move(value));
+                    output.value<int16_t>(value);
                 }
                 else if (member_type == types::TK_INT32)
                 {
                     int32_t value;
                     ret = input->get_int32_value(value, id);
-                    field.set<int64_t>(std::move(value));
+                    output.value<int16_t>(value);
                 }
                 else if (member_type == types::TK_INT64)
                 {
                     int64_t value;
                     ret = input->get_int64_value(value, id);
-                    field.set<int64_t>(std::move(value));
+                    output.value<int64_t>(value);
                 }
                 else if (member_type == types::TK_UINT16)
                 {
                     uint16_t value;
                     ret = input->get_uint16_value(value, id);
-                    field.set<uint64_t>(std::move(value));
+                    output.value<uint16_t>(value);
                 }
                 else if (member_type == types::TK_UINT32)
                 {
                     uint32_t value;
                     ret = input->get_uint32_value(value, id);
-                    field.set<uint64_t>(std::move(value));
+                    output.value<uint32_t>(value);
                 }
                 else if (member_type == types::TK_UINT64)
                 {
                     uint64_t value;
                     ret = input->get_uint64_value(value, id);
-                    field.set<uint64_t>(std::move(value));
+                    output.value<uint64_t>(value);
                 }
                 else if (member_type == types::TK_FLOAT32)
                 {
                     float value;
                     ret = input->get_float32_value(value, id);
-                    field.set<double>(static_cast<double>(std::move(value)));
+                    output.value<float>(value);
                 }
                 else if (member_type == types::TK_FLOAT64)
                 {
                     double value;
                     ret = input->get_float64_value(value, id);
-                    field.set<double>(std::move(value));
+                    output.value<double>(value);
                 }
                 else if (member_type == types::TK_FLOAT128)
                 {
                     long double value;
                     ret = input->get_float128_value(value, id);
-                    field.set<double>(static_cast<double>(std::move(value)));
+                    output.value<long double>(value);
                 }
                 else if (member_type == types::TK_CHAR8)
                 {
                     char value;
                     ret = input->get_char8_value(value, id);
-                    field.set<char>(std::move(value));
+                    output.value<char>(value);
                 }
                 else if (member_type == types::TK_CHAR16)
                 {
                     wchar_t value;
                     ret = input->get_char16_value(value, id);
-                    field.set<wchar_t>(std::move(value));
+                    output.value<wchar_t>(value);
                 }
                 else if (member_type == types::TK_STRING8)
                 {
                     std::string value;
                     ret = input->get_string_value(value, id);
-                    field.set<std::string>(std::move(value));
+                    output.value<std::string>(value);
                 }
                 else if (member_type == types::TK_STRING16)
                 {
                     std::wstring value;
                     ret = input->get_wstring_value(value, id);
-                    field.set<std::wstring>(std::move(value));
+                    output.value<std::wstring>(value);
+                }
+                else if (member_type == types::TK_ARRAY)
+                {
+                    // TODO
+                }
+                else if (member_type == types::TK_SEQUENCE)
+                {
+                    // TODO
                 }
                 else if (member_type == types::TK_STRUCTURE)
                 {
                     DynamicData* nested_msg_dds = input->loan_value(id);
-                    soss::Message nested_msg_soss;
+                    ::xtypes::DynamicData nested_msg_soss = output[id];
 
                     if (nested_msg_dds != nullptr)
                     {
@@ -289,21 +256,10 @@ bool Conversion::dds_to_soss(
                         }
                         input->return_loaned_value(nested_msg_dds);
                     }
-
-                    if (ret == types::RETCODE_OK)
-                    {
-                        output.data[descriptor.get_name()] = soss::make_field<soss::Message>(nested_msg_soss);
-                    }
                 }
                 else
                 {
                     ret = types::RETCODE_ERROR;
-                }
-
-                if (ret == types::RETCODE_OK &&
-                    member_type != types::TK_STRUCTURE)
-                {
-                    output.data[descriptor.get_name()] = std::move(field);
                 }
 
                 i++;
@@ -320,8 +276,6 @@ bool Conversion::dds_to_soss(
     }
 
     return true;
-    */
-    return false;
 }
 
 

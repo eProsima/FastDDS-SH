@@ -33,7 +33,7 @@ struct Conversion {
 
     static bool dds_to_soss(
             const std::string type,
-            DynamicData *input,
+            DynamicData* input,
             ::xtypes::DynamicData& output);
 
 private:
