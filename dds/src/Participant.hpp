@@ -19,6 +19,7 @@
 #define SOSS__DDS__INTERNAL__PARTICIPANT_HPP
 
 #include "DDSMiddlewareException.hpp"
+#include "DynamicTypeAdapter.hpp"
 
 #include <fastrtps/participant/ParticipantListener.h>
 
@@ -26,19 +27,8 @@
 
 #include <map>
 
-namespace eprosima {
-namespace fastrtps {
-namespace types {
-class DynamicData_ptr;
-class DynamicPubSubType;
-} // types
-} // fastrtps
-} // eprosima
-
 namespace soss {
 namespace dds {
-
-class DynamicTypeBuilder;
 
 class Participant : private eprosima::fastrtps::ParticipantListener
 {

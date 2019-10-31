@@ -19,12 +19,11 @@
 #define SOSS__DDS__INTERNAL__CONVERSION_HPP
 
 #include "DDSMiddlewareException.hpp"
+#include "DynamicTypeAdapter.hpp"
 #include <soss/Message.hpp>
 
 namespace soss {
 namespace dds {
-
-class DynamicData;
 
 struct Conversion {
 

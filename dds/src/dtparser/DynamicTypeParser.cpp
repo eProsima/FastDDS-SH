@@ -16,7 +16,6 @@
 */
 
 #include "DynamicTypeParser.hpp"
-#include "../DynamicTypeAdapter.hpp"
 
 namespace soss {
 namespace dds {

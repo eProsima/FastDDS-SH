@@ -16,7 +16,6 @@
 */
 
 #include "Participant.hpp"
-#include "DynamicTypeAdapter.hpp"
 
 #include <fastrtps/attributes/ParticipantAttributes.h>
 #include <fastrtps/Domain.h>

@@ -18,7 +18,6 @@
 #include "Conversion.hpp"
 #include <sstream>
 #include <soss/utilities.hpp>
-#include "DynamicTypeAdapter.hpp"
 
 using eprosima::fastrtps::types::ResponseCode;
 using eprosima::fastrtps::types::MemberDescriptor;
