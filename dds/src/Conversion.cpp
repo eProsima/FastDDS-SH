@@ -17,9 +17,7 @@
 
 #include "Conversion.hpp"
 #include <sstream>
-#include <soss/utilities.hpp>
 
-using eprosima::fastrtps::types::ResponseCode;
 using eprosima::fastrtps::types::MemberDescriptor;
 using eprosima::fastrtps::types::MemberId;
 
@@ -29,14 +27,15 @@ namespace dds {
 using namespace eprosima::fastrtps;
 
 bool Conversion::soss_to_dds(
-        const soss::Message& input,
-        DynamicData* output)
+        const ::xtypes::DynamicData& /*input*/,
+        DynamicData* /*output*/)
 {
+    /*
     for (auto it = input.data.begin(); it != input.data.end() ;it++)
     {
         std::string soss_name = it->first;
         std::string soss_type = it->second.type();
-        types::ResponseCode ret = types::RETCODE_ERROR;
+        ResponseCode ret = types::RETCODE_ERROR;
 
         MemberDescriptor descriptor;
         DynamicDataSOSS* dd_soss = static_cast<DynamicDataSOSS*>(output);
@@ -155,13 +154,16 @@ bool Conversion::soss_to_dds(
     }
 
     return true;
+    */
+    return false;
 }
 
 bool Conversion::dds_to_soss(
-        const std::string type,
-        DynamicData* input,
-        soss::Message& output)
+        const std::string /*type*/,
+        DynamicData* /*input*/,
+        ::xtypes::DynamicData& /*output*/)
 {
+    /*
     uint32_t id = 0;
     uint32_t i = 0;
     MemberDescriptor descriptor;
@@ -171,7 +173,7 @@ bool Conversion::dds_to_soss(
     while (id != MEMBER_ID_INVALID)
     {
         id = input->get_member_id_at_index(i);
-        types::ResponseCode ret = types::RETCODE_ERROR;
+        ResponseCode ret = types::RETCODE_ERROR;
 
         if (id != MEMBER_ID_INVALID)
         {
@@ -318,6 +320,8 @@ bool Conversion::dds_to_soss(
     }
 
     return true;
+    */
+    return false;
 }
 
 

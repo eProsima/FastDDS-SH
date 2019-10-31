@@ -58,7 +58,7 @@ Publisher::~Publisher()
 }
 
 bool Publisher::publish(
-        const soss::Message& soss_message)
+        const xtypes::DynamicData& soss_message)
 {
     bool success = false;
 

@@ -56,7 +56,7 @@ public:
             Publisher&& rhs) = delete;
 
     bool publish(
-            const soss::Message& message) override;
+            const xtypes::DynamicData& message) override;
 
 private:
 

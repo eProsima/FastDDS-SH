@@ -28,12 +28,13 @@ namespace dds {
 struct Conversion {
 
     static bool soss_to_dds(
-            const soss::Message& input,
+            const ::xtypes::DynamicData& input,
             DynamicData* output);
+
     static bool dds_to_soss(
             const std::string type,
             DynamicData *input,
-            soss::Message& output);
+            ::xtypes::DynamicData& output);
 
 private:
     ~Conversion() = default;

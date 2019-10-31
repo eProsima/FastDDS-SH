@@ -34,6 +34,7 @@ namespace dds{
 namespace {
 
 // This function patches the problem of dynamic types, which do not admit '/' in their type name.
+/*
 std::string transform_type(const std::string& message_type)
 {
     std::string type = message_type;
@@ -45,6 +46,7 @@ std::string transform_type(const std::string& message_type)
 
     return type;
 }
+*/
 
 }
 
@@ -52,7 +54,8 @@ SystemHandle::~SystemHandle() = default;
 
 bool SystemHandle::configure(
     const RequiredTypes& /* types */,
-    const YAML::Node& configuration)
+    const YAML::Node& configuration,
+    TypeRegistry& /*type_registry*/) // Support?
 {
     if (!configuration["dynamic types"])
     {
@@ -115,11 +118,12 @@ bool SystemHandle::spin_once()
 }
 
 bool SystemHandle::subscribe(
-    const std::string& topic_name,
-    const std::string& message_type,
-    SubscriptionCallback callback,
+    const std::string& /*topic_name*/,
+    const xtypes::DynamicType& /*message_type*/,
+    SubscriptionCallback /*callback*/,
     const YAML::Node& /* configuration */)
 {
+    /*
     try
     {
         auto subscriber = std::make_shared<Subscriber>(
@@ -138,13 +142,16 @@ bool SystemHandle::subscribe(
         std::cerr << "[soss-dds]: " << e.what() << std::endl;
         return false;
     }
+    */
+    return false;
 }
 
 std::shared_ptr<TopicPublisher> SystemHandle::advertise(
-    const std::string& topic_name,
-    const std::string& message_type,
+    const std::string& /*topic_name*/,
+    const xtypes::DynamicType& /*message_type*/,
     const YAML::Node& /* configuration */)
 {
+    /*
     try
     {
         auto publisher = std::make_shared<Publisher>(participant_.get(), topic_name, transform_type(message_type));
@@ -161,6 +168,8 @@ std::shared_ptr<TopicPublisher> SystemHandle::advertise(
         std::cerr << "[soss-dds]: " << e.what() << std::endl;
         return std::shared_ptr<TopicPublisher>();
     }
+    */
+    return std::shared_ptr<TopicPublisher>();
 }
 
 

@@ -45,6 +45,7 @@ using DynamicDataFactory = eprosima::fastrtps::types::DynamicDataFactory;
 using DynamicTypeBuilderFactory = eprosima::fastrtps::types::DynamicTypeBuilderFactory;
 
 using DynamicData = eprosima::fastrtps::types::DynamicData;
+using ResponseCode = eprosima::fastrtps::types::ReturnCode_t;
 
 // Due to a problem with Fast-RTPS library, which by now does not export the "GetDescriptor" function for windows,
 // this workaround is needed in order to access the protected member "mDescriptors".
@@ -54,7 +55,7 @@ class DynamicDataSOSS : public soss::dds::DynamicData
 {
 public:
 
-    eprosima::fastrtps::types::ResponseCode GetDescriptorSOSS(
+    ResponseCode GetDescriptorSOSS(
             eprosima::fastrtps::types::MemberDescriptor& value,
             eprosima::fastrtps::types::MemberId id) const
     {
@@ -66,7 +67,7 @@ public:
         else
         {
             std::cerr << "Error getting MemberDescriptor. MemberId not found." << std::endl;
-            return eprosima::fastrtps::types::ResponseCode::RETCODE_BAD_PARAMETER;
+            return ResponseCode::RETCODE_BAD_PARAMETER;
         }
     }
 
@@ -80,6 +81,8 @@ using eprosima::fastrtps::NO_KEY;
 using eprosima::fastrtps::ALIVE;
 
 using octet = eprosima::fastrtps::octet;
+
+using ResponseCode = eprosima::fastrtps::types::ResponseCode;
 
 class DynamicData : public eprosima::fastrtps::types::DynamicData
 {
@@ -118,31 +121,31 @@ public:
         return *this;
     }
 
-    eprosima::fastrtps::types::ResponseCode get_descriptor(
+    ResponseCode get_descriptor(
             eprosima::fastrtps::types::MemberDescriptor& value,
             eprosima::fastrtps::types::MemberId id)
     {
         return eprosima::fastrtps::types::DynamicData::GetDescriptor(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_descriptor(
+    ResponseCode set_descriptor(
             eprosima::fastrtps::types::MemberId id,
             const eprosima::fastrtps::types::MemberDescriptor* value)
     {
         return eprosima::fastrtps::types::DynamicData::SetDescriptor(id, value);
     }
 
-    eprosima::fastrtps::types::ResponseCode clear_all_values()
+    ResponseCode clear_all_values()
     {
         return eprosima::fastrtps::types::DynamicData::ClearAllValues();
     }
 
-    eprosima::fastrtps::types::ResponseCode clear_nonkey_values()
+    ResponseCode clear_nonkey_values()
     {
         return eprosima::fastrtps::types::DynamicData::ClearNonkeyValues();
     }
 
-    eprosima::fastrtps::types::ResponseCode clear_value(
+    ResponseCode clear_value(
             eprosima::fastrtps::types::MemberId id)
     {
         return eprosima::fastrtps::types::DynamicData::ClearValue(id);
@@ -182,7 +185,7 @@ public:
         return static_cast<DynamicData*>(eprosima::fastrtps::types::DynamicData::LoanValue(id));
     }
 
-    eprosima::fastrtps::types::ResponseCode return_loaned_value(
+    ResponseCode return_loaned_value(
             const DynamicData* value)
     {
         return eprosima::fastrtps::types::DynamicData::ReturnLoanedValue(value);
@@ -194,163 +197,163 @@ public:
         return eprosima::fastrtps::types::DynamicData::GetArrayIndex(position);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_sequence_data(
+    ResponseCode insert_sequence_data(
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertSequenceData(outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_int32_value(
+    ResponseCode insert_int32_value(
             int32_t value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertInt32Value(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_uint32_value(
+    ResponseCode insert_uint32_value(
             uint32_t value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertUint32Value(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_int16_value(
+    ResponseCode insert_int16_value(
             int16_t value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertInt16Value(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_uint16_value(
+    ResponseCode insert_uint16_value(
             uint16_t value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertUint16Value(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_int64_value(
+    ResponseCode insert_int64_value(
             int64_t value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertInt64Value(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_uint64_value(
+    ResponseCode insert_uint64_value(
             uint64_t value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertUint64Value(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_float32_value(
+    ResponseCode insert_float32_value(
             float value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertFloat32Value(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_float64_value(
+    ResponseCode insert_float64_value(
             double value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertFloat64Value(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_float128_value(
+    ResponseCode insert_float128_value(
             long double value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertFloat128Value(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_char8_value(
+    ResponseCode insert_char8_value(
             char value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertChar8Value(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_char16_value(
+    ResponseCode insert_char16_value(
             wchar_t value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertChar16Value(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_byte_value(
+    ResponseCode insert_byte_value(
             octet value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertByteValue(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_bool_value(
+    ResponseCode insert_bool_value(
             bool value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertBoolValue(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_string_value(
+    ResponseCode insert_string_value(
             const std::string& value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertStringValue(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_wstring_value(
+    ResponseCode insert_wstring_value(
             const std::wstring& value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertWstringValue(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_enum_value(
+    ResponseCode insert_enum_value(
             const std::string& value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertEnumValue(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_complex_value(
+    ResponseCode insert_complex_value(
             const DynamicData* value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertComplexValue(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_complex_value(
+    ResponseCode insert_complex_value(
             DynamicData* value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertComplexValue(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_complex_value(
+    ResponseCode insert_complex_value(
             eprosima::fastrtps::types::DynamicData_ptr value,
             eprosima::fastrtps::types::MemberId& outId)
     {
         return eprosima::fastrtps::types::DynamicData::InsertComplexValue(value, outId);
     }
 
-    eprosima::fastrtps::types::ResponseCode remove_sequence_data(
+    ResponseCode remove_sequence_data(
             eprosima::fastrtps::types::MemberId id)
     {
         return eprosima::fastrtps::types::DynamicData::RemoveSequenceData(id);
     }
 
-    eprosima::fastrtps::types::ResponseCode clear_data()
+    ResponseCode clear_data()
     {
         return eprosima::fastrtps::types::DynamicData::ClearData();
     }
 
-    eprosima::fastrtps::types::ResponseCode clear_array_data(
+    ResponseCode clear_array_data(
             eprosima::fastrtps::types::MemberId indexId)
     {
         return eprosima::fastrtps::types::DynamicData::ClearArrayData(indexId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_map_data(
+    ResponseCode insert_map_data(
             const DynamicData* key,
             eprosima::fastrtps::types::MemberId& outKeyId,
             eprosima::fastrtps::types::MemberId& outValueId)
@@ -358,7 +361,7 @@ public:
         return eprosima::fastrtps::types::DynamicData::InsertMapData(key, outKeyId, outValueId);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_map_data(
+    ResponseCode insert_map_data(
             const DynamicData* key,
             DynamicData* value,
             eprosima::fastrtps::types::MemberId& outKey,
@@ -367,7 +370,7 @@ public:
         return eprosima::fastrtps::types::DynamicData::InsertMapData(key, value, outKey, outValue);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_map_data(
+    ResponseCode insert_map_data(
             const DynamicData* key,
             const DynamicData* value,
             eprosima::fastrtps::types::MemberId& outKey,
@@ -376,7 +379,7 @@ public:
         return eprosima::fastrtps::types::DynamicData::InsertMapData(key, value, outKey, outValue);
     }
 
-    eprosima::fastrtps::types::ResponseCode insert_map_data(
+    ResponseCode insert_map_data(
             const DynamicData* key,
             eprosima::fastrtps::types::DynamicData_ptr value,
             eprosima::fastrtps::types::MemberId& outKey,
@@ -385,284 +388,284 @@ public:
         return eprosima::fastrtps::types::DynamicData::InsertMapData(key, value, outKey, outValue);
     }
 
-    eprosima::fastrtps::types::ResponseCode remove_map_data(
+    ResponseCode remove_map_data(
             eprosima::fastrtps::types::MemberId keyId)
     {
         return eprosima::fastrtps::types::DynamicData::RemoveMapData(keyId);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_int32_value(
+    ResponseCode get_int32_value(
             int32_t& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetInt32Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_int32_value(
+    ResponseCode set_int32_value(
             int32_t value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetInt32Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_uint32_value(
+    ResponseCode get_uint32_value(
             uint32_t& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetUint32Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_uint32_value(
+    ResponseCode set_uint32_value(
             uint32_t value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetUint32Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_int16_value(
+    ResponseCode get_int16_value(
             int16_t& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetInt16Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_int16_value(
+    ResponseCode set_int16_value(
             int16_t value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetInt16Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_uint16_value(
+    ResponseCode get_uint16_value(
             uint16_t& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetUint16Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_uint16_value(
+    ResponseCode set_uint16_value(
             uint16_t value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetUint16Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_int64_value(
+    ResponseCode get_int64_value(
             int64_t& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetInt64Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_int64_value(
+    ResponseCode set_int64_value(
             int64_t value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetInt64Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_uint64_value(
+    ResponseCode get_uint64_value(
             uint64_t& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetUint64Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_uint64_value(
+    ResponseCode set_uint64_value(
             uint64_t value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetUint64Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_float32_value(
+    ResponseCode get_float32_value(
             float& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetFloat32Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_float32_value(
+    ResponseCode set_float32_value(
             float value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetFloat32Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_float64_value(
+    ResponseCode get_float64_value(
             double& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetFloat64Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_float64_value(
+    ResponseCode set_float64_value(
             double value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetFloat64Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_float128_value(
+    ResponseCode get_float128_value(
             long double& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetFloat128Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_float128_value(
+    ResponseCode set_float128_value(
             long double value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetFloat128Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_char8_value(
+    ResponseCode get_char8_value(
             char& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetChar8Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_char8_value(
+    ResponseCode set_char8_value(
             char value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetChar8Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_char16_value(
+    ResponseCode get_char16_value(
             wchar_t& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetChar16Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_char16_value(
+    ResponseCode set_char16_value(
             wchar_t value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetChar16Value(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_byte_value(
+    ResponseCode get_byte_value(
             octet& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetByteValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_byte_value(
+    ResponseCode set_byte_value(
             octet value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetByteValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_bool_value(
+    ResponseCode get_bool_value(
             bool& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetBoolValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_bool_value(
+    ResponseCode set_bool_value(
             bool value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetBoolValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_string_value(
+    ResponseCode get_string_value(
             std::string& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetStringValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_string_value(
+    ResponseCode set_string_value(
             const std::string& value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetStringValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_wstring_value(
+    ResponseCode get_wstring_value(
             std::wstring& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetWstringValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_wstring_value(
+    ResponseCode set_wstring_value(
             const std::wstring& value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetWstringValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_enum_value(
+    ResponseCode get_enum_value(
             std::string& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetEnumValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_enum_value(
+    ResponseCode set_enum_value(
             const std::string& value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetEnumValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_enum_value(
+    ResponseCode get_enum_value(
             uint32_t& value,
             eprosima::fastrtps::types::MemberId id) const
     {
         return eprosima::fastrtps::types::DynamicData::GetEnumValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_enum_value(
+    ResponseCode set_enum_value(
             const uint32_t& value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetEnumValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_bitmask_value(
+    ResponseCode get_bitmask_value(
             const std::string& name,
             bool& value) const
     {
         return eprosima::fastrtps::types::DynamicData::GetBitmaskValue(name, value);
     }
 
-    eprosima::fastrtps::types::ResponseCode set_bitmask_value(
+    ResponseCode set_bitmask_value(
             bool value,
             const std::string& name)
     {
         return eprosima::fastrtps::types::DynamicData::SetBitmaskValue(value, name);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_complex_value(
+    ResponseCode get_complex_value(
             DynamicData** value,
             eprosima::fastrtps::types::MemberId id) const
     {
         eprosima::fastrtps::types::DynamicData* temp = *value;
-        eprosima::fastrtps::types::ResponseCode result =
+        ResponseCode result =
                 eprosima::fastrtps::types::DynamicData::GetComplexValue(&temp, id);
         //*value = static_cast<DynamicData*>(temp);
         return result;
 
     }
 
-    eprosima::fastrtps::types::ResponseCode set_complex_value(
+    ResponseCode set_complex_value(
             DynamicData* value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetComplexValue(value, id);
     }
 
-    eprosima::fastrtps::types::ResponseCode get_union_label(
+    ResponseCode get_union_label(
             uint64_t& value) const
     {
         return eprosima::fastrtps::types::DynamicData::GetUnionLabel(value);
@@ -786,7 +789,7 @@ class DynamicDataSOSS : public soss::dds::DynamicData
 {
 public:
 
-    eprosima::fastrtps::types::ResponseCode GetDescriptorSOSS(
+    ResponseCode GetDescriptorSOSS(
             eprosima::fastrtps::types::MemberDescriptor& value,
             eprosima::fastrtps::types::MemberId id) const
     {
@@ -798,7 +801,7 @@ public:
         else
         {
             std::cerr << "Error getting MemberDescriptor. MemberId not found." << std::endl;
-            return eprosima::fastrtps::types::ResponseCode::RETCODE_BAD_PARAMETER;
+            return ResponseCode::RETCODE_BAD_PARAMETER;
         }
     }
 
@@ -860,7 +863,7 @@ public:
         return eprosima::fastrtps::types::MemberDescriptor::CheckUnionLabels(labels);
     }
 
-    eprosima::fastrtps::types::ResponseCode copy_from(
+    ResponseCode copy_from(
             const MemberDescriptor* other)
     {
         return eprosima::fastrtps::types::MemberDescriptor::CopyFrom(other);
@@ -954,20 +957,20 @@ public:
         return eprosima::fastrtps::types::DynamicTypeBuilder::Build();
     }
 
-    eprosima::fastrtps::types::ResponseCode set_name(
+    ResponseCode set_name(
             const std::string& name)
     {
         return eprosima::fastrtps::types::DynamicTypeBuilder::SetName(name);
     }
 
-    eprosima::fastrtps::types::ResponseCode add_empty_member(
+    ResponseCode add_empty_member(
             uint32_t index,
             const std::string& name)
     {
         return eprosima::fastrtps::types::DynamicTypeBuilder::AddEmptyMember(index, name);
     }
 
-    eprosima::fastrtps::types::ResponseCode add_member(
+    ResponseCode add_member(
             eprosima::fastrtps::types::MemberId id,
             const std::string& name,
             DynamicTypeBuilder* mType = nullptr)
@@ -1000,7 +1003,7 @@ public:
             eprosima::fastrtps::types::DynamicTypeBuilderFactory::GetInstance());
     }
 
-    eprosima::fastrtps::types::ResponseCode delete_builder(
+    ResponseCode delete_builder(
             DynamicTypeBuilder* builder)
     {
         return eprosima::fastrtps::types::DynamicTypeBuilderFactory::DeleteBuilder(builder);

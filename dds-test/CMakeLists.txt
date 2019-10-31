@@ -18,6 +18,7 @@ cmake_minimum_required(VERSION 3.5.0)
 
 project(soss-dds-test)
 
+find_package(fastrtps REQUIRED)
 find_package(soss-dds REQUIRED)
 find_package(soss-mock REQUIRED)
 if(WIN32)

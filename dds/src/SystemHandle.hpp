@@ -41,7 +41,8 @@ public:
 
     bool configure(
         const RequiredTypes& types,
-        const YAML::Node& configuration) override;
+        const YAML::Node& configuration,
+        TypeRegistry& type_registry) override;
 
     bool okay() const override;
 
@@ -49,13 +50,13 @@ public:
 
     bool subscribe(
         const std::string& topic_name,
-        const std::string& message_type,
+        const xtypes::DynamicType& message_type,
         SubscriptionCallback callback,
         const YAML::Node& configuration) override;
 
     std::shared_ptr<TopicPublisher> advertise(
         const std::string& topic_name,
-        const std::string& message_type,
+        const xtypes::DynamicType& message_type,
         const YAML::Node& configuration) override;
 
 private:
