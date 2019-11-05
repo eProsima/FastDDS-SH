@@ -108,7 +108,6 @@ bool SystemHandle::configure(
 
 bool SystemHandle::okay() const
 {
-    //TODO
     return true;
 }
 
