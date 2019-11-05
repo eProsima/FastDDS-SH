@@ -28,26 +28,36 @@
 #include <fastrtps/types/DynamicPubSubType.h>
 #include <fastrtps/types/MemberDescriptor.h>
 #include <fastrtps/types/TypesBase.h>
+#include <fastrtps/types/TypeDescriptor.h>
+#include <fastrtps/types/DynamicType.h>
+#include <fastrtps/types/DynamicTypeMember.h>
+#include <fastrtps/types/DynamicTypePtr.h>
 #include <fastrtps/attributes/PublisherAttributes.h>
 
 namespace soss {
 namespace dds {
 
 using DynamicData_ptr = eprosima::fastrtps::types::DynamicData_ptr;
+using DynamicType_ptr = eprosima::fastrtps::types::DynamicType_ptr;
 using DynamicPubSubType = eprosima::fastrtps::types::DynamicPubSubType;
-using DynamicType = eprosima::fastrtps::types::DynamicType;
+using TypeKind = eprosima::fastrtps::types::TypeKind;
 
 #if 1 < FASTRTPS_VERSION_MAJOR || (1 == FASTRTPS_VERSION_MAJOR && 8 <= FASTRTPS_VERSION_MINOR)
 
+#define EPROSIMA_XTYPES_DASHING
 using eprosima::fastrtps::rtps::NO_KEY;
 using eprosima::fastrtps::rtps::ALIVE;
 
+using DynamicType = eprosima::fastrtps::types::DynamicType;
+using DynamicTypeMember = eprosima::fastrtps::types::DynamicTypeMember;
 using DynamicTypeBuilder = eprosima::fastrtps::types::DynamicTypeBuilder;
 using DynamicDataFactory = eprosima::fastrtps::types::DynamicDataFactory;
 using DynamicTypeBuilderFactory = eprosima::fastrtps::types::DynamicTypeBuilderFactory;
 
 using DynamicData = eprosima::fastrtps::types::DynamicData;
 using ResponseCode = eprosima::fastrtps::types::ReturnCode_t;
+
+using TypeDescriptor = eprosima::fastrtps::types::TypeDescriptor;
 
 // Due to a problem with Fast-RTPS library, which by now does not export the "GetDescriptor" function for windows,
 // this workaround is needed in order to access the protected member "mDescriptors".
@@ -79,6 +89,7 @@ using MemberDescriptor = eprosima::fastrtps::types::MemberDescriptor;
 
 #else
 
+#define EPROSIMA_XTYPES_CRYSTAL
 using eprosima::fastrtps::NO_KEY;
 using eprosima::fastrtps::ALIVE;
 
@@ -422,6 +433,23 @@ public:
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetUint32Value(value, id);
+    }
+
+    ResponseCode get_uint8_value(
+            uint8_t& value,
+            eprosima::fastrtps::types::MemberId id) const
+    {
+        octet aux;
+        ResponseCode result = eprosima::fastrtps::types::DynamicData::GetByteValue(aux, id);
+        value = static_cast<uint8_t>(aux);
+        return result;
+    }
+
+    ResponseCode set_uint8_value(
+            uint8_t value,
+            eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
+    {
+        return eprosima::fastrtps::types::DynamicData::SetByteValue(static_cast<octet>(value), id);
     }
 
     ResponseCode get_int16_value(
@@ -943,6 +971,11 @@ public:
         return eprosima::fastrtps::types::MemberDescriptor::SetType(type);
     }
 
+    eprosima::fastrtps::types::DynamicType_ptr get_type() const
+    {
+        return mType;
+    }
+
     void set_default_union_value(
             bool bDefault)
     {
@@ -1130,6 +1163,139 @@ public:
         return static_cast<DynamicTypeBuilder*>(
             eprosima::fastrtps::types::DynamicTypeBuilderFactory::CreateAliasBuilder(base_type, sName));
     }
+};
+
+class TypeDescriptor : public eprosima::fastrtps::types::TypeDescriptor
+{
+public:
+    DynamicType_ptr get_base_type() const
+    {
+        return eprosima::fastrtps::types::TypeDescriptor::GetBaseType();
+    }
+
+    uint32_t get_bounds(
+            uint32_t index = 0) const
+    {
+        return eprosima::fastrtps::types::TypeDescriptor::GetBounds(index);
+    }
+
+    uint32_t get_bounds_size() const
+    {
+        return eprosima::fastrtps::types::TypeDescriptor::GetBoundsSize();
+    }
+
+    DynamicType_ptr get_discriminator_type() const
+    {
+        return eprosima::fastrtps::types::TypeDescriptor::GetDiscriminatorType();
+    }
+
+    DynamicType_ptr get_element_type() const
+    {
+        return eprosima::fastrtps::types::TypeDescriptor::GetElementType();
+    }
+
+    DynamicType_ptr get_key_element_type() const
+    {
+        return eprosima::fastrtps::types::TypeDescriptor::GetKeyElementType();
+    }
+
+    TypeKind get_kind() const
+    {
+        return eprosima::fastrtps::types::TypeDescriptor::GetKind();
+    }
+
+    std::string get_name() const
+    {
+        return eprosima::fastrtps::types::TypeDescriptor::GetName();
+    }
+
+    uint32_t get_total_bounds() const
+    {
+        return eprosima::fastrtps::types::TypeDescriptor::GetTotalBounds();
+    }
+
+};
+
+class DynamicTypeMember : public eprosima::fastrtps::types::DynamicTypeMember
+{
+public:
+    std::vector<uint64_t> get_union_labels() const
+    {
+        return eprosima::fastrtps::types::DynamicTypeMember::GetUnionLabels();
+    }
+
+    ResponseCode get_descriptor(
+            MemberDescriptor* descriptor) const
+    {
+        return eprosima::fastrtps::types::DynamicTypeMember::GetDescriptor(descriptor);
+    }
+
+    eprosima::fastrtps::types::MemberId get_id() const
+    {
+        return eprosima::fastrtps::types::DynamicTypeMember::GetId();
+    }
+
+    std::string get_name() const
+    {
+        return eprosima::fastrtps::types::DynamicTypeMember::GetName();
+    }
+
+    bool is_default_union_value() const
+    {
+        return eprosima::fastrtps::types::DynamicTypeMember::IsDefaultUnionValue();
+    }
+
+    const MemberDescriptor* get_descriptor() const
+    {
+        return static_cast<const MemberDescriptor*>(eprosima::fastrtps::types::DynamicTypeMember::GetDescriptor());
+    }
+
+};
+
+
+class DynamicType : public eprosima::fastrtps::types::DynamicType
+{
+public:
+    ResponseCode get_all_members(
+            std::map<eprosima::fastrtps::types::MemberId, DynamicTypeMember*>& members)
+    {
+        std::map<eprosima::fastrtps::types::MemberId, eprosima::fastrtps::types::DynamicTypeMember*> members_aux;
+        ResponseCode result = eprosima::fastrtps::types::DynamicType::GetAllMembers(members_aux);
+        members.clear();
+        for (auto& it : members_aux)
+        {
+            members.emplace(it.first, static_cast<DynamicTypeMember*>(it.second));
+        }
+        return result;
+    }
+
+    uint32_t get_bounds(
+            uint32_t index = 0) const
+    {
+        return eprosima::fastrtps::types::DynamicType::GetBounds(index);
+    }
+
+    ResponseCode get_descriptor(
+            TypeDescriptor* descriptor) const
+    {
+        return eprosima::fastrtps::types::DynamicType::GetDescriptor(descriptor);
+    }
+
+    inline TypeKind get_kind() const
+    {
+        return eprosima::fastrtps::types::DynamicType::GetKind();
+    }
+
+    std::string get_name() const
+    {
+        return eprosima::fastrtps::types::DynamicType::GetName();
+    }
+
+    const TypeDescriptor* get_descriptor() const
+    {
+        return static_cast<const TypeDescriptor*>(eprosima::fastrtps::types::DynamicType::getTypeDescriptor());
+    }
+
 };
 
 #endif // Fast version >= 1.8.0

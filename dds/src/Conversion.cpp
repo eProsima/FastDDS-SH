@@ -328,7 +328,7 @@ bool Conversion::dds_to_soss(
         }
         auto pair = types_.emplace(
             type_name,
-            convert_type(pst_it->second->GetDynamicType().get()));
+            convert_type(static_cast<const DynamicType*>(pst_it->second->GetDynamicType().get())));
         it = pair.first;
     }
 
@@ -351,7 +351,7 @@ bool Conversion::dds_to_soss(
 ::xtypes::DynamicType::Ptr Conversion::create_type(
         const DynamicType* type)
 {
-    const eprosima::fastrtps::types::TypeDescriptor* descriptor = type->get_descriptor();
+    const TypeDescriptor* descriptor = type->get_descriptor();
     switch (descriptor->get_kind())
     {
         // Basic types
@@ -403,12 +403,14 @@ bool Conversion::dds_to_soss(
         // Collection TKs
         case ::eprosima::fastrtps::types::TK_SEQUENCE:
         {
-            ::xtypes::DynamicType::Ptr inner = convert_type(descriptor->get_element_type().get());
+            ::xtypes::DynamicType::Ptr inner =
+                convert_type(static_cast<const DynamicType*>(descriptor->get_element_type().get()));
             return ::xtypes::SequenceType(*inner.get(), descriptor->get_bounds());
         }
         case ::eprosima::fastrtps::types::TK_ARRAY:
         {
-            ::xtypes::DynamicType::Ptr inner = convert_type(descriptor->get_element_type().get());
+            ::xtypes::DynamicType::Ptr inner =
+                convert_type(static_cast<const DynamicType*>(descriptor->get_element_type().get()));
             return ::xtypes::ArrayType(*inner.get(), descriptor->get_bounds());
         }
         case ::eprosima::fastrtps::types::TK_MAP:
@@ -441,7 +443,6 @@ bool Conversion::dds_to_soss(
         }
         case ::eprosima::fastrtps::types::TK_STRUCTURE:
         {
-            using ::eprosima::fastrtps::types::DynamicTypeMember;
             ::xtypes::StructType struct_type(descriptor->get_name());
             // TODO inheritance.
             // type.parent(convert_type(descriptor->get_base_type().get()));
@@ -454,7 +455,8 @@ bool Conversion::dds_to_soss(
             {
                 struct_type.add_member(
                     it.second->get_descriptor()->get_name(),
-                    *convert_type(it.second->get_descriptor()->get_type().get()).get());
+                    *convert_type(
+                        static_cast<const DynamicType*>(it.second->get_descriptor()->get_type().get())).get());
             }
             return struct_type;
         }

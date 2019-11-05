@@ -53,7 +53,7 @@ public:
     DynamicData_ptr create_dynamic_data(
             const std::string& name) const;
 
-    DynamicType* get_dynamic_type(
+    const DynamicType* get_dynamic_type(
             const std::string& name) const
     {
         auto it = topics_.find(name);
@@ -61,7 +61,7 @@ public:
         {
             return nullptr;
         }
-        return it->second.GetDynamicType().get();
+        return static_cast<const DynamicType*>(it->second.GetDynamicType().get());
     }
 
 private:

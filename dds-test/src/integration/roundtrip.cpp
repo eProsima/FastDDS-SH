@@ -17,7 +17,8 @@
 
 #include <soss/mock/api.hpp>
 #include <soss/Instance.hpp>
-//#include <soss/utilities.hpp>
+
+#include "../../../dds/src/DynamicTypeAdapter.hpp"
 
 #include <catch2/catch.hpp>
 
@@ -160,7 +161,7 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
 
         SECTION("tcp tunnel")
         {
-#if 1 < FASTRTPS_VERSION_MAJOR || (1 == FASTRTPS_VERSION_MAJOR && 8 <= FASTRTPS_VERSION_MINOR)
+#ifdef EPROSIMA_XTYPES_CRYSTAL
             const std::string config_file = "resources/tcp_config_crystal.xml";
 #else
             const std::string config_file = "resources/tcp_config_dashing.xml";
