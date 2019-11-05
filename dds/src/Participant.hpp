@@ -50,8 +50,19 @@ public:
             const std::string& name,
             DynamicTypeBuilder* builder);
 
-    eprosima::fastrtps::types::DynamicData_ptr create_dynamic_data(
+    DynamicData_ptr create_dynamic_data(
             const std::string& name) const;
+
+    DynamicType* get_dynamic_type(
+            const std::string& name) const
+    {
+        auto it = topics_.find(name);
+        if (it == topics_.end())
+        {
+            return nullptr;
+        }
+        return it->second.GetDynamicType().get();
+    }
 
 private:
 
@@ -60,7 +71,7 @@ private:
             eprosima::fastrtps::rtps::ParticipantDiscoveryInfo&& info) override;
 
     eprosima::fastrtps::Participant* dds_participant_;
-    std::map<std::string, eprosima::fastrtps::types::DynamicPubSubType> topics_;
+    std::map<std::string, DynamicPubSubType> topics_;
 };
 
 

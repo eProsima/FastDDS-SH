@@ -21,6 +21,7 @@
 #include "DDSMiddlewareException.hpp"
 #include "DynamicTypeAdapter.hpp"
 #include <soss/Message.hpp>
+#include <map>
 
 namespace soss {
 namespace dds {
@@ -36,8 +37,27 @@ struct Conversion {
             DynamicData* input,
             ::xtypes::DynamicData& output);
 
+    static ::xtypes::DynamicData dynamic_data(
+            const std::string& type_name);
+
+    static void register_type(
+            const std::string& type_name,
+            DynamicPubSubType* type)
+    {
+        registered_types_.emplace(type_name, type);
+        //convert_type(type->GetDynamicType().get());
+    }
+
+    static ::xtypes::DynamicType::Ptr convert_type(
+            const DynamicType* type);
+
 private:
     ~Conversion() = default;
+    static std::map<std::string, ::xtypes::DynamicType::Ptr> types_;
+    static std::map<std::string, DynamicPubSubType*> registered_types_;
+
+    static ::xtypes::DynamicType::Ptr create_type(
+            const DynamicType* type);
 };
 
 

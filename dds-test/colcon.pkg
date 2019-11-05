@@ -1,0 +1,6 @@
+{
+    "name": "soss-dds-test",
+    "type": "cmake",
+    "dependencies": ["fastrtps", "soss-core", "soss-dds", "soss-mock"]
+}
+

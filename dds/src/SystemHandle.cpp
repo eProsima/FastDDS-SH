@@ -20,6 +20,7 @@
 #include "Participant.hpp"
 #include "Publisher.hpp"
 #include "Subscriber.hpp"
+#include "Conversion.hpp"
 
 #include "dtparser/YAMLParser.hpp"
 
@@ -55,7 +56,7 @@ SystemHandle::~SystemHandle() = default;
 bool SystemHandle::configure(
     const RequiredTypes& /* types */,
     const YAML::Node& configuration,
-    TypeRegistry& /*type_registry*/) // Support?
+    TypeRegistry& type_registry)
 {
     if (!configuration["dynamic types"])
     {
@@ -79,9 +80,10 @@ bool SystemHandle::configure(
         }
 
         dtparser::RegisterCallback callback =
-            [=](std::string name, p_dynamictypebuilder_t builder)
+            [=, &type_registry](std::string name, p_dynamictypebuilder_t builder)
         {
             participant_->register_dynamic_type(name, builder);
+            type_registry.emplace(name, Conversion::convert_type(participant_->get_dynamic_type(name)));
         };
 
         dtparser::YAMLParser::set_callback(callback);
@@ -118,22 +120,21 @@ bool SystemHandle::spin_once()
 }
 
 bool SystemHandle::subscribe(
-    const std::string& /*topic_name*/,
-    const xtypes::DynamicType& /*message_type*/,
-    SubscriptionCallback /*callback*/,
+    const std::string& topic_name,
+    const xtypes::DynamicType& message_type,
+    SubscriptionCallback callback,
     const YAML::Node& /* configuration */)
 {
-    /*
     try
     {
         auto subscriber = std::make_shared<Subscriber>(
-            participant_.get(), topic_name, transform_type(message_type), callback);
+            participant_.get(), topic_name, message_type.name(), callback);
 
         subscribers_.emplace_back(std::move(subscriber));
 
         std::cout << "[soss-dds]: subscriber created. "
             "topic: " << topic_name << ", "
-            "type: " << message_type << std::endl;
+            "type: " << message_type.name() << std::endl;
 
         return true;
     }
@@ -142,24 +143,21 @@ bool SystemHandle::subscribe(
         std::cerr << "[soss-dds]: " << e.what() << std::endl;
         return false;
     }
-    */
-    return false;
 }
 
 std::shared_ptr<TopicPublisher> SystemHandle::advertise(
-    const std::string& /*topic_name*/,
-    const xtypes::DynamicType& /*message_type*/,
+    const std::string& topic_name,
+    const xtypes::DynamicType& message_type,
     const YAML::Node& /* configuration */)
 {
-    /*
     try
     {
-        auto publisher = std::make_shared<Publisher>(participant_.get(), topic_name, transform_type(message_type));
+        auto publisher = std::make_shared<Publisher>(participant_.get(), topic_name, message_type.name());
         publishers_.emplace_back(std::move(publisher));
 
         std::cout << "[soss-dds]: publisher created. "
             "topic: " << topic_name << ", "
-            "type: " << message_type << std::endl;
+            "type: " << message_type.name() << std::endl;
 
         return publishers_.back();
     }
@@ -168,8 +166,6 @@ std::shared_ptr<TopicPublisher> SystemHandle::advertise(
         std::cerr << "[soss-dds]: " << e.what() << std::endl;
         return std::shared_ptr<TopicPublisher>();
     }
-    */
-    return std::shared_ptr<TopicPublisher>();
 }
 
 

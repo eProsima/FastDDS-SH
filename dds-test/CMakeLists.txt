@@ -56,7 +56,11 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 
-file(COPY ${PROJECT_SOURCE_DIR}/resources/tcp_config.xml
+file(COPY ${PROJECT_SOURCE_DIR}/resources/tcp_config_crystal.xml
+    DESTINATION ${PROJECT_BINARY_DIR}/resources
+    )
+
+file(COPY ${PROJECT_SOURCE_DIR}/resources/tcp_config_dashing.xml
     DESTINATION ${PROJECT_BINARY_DIR}/resources
     )
 

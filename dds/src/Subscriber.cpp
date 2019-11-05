@@ -75,12 +75,12 @@ Subscriber::~Subscriber()
     fastrtps::Domain::removeSubscriber(dds_subscriber_);
 }
 
-void Subscriber::receive(const fastrtps::types::DynamicData_ptr /*dds_message*/)
+void Subscriber::receive(const fastrtps::types::DynamicData_ptr dds_message)
 {
     std::cout << "[soss-dds][subscriber]: translate message: dds -> soss "
         "(" << topic_name_ << ") " << std::endl;
-/*
-    ::xtypes::DynamicData soss_message;
+
+    ::xtypes::DynamicData soss_message(Conversion::dynamic_data(message_type_));
 
     bool success = Conversion::dds_to_soss(message_type_, static_cast<DynamicData*>(dds_message.get()), soss_message);
 
@@ -92,7 +92,6 @@ void Subscriber::receive(const fastrtps::types::DynamicData_ptr /*dds_message*/)
     {
         std::cerr << "Error converting message from soss message to dynamic types." << std::endl;
    }
-*/
 }
 
 void Subscriber::onSubscriptionMatched(

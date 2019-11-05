@@ -34,6 +34,8 @@ namespace soss {
 namespace dds {
 
 using DynamicData_ptr = eprosima::fastrtps::types::DynamicData_ptr;
+using DynamicPubSubType = eprosima::fastrtps::types::DynamicPubSubType;
+using DynamicType = eprosima::fastrtps::types::DynamicType;
 
 #if 1 < FASTRTPS_VERSION_MAJOR || (1 == FASTRTPS_VERSION_MAJOR && 8 <= FASTRTPS_VERSION_MINOR)
 

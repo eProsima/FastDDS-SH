@@ -27,7 +27,8 @@ namespace dds {
 class DDSMiddlewareException : public std::runtime_error
 {
 public:
-    DDSMiddlewareException(const std::string& message)
+    DDSMiddlewareException(
+            const std::string& message)
         : std::runtime_error(message)
     {
     }

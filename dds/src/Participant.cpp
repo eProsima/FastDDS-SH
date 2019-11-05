@@ -16,6 +16,7 @@
 */
 
 #include "Participant.hpp"
+#include "Conversion.hpp"
 
 #include <fastrtps/attributes/ParticipantAttributes.h>
 #include <fastrtps/Domain.h>
@@ -25,6 +26,7 @@
 #include <iostream>
 
 using namespace eprosima;
+using eprosima::fastrtps::types::DynamicType_ptr;
 
 namespace soss {
 namespace dds {
@@ -76,7 +78,7 @@ void Participant::register_dynamic_type(
         const std::string& topic_name,
         DynamicTypeBuilder* builder)
 {
-    fastrtps::types::DynamicType_ptr dtptr = builder->build();
+    DynamicType_ptr dtptr = builder->build();
 
     if(dtptr != nullptr)
     {
@@ -96,6 +98,8 @@ void Participant::register_dynamic_type(
             ss << "Error registering dynamic type '" << pair.first->second.getName() << "'.";
             throw DDSMiddlewareException(ss.str());
         }
+
+        Conversion::register_type(topic_name, &pair.first->second);
     }
     else
     {
@@ -114,7 +118,7 @@ fastrtps::types::DynamicData_ptr Participant::create_dynamic_data(
         throw DDSMiddlewareException(ss.str());
     }
 
-    const fastrtps::types::DynamicType_ptr& dynamic_type_ = it->second.GetDynamicType();
+    const DynamicType_ptr& dynamic_type_ = it->second.GetDynamicType();
     return DynamicDataFactory::get_instance()->create_data(dynamic_type_);
 }
 

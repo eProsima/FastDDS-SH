@@ -37,7 +37,7 @@ std::string gen_config_yaml(
 {
     std::string remap = "";
     if (topic_mapped != "") {
-        remap = ", remap: {dds: \"" + topic_mapped + "\" }";
+        remap = ", remap: {dds: { topic: \"" + topic_mapped + "\" } }";
     }
 
     std::string s;
@@ -54,7 +54,7 @@ std::string gen_config_yaml(
         s += "            profile_name: " + dds_profile_name + "\n";
     }
 
-    s += "    mock: { type: mock }\n";
+    s += "    mock: { type: mock, types-from: dds }\n";
 
     s += "routes:\n";
     s += "    mock_to_dds: { from: mock, to: dds }\n";
@@ -124,7 +124,6 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
 {
     SECTION("basic-type")
     {
-        /*
         const std::string topic_type = "dds_test_string";
 
         auto t = std::time(nullptr);
@@ -133,10 +132,6 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
         ss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
         std::string message_data = "mock test message at " + ss.str();
         std::cout << "[test]: message id: " << ss.str() << std::endl;
-
-        xtypes::DynamicData msg_to_sent;
-        msg_to_sent.type = topic_type;
-        msg_to_sent.data["data"] = soss::Convert<std::string>::make_soss_field(message_data);
 
         SECTION("udp")
         {
@@ -150,17 +145,26 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
                     "",
                     "");
 
+            const soss::TypeRegistry& mock_types = *instance.type_registry("mock");
+            xtypes::DynamicData msg_to_sent(*mock_types.at(topic_type));
+            msg_to_sent["data"].value(message_data);
+
             // Road: [mock -> dds -> dds -> mock]
             xtypes::DynamicData msg_to_recv = roundtrip(topic_sent, topic_recv, msg_to_sent);
 
-            REQUIRE(*msg_to_sent.data.at("data").cast<std::string>() == *msg_to_recv.data.at("data").cast<std::string>());
-            REQUIRE(msg_to_sent.type == msg_to_recv.type);
+            REQUIRE(msg_to_sent == msg_to_recv);
+            // TODO
+            // REQUIRE(msg_to_sent.type() == msg_to_recv.type());
             REQUIRE(0 == instance.quit().wait_for(1s));
         }
 
         SECTION("tcp tunnel")
         {
-            const std::string config_file = "resources/tcp_config.xml";
+#if 1 < FASTRTPS_VERSION_MAJOR || (1 == FASTRTPS_VERSION_MAJOR && 8 <= FASTRTPS_VERSION_MINOR)
+            const std::string config_file = "resources/tcp_config_crystal.xml";
+#else
+            const std::string config_file = "resources/tcp_config_dashing.xml";
+#endif
             const std::string client_to_server_topic = "client_to_server_topic";
             const std::string server_to_client_topic = "server_to_client_topic";
 
@@ -182,23 +186,28 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
                     config_file,
                     profile_name_client);
 
+
+            const soss::TypeRegistry& mock_types = *server_instance.type_registry("mock");
+            client_instance.type_registry("mock");
+            xtypes::DynamicData msg_to_sent(*mock_types.at(topic_type));
+            msg_to_sent["data"].value(message_data);
             std::this_thread::sleep_for(2s); // wait publisher and subscriber matching
-            xtypes::DynamicData msg_to_recv;
 
             // Road: [mock -> dds-client] -> [dds-server -> mock]
-            msg_to_recv = roundtrip(client_to_server_topic, client_to_server_topic, msg_to_sent);
-            REQUIRE(*msg_to_sent.data.at("data").cast<std::string>() == *msg_to_recv.data.at("data").cast<std::string>());
-            REQUIRE(msg_to_sent.type == msg_to_recv.type);
+            xtypes::DynamicData msg_to_recv = roundtrip(client_to_server_topic, client_to_server_topic, msg_to_sent);
+            REQUIRE(msg_to_sent == msg_to_recv);
+            // TODO
+            // REQUIRE(msg_to_sent.type() == msg_to_recv.type());
 
             // Road: [mock <- dds-client] <- [dds-server <- mock]
             msg_to_recv = roundtrip(server_to_client_topic, server_to_client_topic, msg_to_sent);
-            REQUIRE(*msg_to_sent.data.at("data").cast<std::string>() == *msg_to_recv.data.at("data").cast<std::string>());
-            REQUIRE(msg_to_sent.type == msg_to_recv.type);
+            REQUIRE(msg_to_sent == msg_to_recv);
+            // TODO
+            // REQUIRE(msg_to_sent.type() == msg_to_recv.type());
 
             REQUIRE(0 == client_instance.quit().wait_for(1s));
             REQUIRE(0 == server_instance.quit().wait_for(1s));
         }
-        */
     }
 }
 
