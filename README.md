@@ -1,11 +1,13 @@
 [![soss-commit](https://img.shields.io/badge/soss--commit-660078e-blue.svg)](https://github.com/osrf/soss_v2/tree/660078e9fee9fca1b3094d62dc6a22d4a1e80a38)
 # soss-dds
 
-System handle to connect [*SOSS*][soss] to *eProsima*'s open-source implementation of the [DDS protocol][dds], [Fast-RTPS][fast].
+System handle to connect [*SOSS*][soss] to *eProsima*'s open-source implementation of the
+[DDS protocol][dds], [Fast-RTPS][fast].
 
 ## Installation
 
-To install this package into a workspace already containing SOSS, just clone this repository into the sources directory and build it:
+To install this package into a workspace already containing SOSS,
+just clone this repository into the sources directory and build it:
 ```
 $ cd <soss workspace folder>
 $ git clone https://github.com/eProsima/SOSS-DDS.git src/soss-dds
@@ -38,8 +40,8 @@ $ colcon build --packages-up-to soss-dds
             │   └── packages
             │       └── soss-ros2 (ROS2 system handle)
             └── soss-dds (repo)
-                    ├── dds (soss-dds colcon pkg)
-                    └── dds-test (soss-dds-test colcon pkg)
+                    ├── dds (soss-dds colcon pkg)
+                    └── dds-test (soss-dds-test colcon pkg)
     ```
 
 5. Source a colcon environment in which ROS2 has been built (soss-ros2 uses rclcpp package).
@@ -101,19 +103,24 @@ For the DDS system handle the user must add two extra YAML maps to the configura
 which are `dynamic types` and `participant`:
 
 * The `dynamic types` map tells the DDS system handle how a certain type is mapped.
-This is necessary to convert the type from a *soss message*, which is the type used inside soss,
-to a *dynamic type*, which is the type used in DDS.
+This is necessary to convert the type from a *xtypes*, which is the type used inside soss,
+to a *dynamic type*, which is the type internally used in DDS.
 This conversion is done dynamically at runtime.
-To have a guide on how dynamic types are defined in YAML files, see the [YAML dynamic types](#yaml-dynamic-types) section.
+To have a guide on how dynamic types are defined in YAML files,
+see the [YAML dynamic types](#yaml-dynamic-types) section.
 
   **The dynamic types standard does not allow certain characters in its names**.
 For this reason, if a type defined in the topics section of the configuration file has in its name a `/`,
 the dds system handle will map that character into two underscores.
-That's why the type inside the dynamic types map is `std_msgs__String`, while the type inside the topics section is `std_msgs/String`.
-This is **something important to notice when connecting to ROS2**, because in ROS2 most of the types have a `/` in their names.
-Also, notice that **in the DDS system, the message will be published with a type name with two underscores instead of a slash**.
+That's why the type inside the dynamic types map is `std_msgs__String`,
+while the type inside the topics section is `std_msgs/String`.
+This is **something important to notice when connecting to ROS2**,
+because in ROS2 most of the types have a `/` in their names.
+Also, notice that **in the DDS system, the message will be published with a type name with two
+underscores instead of a slash**.
 
-* The `participant` map *(optional)* tells to the dds system handle where it can find the configuration file for the DDS profle,
+* The `participant` map *(optional)* tells to the dds system handle where it can
+find the configuration file for the DDS profle,
 and what profile must be used from the many that can be defined in that XML.
 This profile is used to set the DDS quality of services' parameters.
 A guide on how this XML files are configured can be found in
@@ -128,7 +135,8 @@ from `soss_profile_client` to `soss_profile_server`.
 
 ### YAML dynamic types
 
-*eProsima*'s *dtparser* can create dynamic types from a YAML map, allowing the user to define new dynamic types for each run without the need of rebuilding the project.
+*eProsima*'s *dtparser* can create dynamic types from a YAML map,
+allowing the user to define new dynamic types for each run without the need of rebuilding the project.
 
 Dynamic types are defined in the YAML map as follows:
 
@@ -138,13 +146,14 @@ type name:
     member_2_type: "member_2_name"
 ```
 
-The main 'type' for the general dynamic type must be a struct, as soss messages are defined as structures.
+The main 'type' for the general dynamic type must be a struct, as xtypes are defined as structures.
 
 The name for each type can be whatever the user wants, with the two following rules:
 
 1. The name can not have spaces in it.
 1. The name must be formed only by letters, numbers and underscores.
-Remember that the system handle will map each `/` for `__`, as mentioned in the configuration section, to allow an easy connection with ROS2 types.
+Remember that the system handle will map each `/` for `__`, as mentioned in the configuration section,
+to allow an easy connection with ROS2 types.
 
 Each of the members of the dynamic type can be defined just by its type and name, such as `int32: "my_integer"`.
 
@@ -166,9 +175,11 @@ Each of the members of the dynamic type can be defined just by its type and name
 - string
 
 The dynamic types parser also allow nested structures.
-To create a nested structure, there must be a definition of the basic structure and a reference to the basic structure in the member of the nested structure, using the name of the simple structure.
+To create a nested structure, there must be a definition of the basic structure and a reference to the basic structure
+in the member of the nested structure, using the name of the simple structure.
 
-The following is an example of a full configuration file that uses the ROS2 nested type [std_msgs/Header](http://docs.ros.org/melodic/api/std_msgs/html/msg/Header.html):
+The following is an example of a full configuration file that uses the ROS2 nested type
+[std_msgs/Header](http://docs.ros.org/melodic/api/std_msgs/html/msg/Header.html):
 
 ```YAML
 systems:
@@ -198,16 +209,19 @@ topics:
       route: dds_to_ros2
 ```
 
-Notice how in the definition of the dynamic types, the structure "stamp" is used as a member type in the structure "std_msgs__Header", and is defined just before the nested structure.
+Notice how in the definition of the dynamic types, the structure "stamp" is used as a member type in the structure
+"std_msgs__Header", and is defined just before the nested structure.
 The order is not actually important, so the type "stamp" could have been defined after "std_msgs__Header".
 
 ### TCP tunnel
 
-Besides connecting any system to DDS, this system handle can also be used to create a TCP tunnel connecting two SOSS instances.
+Besides connecting any system to DDS, this system handle can also be used to create a TCP tunnel connecting
+two SOSS instances.
 That way, a user can connect two ROS2 systems through TCP,
 or connect any system supported by soss with other system that is not in its LAN.
 
-For the TCP tunnel, two instances of SOSS are going to be used, one in each of the computers that are going to be communicated.
+For the TCP tunnel, two instances of SOSS are going to be used, one in each of the computers that
+are going to be communicated.
 Each of those instances will have a system handle for the system they want to communicate in the WAN network,
 and other to communicate with Fast-RTPS' DDS implementation.
 

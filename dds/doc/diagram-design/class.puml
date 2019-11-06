@@ -31,7 +31,7 @@ class Publisher {
     - dds::dynamic_data
     - topic_name
     - message_type
-    + publish(soss_message)
+    + publish(xtypes)
 }
 
 class Subscriber {
@@ -43,8 +43,8 @@ class Subscriber {
 }
 
 class Conversion << (S,#FF7700) Singleton >> {
-    + dds_message soss_to_dds(soss_message)
-    + soss_message dds_to_soss(dds_message)
+    + dds_message soss_to_dds(xtypes)
+    + xtypes dds_to_soss(dds_message)
 }
 
 package dtparser {
