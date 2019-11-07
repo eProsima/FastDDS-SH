@@ -19,12 +19,13 @@ cmake_minimum_required(VERSION 3.5.0)
 project(soss-dds)
 
 find_package(soss-core REQUIRED)
+find_package(xtypes REQUIRED)
 if(WIN32)
     find_package(yaml-cpp)
 endif()
 
 ########################################################################
-# Find Asio
+# Find FastRTPS
 find_package(fastrtps QUIET)
 
 if(fastrtps_DIR)

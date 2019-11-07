@@ -1,6 +1,6 @@
 {
     "name": "soss-dds",
     "type": "cmake",
-    "dependencies": ["fastrtps", "soss-core"]
+    "dependencies": ["fastrtps", "soss-core", "xtypes"]
 }
 

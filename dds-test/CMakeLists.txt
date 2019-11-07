@@ -18,8 +18,8 @@ cmake_minimum_required(VERSION 3.5.0)
 
 project(soss-dds-test)
 
-find_package(fastrtps REQUIRED)
 find_package(soss-dds REQUIRED)
+find_package(xtypes REQUIRED)
 find_package(soss-mock REQUIRED)
 if(WIN32)
     find_package(yaml-cpp)
@@ -55,13 +55,19 @@ target_link_libraries(${PROJECT_NAME}
         $<$<PLATFORM_ID:Windows>:yaml-cpp>
 )
 
-
-file(COPY ${PROJECT_SOURCE_DIR}/resources/tcp_config_crystal.xml
-    DESTINATION ${PROJECT_BINARY_DIR}/resources
-    )
-
-file(COPY ${PROJECT_SOURCE_DIR}/resources/tcp_config_dashing.xml
-    DESTINATION ${PROJECT_BINARY_DIR}/resources
-    )
+option(CRYSTAL "Test against ROS2 Crystal" OFF)
+if(CRYSTAL)
+    configure_file(
+        ${PROJECT_SOURCE_DIR}/resources/tcp_config_crystal.xml
+        ${PROJECT_BINARY_DIR}/resources/tcp_config.xml
+        COPYONLY
+        )
+else()
+    configure_file(
+        ${PROJECT_SOURCE_DIR}/resources/tcp_config_dashing.xml
+        ${PROJECT_BINARY_DIR}/resources/tcp_config.xml
+        COPYONLY
+        )
+endif()
 
 catch_discover_tests(${PROJECT_NAME})
