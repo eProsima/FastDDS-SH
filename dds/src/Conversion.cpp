@@ -168,14 +168,14 @@ bool Conversion::dds_to_soss(
     while (id != MEMBER_ID_INVALID)
     {
         id = input->get_member_id_at_index(i);
-        ResponseCode ret = types::RETCODE_ERROR;
+        ResponseCode ret = ResponseCode::RETCODE_ERROR;
 
         if (id != MEMBER_ID_INVALID)
         {
             DynamicDataSOSS* dd_soss = static_cast<DynamicDataSOSS*>(input);
             ret = dd_soss->GetDescriptorSOSS(descriptor, id);
 
-            if (ret == types::RETCODE_OK)
+            if (ret == ResponseCode::RETCODE_OK)
             {
                 types::TypeKind member_type = descriptor.get_kind();
 
@@ -286,24 +286,24 @@ bool Conversion::dds_to_soss(
                     {
                         if (dds_to_soss(nested_msg_dds->get_name(), nested_msg_dds, nested_msg_soss))
                         {
-                            ret = types::RETCODE_OK;
+                            ret = ResponseCode::RETCODE_OK;
                         }
                         input->return_loaned_value(nested_msg_dds);
                     }
                 }
                 else
                 {
-                    ret = types::RETCODE_ERROR;
+                    ret = ResponseCode::RETCODE_ERROR;
                 }
 
                 i++;
             }
 
-            if (ret != types::RETCODE_OK)
+            if (ret != ResponseCode::RETCODE_OK)
             {
                 std::stringstream ss;
                 ss << "Error parsing from dynamic type '" << input->get_name();
-                ss << "Error code: " << ret << ".";
+                //ss << "Error code: " << ret << ".";
                 throw DDSMiddlewareException(ss.str());
             }
         }

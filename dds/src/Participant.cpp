@@ -119,7 +119,7 @@ fastrtps::types::DynamicData_ptr Participant::create_dynamic_data(
     }
 
     const DynamicType_ptr& dynamic_type_ = it->second.GetDynamicType();
-    return DynamicDataFactory::get_instance()->create_data(dynamic_type_);
+    return fastrtps::types::DynamicData_ptr(DynamicDataFactory::get_instance()->create_data(dynamic_type_));
 }
 
 void Participant::onParticipantDiscovery(

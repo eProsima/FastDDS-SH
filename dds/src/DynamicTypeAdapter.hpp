@@ -55,7 +55,23 @@ using DynamicDataFactory = eprosima::fastrtps::types::DynamicDataFactory;
 using DynamicTypeBuilderFactory = eprosima::fastrtps::types::DynamicTypeBuilderFactory;
 
 using DynamicData = eprosima::fastrtps::types::DynamicData;
-using ResponseCode = eprosima::fastrtps::types::ReturnCode_t;
+#if 2 <= FASTRTPS_VERSION_MAJOR
+class ResponseCode : public eprosima::fastrtps::types::ReturnCode_t
+{
+public:
+    ResponseCode(
+            const ReturnCode_t& code)
+        : eprosima::fastrtps::types::ReturnCode_t(code)
+    {}
+
+    ResponseCode(
+            ReturnCode_t&& code)
+        : eprosima::fastrtps::types::ReturnCode_t(std::move(code))
+    {}
+};
+#else
+using ResponseCode = eprosima::fastrtps::types::ResponseCode;
+#endif
 
 using TypeDescriptor = eprosima::fastrtps::types::TypeDescriptor;
 
@@ -74,12 +90,12 @@ public:
         auto it = descriptors_.find(id);
         if (it != descriptors_.end())
         {
-            return value.copy_from(it->second);
+            return static_cast<ResponseCode>(value.copy_from(it->second));
         }
         else
         {
             std::cerr << "Error getting MemberDescriptor. MemberId not found." << std::endl;
-            return ResponseCode::RETCODE_BAD_PARAMETER;
+            return static_cast<ResponseCode>(ResponseCode::RETCODE_BAD_PARAMETER);
         }
     }
 
