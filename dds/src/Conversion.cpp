@@ -89,6 +89,9 @@ bool Conversion::soss_to_dds(
                 case ::xtypes::TypeKind::UINT_8_TYPE:
                     current_data->set_uint8_value(node.data().value<uint8_t>(), 0);
                     break;
+                case ::xtypes::TypeKind::INT_8_TYPE:
+                    current_data->set_int8_value(node.data().value<int8_t>(), 0);
+                    break;
                 case ::xtypes::TypeKind::INT_16_TYPE:
                     current_data->set_int16_value(node.data().value<int16_t>(), 0);
                     break;
