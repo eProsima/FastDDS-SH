@@ -22,7 +22,7 @@
 #include "Subscriber.hpp"
 #include "Conversion.hpp"
 
-#include "dtparser/YAMLParser.hpp"
+//#include "dtparser/YAMLParser.hpp"
 
 #include <fastrtps/Domain.h>
 
@@ -56,15 +56,8 @@ SystemHandle::~SystemHandle() = default;
 bool SystemHandle::configure(
     const RequiredTypes& /* types */,
     const YAML::Node& configuration,
-    TypeRegistry& type_registry)
+    TypeRegistry& /*type_registry*/)
 {
-    if (!configuration["dynamic types"])
-    {
-        std::cerr << "[soss-dds]: Configuration must have a 'dynamic types' field." << std::endl;
-        return false;
-    }
-
-
     try
     {
         if (configuration["participant"])
@@ -78,29 +71,12 @@ bool SystemHandle::configure(
 
             participant_ = std::make_unique<Participant>();
         }
-
-        dtparser::RegisterCallback callback =
-            [=, &type_registry](std::string name, p_dynamictypebuilder_t builder)
-        {
-            participant_->register_dynamic_type(name, builder);
-            type_registry.emplace(name, Conversion::convert_type(participant_->get_dynamic_type(name)));
-        };
-
-        dtparser::YAMLParser::set_callback(callback);
-
-        if (dtparser::YAMLP_ret::YAMLP_OK != dtparser::YAMLParser::parseYAMLNode(configuration))
-        {
-            std::cerr << "[soss-dds]: error parsing the dynamic types" << std::endl;
-        }
     }
     catch(DDSMiddlewareException& e)
     {
         std::cerr << "[soss-dds]: " << e.what() << std::endl;
         return false;
     }
-
-    dtparser::YAMLParser::DeleteInstance(); // TODO: an exception error will not delete the instances
-                                            // (Use RAII in YamlParser could fix it cleanly)
 
     std::cout << "[soss-dds]: configured!" << std::endl;
     return true;
@@ -127,7 +103,7 @@ bool SystemHandle::subscribe(
     try
     {
         auto subscriber = std::make_shared<Subscriber>(
-            participant_.get(), topic_name, message_type.name(), callback);
+            participant_.get(), topic_name, message_type, callback);
 
         subscribers_.emplace_back(std::move(subscriber));
 
@@ -151,7 +127,7 @@ std::shared_ptr<TopicPublisher> SystemHandle::advertise(
 {
     try
     {
-        auto publisher = std::make_shared<Publisher>(participant_.get(), topic_name, message_type.name());
+        auto publisher = std::make_shared<Publisher>(participant_.get(), topic_name, message_type);
         publishers_.emplace_back(std::move(publisher));
 
         std::cout << "[soss-dds]: publisher created. "

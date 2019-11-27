@@ -30,6 +30,7 @@ using namespace eprosima::fastrtps;
 
 std::map<std::string, ::xtypes::DynamicType::Ptr> Conversion::types_;
 std::map<std::string, DynamicPubSubType*> Conversion::registered_types_;
+std::map<std::string, DynamicTypeBuilder_ptr> Conversion::builders_;
 
 bool Conversion::soss_to_dds(
         const ::xtypes::DynamicData& input,
@@ -159,7 +160,6 @@ bool Conversion::soss_to_dds(
 
 // TODO: Can we receive a type without members as root?
 bool Conversion::dds_to_soss(
-        const std::string /*type*/,
         DynamicData* input,
         ::xtypes::DynamicData& output)
 {
@@ -287,7 +287,7 @@ bool Conversion::dds_to_soss(
 
                     if (nested_msg_dds != nullptr)
                     {
-                        if (dds_to_soss(nested_msg_dds->get_name(), nested_msg_dds, nested_msg_soss))
+                        if (dds_to_soss(nested_msg_dds, nested_msg_soss))
                         {
                             ret = ResponseCode::RETCODE_OK;
                         }
@@ -322,162 +322,177 @@ bool Conversion::dds_to_soss(
 
     if (it == types_.end())
     {
-        auto pst_it = registered_types_.find(type_name);
-        if (pst_it != registered_types_.end())
-        {
-            std::stringstream ss;
-            ss << "Error getting data from dynamic type '" << type_name << " (not registered).";
-            throw DDSMiddlewareException(ss.str());
-        }
-        auto pair = types_.emplace(
-            type_name,
-            convert_type(static_cast<const DynamicType*>(pst_it->second->GetDynamicType().get())));
-        it = pair.first;
+        std::stringstream ss;
+        ss << "Error getting data from dynamic type '" << type_name << " (not registered).";
+        throw DDSMiddlewareException(ss.str());
     }
 
     return ::xtypes::DynamicData(*it->second.get());
 }
 
-::xtypes::DynamicType::Ptr Conversion::convert_type(
-        const DynamicType* type)
+DynamicTypeBuilder* Conversion::create_builder(
+        const xtypes::DynamicType& type)
 {
-    auto it = types_.find(type->get_name());
-    if (it != types_.end())
+    if (builders_.count(type.name()) > 0)
     {
-        return it->second;
-    }
-    ::xtypes::DynamicType::Ptr ptr = create_type(type);
-    types_.emplace(type->get_name(), ptr);
-    return ptr;
-}
-
-::xtypes::DynamicType::Ptr Conversion::create_type(
-        const DynamicType* type)
-{
-    const TypeDescriptor* descriptor = type->get_descriptor();
-    switch (descriptor->get_kind())
-    {
-        // Basic types
-        case ::eprosima::fastrtps::types::TK_NONE:
-            return ::xtypes::DynamicType::Ptr();
-        case ::eprosima::fastrtps::types::TK_BOOLEAN:
-            return ::xtypes::primitive_type<bool>();
-        case ::eprosima::fastrtps::types::TK_BYTE:
-            return ::xtypes::primitive_type<uint8_t>();
-        case ::eprosima::fastrtps::types::TK_INT16:
-            return ::xtypes::primitive_type<int16_t>();
-        case ::eprosima::fastrtps::types::TK_INT32:
-            return ::xtypes::primitive_type<int32_t>();
-        case ::eprosima::fastrtps::types::TK_INT64:
-            return ::xtypes::primitive_type<int64_t>();
-        case ::eprosima::fastrtps::types::TK_UINT16:
-            return ::xtypes::primitive_type<uint16_t>();
-        case ::eprosima::fastrtps::types::TK_UINT32:
-            return ::xtypes::primitive_type<uint32_t>();
-        case ::eprosima::fastrtps::types::TK_UINT64:
-            return ::xtypes::primitive_type<uint64_t>();
-        case ::eprosima::fastrtps::types::TK_FLOAT32:
-            return ::xtypes::primitive_type<float>();
-        case ::eprosima::fastrtps::types::TK_FLOAT64:
-            return ::xtypes::primitive_type<double>();
-        case ::eprosima::fastrtps::types::TK_FLOAT128:
-            return ::xtypes::primitive_type<long double>();
-        case ::eprosima::fastrtps::types::TK_CHAR8:
-            return ::xtypes::primitive_type<char>();
-        case ::eprosima::fastrtps::types::TK_CHAR16:
-            return ::xtypes::primitive_type<wchar_t>();
-        // String TKs
-        case ::eprosima::fastrtps::types::TK_STRING8:
-        {
-            if (descriptor->get_bounds() != LENGTH_UNLIMITED)
-            {
-                return ::xtypes::StringType(descriptor->get_bounds());
-            }
-            return ::xtypes::StringType();
-        }
-        case ::eprosima::fastrtps::types::TK_STRING16:
-        {
-            if (descriptor->get_bounds() != LENGTH_UNLIMITED)
-            {
-                return ::xtypes::WStringType(descriptor->get_bounds());
-            }
-            return ::xtypes::WStringType();
-        }
-        // Collection TKs
-        case ::eprosima::fastrtps::types::TK_SEQUENCE:
-        {
-            ::xtypes::DynamicType::Ptr inner =
-                convert_type(static_cast<const DynamicType*>(descriptor->get_element_type().get()));
-            return ::xtypes::SequenceType(*inner.get(), descriptor->get_bounds());
-        }
-        case ::eprosima::fastrtps::types::TK_ARRAY:
-        {
-            ::xtypes::DynamicType::Ptr inner =
-                convert_type(static_cast<const DynamicType*>(descriptor->get_element_type().get()));
-            return ::xtypes::ArrayType(*inner.get(), descriptor->get_bounds());
-        }
-        case ::eprosima::fastrtps::types::TK_MAP:
-        {
-            // TODO
-            break;
-        }
-        // Constructed/Named types
-        case ::eprosima::fastrtps::types::TK_ALIAS:
-        {
-            // TODO
-            break;
-        }
-        // Enumerated TKs
-        case ::eprosima::fastrtps::types::TK_ENUM:
-        {
-            // TODO
-            break;
-        }
-        case ::eprosima::fastrtps::types::TK_BITMASK:
-        {
-            // TODO
-            break;
-        }
-        // Structured TKs
-        case ::eprosima::fastrtps::types::TK_ANNOTATION:
-        {
-            // TODO
-            break;
-        }
-        case ::eprosima::fastrtps::types::TK_STRUCTURE:
-        {
-            ::xtypes::StructType struct_type(descriptor->get_name());
-            // TODO inheritance.
-            // type.parent(convert_type(descriptor->get_base_type().get()));
-
-            std::map<MemberId, DynamicTypeMember*> members_map;
-            // It lacks a const version.
-            const_cast<DynamicType*>(type)->get_all_members(members_map);
-
-            for (auto& it : members_map)
-            {
-                struct_type.add_member(
-                    it.second->get_descriptor()->get_name(),
-                    *convert_type(
-                        static_cast<const DynamicType*>(it.second->get_descriptor()->get_type().get())).get());
-            }
-            return struct_type;
-        }
-        case ::eprosima::fastrtps::types::TK_UNION:
-        {
-            // TODO
-            break;
-        }
-        case ::eprosima::fastrtps::types::TK_BITSET:
-        {
-            // TODO
-            break;
-        }
+        /*
+        std::cout << "[soss-dds]: Topic '" << topic_name << "' has a type already registered." << std::endl;
+        std::cout << "[soss-dds]: Registed type: '" << registered_types_[topic_name]->getName()
+                  << "' but trying to register type: '" << type.name() << "'." << std::endl;
+        */
+        return builders_[type.name()].get();
     }
 
-    return ::xtypes::DynamicType::Ptr();
+    DynamicTypeBuilder_ptr builder = get_builder(type);
+    builder->set_name(type.name());
+    DynamicTypeBuilder* result = builder.get();
+    builders_.emplace(type.name(), std::move(builder));
+    return result;
 }
 
+DynamicTypeBuilder_ptr Conversion::get_builder(
+        const xtypes::DynamicType& type)
+{
+    DynamicTypeBuilderFactory* factory = DynamicTypeBuilderFactory::get_instance();
+    switch (type.kind())
+    {
+        case ::xtypes::TypeKind::BOOLEAN_TYPE:
+        {
+            return factory->create_bool_builder();
+        }
+        case ::xtypes::TypeKind::INT_8_TYPE:
+        case ::xtypes::TypeKind::UINT_8_TYPE:
+        {
+            return factory->create_byte_builder();
+        }
+        case ::xtypes::TypeKind::INT_16_TYPE:
+        {
+            return factory->create_int16_builder();
+        }
+        case ::xtypes::TypeKind::UINT_16_TYPE:
+        {
+            return factory->create_uint16_builder();
+        }
+        case ::xtypes::TypeKind::INT_32_TYPE:
+        {
+            return factory->create_int32_builder();
+        }
+        case ::xtypes::TypeKind::UINT_32_TYPE:
+        {
+            return factory->create_uint32_builder();
+        }
+        case ::xtypes::TypeKind::INT_64_TYPE:
+        {
+            return factory->create_int64_builder();
+        }
+        case ::xtypes::TypeKind::UINT_64_TYPE:
+        {
+            return factory->create_uint64_builder();
+        }
+        case ::xtypes::TypeKind::FLOAT_32_TYPE:
+        {
+            return factory->create_float32_builder();
+        }
+        case ::xtypes::TypeKind::FLOAT_64_TYPE:
+        {
+            return factory->create_float64_builder();
+        }
+        case ::xtypes::TypeKind::FLOAT_128_TYPE:
+        {
+            return factory->create_float128_builder();
+        }
+        case ::xtypes::TypeKind::CHAR_8_TYPE:
+        {
+            return factory->create_char8_builder();
+        }
+        case ::xtypes::TypeKind::CHAR_16_TYPE:
+        {
+            return factory->create_char16_builder();
+        }
+        case ::xtypes::TypeKind::ENUMERATION_TYPE:
+        {
+            // TODO
+        }
+        case ::xtypes::TypeKind::BITSET_TYPE:
+        {
+            // TODO
+        }
+        case ::xtypes::TypeKind::ALIAS_TYPE:
+        {
+            // TODO
+        }
+        /*
+        case ::xtypes::TypeKind::BITMASK_TYPE:
+        {
+            // TODO
+        }
+        */
+        case ::xtypes::TypeKind::ARRAY_TYPE:
+        {
+            const xtypes::ArrayType& c_type = static_cast<const xtypes::ArrayType&>(type);
+            std::pair<std::vector<uint32_t>, DynamicTypeBuilder_ptr> pair;
+            get_array_specs(c_type, pair);
+            DynamicTypeBuilder_ptr result = factory->create_array_builder(pair.second->build(), pair.first);
+            return result;
+        }
+        case ::xtypes::TypeKind::SEQUENCE_TYPE:
+        {
+            const xtypes::SequenceType& c_type = static_cast<const xtypes::SequenceType&>(type);
+            DynamicTypeBuilder_ptr content = get_builder(c_type.content_type());
+            DynamicTypeBuilder_ptr result = factory->create_sequence_builder(content->build(), c_type.bounds());
+            return result;
+        }
+        case ::xtypes::TypeKind::STRING_TYPE:
+        {
+            const xtypes::StringType& c_type = static_cast<const xtypes::StringType&>(type);
+            return factory->create_string_builder(c_type.bounds());
+        }
+        case ::xtypes::TypeKind::WSTRING_TYPE:
+        {
+            const xtypes::WStringType& c_type = static_cast<const xtypes::WStringType&>(type);
+            return factory->create_wstring_builder(c_type.bounds());
+        }
+        case ::xtypes::TypeKind::MAP_TYPE:
+        {
+            // TODO
+        }
+        case ::xtypes::TypeKind::UNION_TYPE:
+        {
+            // TODO
+        }
+        case ::xtypes::TypeKind::STRUCTURE_TYPE:
+        {
+            DynamicTypeBuilder_ptr result = factory->create_struct_builder();
+            const xtypes::StructType& from = static_cast<const xtypes::StructType&>(type);
+
+            for (size_t idx = 0; idx < from.members().size(); ++idx)
+            {
+                const xtypes::Member& member = from.member(idx);
+                DynamicTypeBuilder_ptr member_builder = get_builder(member.type());
+                result->add_member(idx, member.name(), member_builder->build());
+            }
+            return result;
+        }
+        default:
+            break;
+    }
+    return nullptr;
+}
+
+void Conversion::get_array_specs(
+        const xtypes::ArrayType& array,
+        std::pair<std::vector<uint32_t>, DynamicTypeBuilder_ptr>& result)
+{
+    result.first.push_back(array.dimension());
+    if (array.content_type().kind() == ::xtypes::TypeKind::ARRAY_TYPE)
+    {
+        get_array_specs(static_cast<const xtypes::ArrayType&>(array.content_type()), result);
+    }
+    else
+    {
+        result.second = get_builder(array.content_type());
+    }
+}
 } // namespace dds
 } // namespace soss
 

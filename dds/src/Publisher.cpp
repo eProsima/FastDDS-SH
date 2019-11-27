@@ -32,17 +32,22 @@ namespace dds {
 Publisher::Publisher(
         Participant* participant,
         const std::string& topic_name,
-        const std::string& message_type)
+        const ::xtypes::DynamicType& message_type)
 
     : topic_name_{topic_name}
-    , message_type_{message_type}
 {
-    dynamic_data_ = participant->create_dynamic_data(message_type);
+    DynamicTypeBuilder* builder = Conversion::create_builder(message_type);
+    if (builder != nullptr)
+    {
+        participant->register_dynamic_type(topic_name, builder);
+    }
+
+    dynamic_data_ = participant->create_dynamic_data(topic_name);
 
     fastrtps::PublisherAttributes attributes;
     attributes.topic.topicKind = NO_KEY; //Check this
     attributes.topic.topicName = topic_name_;
-    attributes.topic.topicDataType = message_type;
+    attributes.topic.topicDataType = message_type.name();
 
     dds_publisher_ = fastrtps::Domain::createPublisher(participant->get_dds_participant(), attributes, this);
 

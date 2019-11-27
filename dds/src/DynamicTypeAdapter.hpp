@@ -101,8 +101,16 @@ public:
 
 };
 
-using MemberDescriptor = eprosima::fastrtps::types::MemberDescriptor;
+class MemberDescriptor : public eprosima::fastrtps::types::MemberDescriptor
+{
+public:
+    eprosima::fastrtps::types::DynamicType_ptr get_type() const
+    {
+        return type_;
+    }
+};
 
+using DynamicTypeBuilder_ptr = eprosima::fastrtps::types::DynamicTypeBuilder_ptr;
 #else
 
 #define EPROSIMA_XTYPES_CRYSTAL
@@ -112,6 +120,7 @@ using eprosima::fastrtps::ALIVE;
 using octet = eprosima::fastrtps::octet;
 
 using ResponseCode = eprosima::fastrtps::types::ResponseCode;
+using DynamicTypeBuilder_ptr = eprosima::fastrtps::types::DynamicTypeBuilder_ptr;
 
 class DynamicData : public eprosima::fastrtps::types::DynamicData
 {

@@ -36,7 +36,7 @@ namespace dds {
 Subscriber::Subscriber(
         Participant* participant,
         const std::string& topic_name,
-        const std::string& message_type,
+        const ::xtypes::DynamicType& message_type,
         TopicSubscriberSystem::SubscriptionCallback soss_callback)
 
     : topic_name_{topic_name}
@@ -44,12 +44,18 @@ Subscriber::Subscriber(
     , soss_callback_{soss_callback}
     , reception_threads_{}
 {
-    dynamic_data_ = participant->create_dynamic_data(message_type);
+    DynamicTypeBuilder* builder = Conversion::create_builder(message_type);
+    if (builder != nullptr)
+    {
+        participant->register_dynamic_type(topic_name, builder);
+    }
+
+    dynamic_data_ = participant->create_dynamic_data(topic_name);
 
     fastrtps::SubscriberAttributes attributes;
     attributes.topic.topicKind = NO_KEY;
     attributes.topic.topicName = topic_name;
-    attributes.topic.topicDataType = message_type;
+    attributes.topic.topicDataType = message_type.name();
 
     dds_subscriber_ = fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, this);
 
@@ -80,9 +86,9 @@ void Subscriber::receive(const fastrtps::types::DynamicData_ptr dds_message)
     std::cout << "[soss-dds][subscriber]: translate message: dds -> soss "
         "(" << topic_name_ << ") " << std::endl;
 
-    ::xtypes::DynamicData soss_message(Conversion::dynamic_data(message_type_));
+    ::xtypes::DynamicData soss_message(message_type_);
 
-    bool success = Conversion::dds_to_soss(message_type_, static_cast<DynamicData*>(dds_message.get()), soss_message);
+    bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(dds_message.get()), soss_message);
 
     if (success)
     {

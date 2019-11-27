@@ -40,7 +40,7 @@ public:
     Subscriber(
             Participant* participant,
             const std::string& topic_name,
-            const std::string& message_type,
+            const xtypes::DynamicType& message_type,
             TopicSubscriberSystem::SubscriptionCallback soss_callback);
 
     virtual ~Subscriber();
@@ -75,7 +75,7 @@ private:
     DynamicData_ptr dynamic_data_;
 
     const std::string topic_name_;
-    const std::string message_type_;
+    const xtypes::DynamicType& message_type_;
 
     TopicSubscriberSystem::SubscriptionCallback soss_callback_;
     std::vector<std::thread> reception_threads_;

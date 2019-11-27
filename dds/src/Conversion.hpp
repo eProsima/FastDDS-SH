@@ -22,6 +22,7 @@
 #include "DynamicTypeAdapter.hpp"
 #include <soss/Message.hpp>
 #include <map>
+#include <vector>
 
 namespace soss {
 namespace dds {
@@ -33,7 +34,6 @@ struct Conversion {
             DynamicData* output);
 
     static bool dds_to_soss(
-            const std::string type,
             DynamicData* input,
             ::xtypes::DynamicData& output);
 
@@ -45,19 +45,22 @@ struct Conversion {
             DynamicPubSubType* type)
     {
         registered_types_.emplace(type_name, type);
-        //convert_type(type->GetDynamicType().get());
     }
 
-    static ::xtypes::DynamicType::Ptr convert_type(
-            const DynamicType* type);
-
+    static DynamicTypeBuilder* create_builder(
+            const xtypes::DynamicType& type);
 private:
     ~Conversion() = default;
     static std::map<std::string, ::xtypes::DynamicType::Ptr> types_;
     static std::map<std::string, DynamicPubSubType*> registered_types_;
+    static std::map<std::string, DynamicTypeBuilder_ptr> builders_;
 
-    static ::xtypes::DynamicType::Ptr create_type(
-            const DynamicType* type);
+    static DynamicTypeBuilder_ptr get_builder(
+        const xtypes::DynamicType& type);
+
+    static void get_array_specs(
+        const xtypes::ArrayType& array,
+        std::pair<std::vector<uint32_t>, DynamicTypeBuilder_ptr>& result);
 };
 
 

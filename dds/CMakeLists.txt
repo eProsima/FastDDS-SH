@@ -38,12 +38,6 @@ endif()
 
 ########################################################################
 # Library
-set(SRC_DTPARSER
-    src/dtparser/DynamicTypeParser.cpp
-    src/dtparser/DynamicTypeParserCommon.cpp
-    src/dtparser/YAMLParser.cpp
-    )
-
 set(SRC
     src/Conversion.cpp
     src/Publisher.cpp
@@ -52,7 +46,7 @@ set(SRC
     src/SystemHandle.cpp
     )
 
-add_library(${PROJECT_NAME} SHARED ${SRC_DTPARSER} ${SRC})
+add_library(${PROJECT_NAME} SHARED ${SRC})
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
