@@ -34,7 +34,7 @@ struct Conversion {
             DynamicData* output);
 
     static bool dds_to_soss(
-            DynamicData* input,
+            const DynamicData* input,
             ::xtypes::DynamicData& output);
 
     static ::xtypes::DynamicData dynamic_data(
@@ -61,6 +61,33 @@ private:
     static void get_array_specs(
         const xtypes::ArrayType& array,
         std::pair<std::vector<uint32_t>, DynamicTypeBuilder_ptr>& result);
+
+    // soss -> dds
+    static void set_primitive_data(
+        const xtypes::DynamicData& from,
+        DynamicData* to);
+
+    // soss -> dds
+    static void set_sequence_data(
+        const xtypes::DynamicData& from,
+        DynamicData* to);
+
+    // soss -> dds
+    static void set_array_data(
+        const xtypes::DynamicData& from,
+        DynamicData* to,
+        const std::vector<uint32_t>& indexes);
+
+    // dds -> soss
+    static void set_sequence_data(
+        const DynamicData* from,
+        xtypes::DynamicData& to);
+
+    // dds -> soss
+    static void set_array_data(
+        const DynamicData* from,
+        xtypes::DynamicData& to,
+        const std::vector<uint32_t>& indexes);
 };
 
 

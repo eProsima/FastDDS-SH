@@ -32,6 +32,262 @@ std::map<std::string, ::xtypes::DynamicType::Ptr> Conversion::types_;
 std::map<std::string, DynamicPubSubType*> Conversion::registered_types_;
 std::map<std::string, DynamicTypeBuilder_ptr> Conversion::builders_;
 
+void Conversion::set_primitive_data(
+        const xtypes::DynamicData& from,
+        DynamicData* to)
+{
+    switch (from.type().kind())
+    {
+        // TODO 0 or MEMBER_ID_INVALID?
+        case ::xtypes::TypeKind::BOOLEAN_TYPE:
+            to->set_bool_value(from.value<bool>(), 0);
+            break;
+        case ::xtypes::TypeKind::CHAR_8_TYPE:
+            to->set_char8_value(from.value<char>(), 0);
+            break;
+        case ::xtypes::TypeKind::CHAR_16_TYPE:
+            to->set_char16_value(from.value<char32_t>(), 0);
+            break;
+        case ::xtypes::TypeKind::UINT_8_TYPE:
+            to->set_uint8_value(from.value<uint8_t>(), 0);
+            break;
+        case ::xtypes::TypeKind::INT_8_TYPE:
+            to->set_int8_value(from.value<int8_t>(), 0);
+            break;
+        case ::xtypes::TypeKind::INT_16_TYPE:
+            to->set_int16_value(from.value<int16_t>(), 0);
+            break;
+        case ::xtypes::TypeKind::UINT_16_TYPE:
+            to->set_uint16_value(from.value<uint16_t>(), 0);
+            break;
+        case ::xtypes::TypeKind::INT_32_TYPE:
+            to->set_int32_value(from.value<int32_t>(), 0);
+            break;
+        case ::xtypes::TypeKind::UINT_32_TYPE:
+            to->set_uint32_value(from.value<uint32_t>(), 0);
+            break;
+        case ::xtypes::TypeKind::INT_64_TYPE:
+            to->set_int64_value(from.value<int64_t>(), 0);
+            break;
+        case ::xtypes::TypeKind::UINT_64_TYPE:
+            to->set_uint64_value(from.value<uint64_t>(), 0);
+            break;
+        case ::xtypes::TypeKind::FLOAT_32_TYPE:
+            to->set_float32_value(from.value<float>(), 0);
+            break;
+        case ::xtypes::TypeKind::FLOAT_64_TYPE:
+            to->set_float64_value(from.value<double>(), 0);
+            break;
+        case ::xtypes::TypeKind::FLOAT_128_TYPE:
+            to->set_float128_value(from.value<long double>(), 0);
+            break;
+        case ::xtypes::TypeKind::STRING_TYPE:
+            to->set_string_value(from.value<std::string>(), 0);
+            break;
+        case ::xtypes::TypeKind::WSTRING_TYPE:
+        {
+            to->set_wstring_value(from.value<std::wstring>(), 0);
+            break;
+        }
+        default:
+        {
+            std::stringstream ss;
+            ss << "Expected primitive data, but found " << from.type().name();
+            throw DDSMiddlewareException(ss.str());
+        }
+    }
+}
+
+void Conversion::set_array_data(
+        const xtypes::DynamicData& from,
+        DynamicData* to,
+        const std::vector<uint32_t>& indexes)
+{
+    const xtypes::ArrayType& type = static_cast<const xtypes::ArrayType&>(from.type());
+    const xtypes::DynamicType& inner_type = type.content_type();
+    DynamicDataFactory* factory = DynamicDataFactory::get_instance();
+
+    for (uint32_t idx = 0; idx < from.size(); ++idx)
+    {
+        std::vector<uint32_t> new_indexes = indexes;
+        new_indexes.push_back(idx);
+        MemberId id = to->get_array_index(new_indexes);
+        switch (inner_type.kind())
+        {
+            case ::xtypes::TypeKind::BOOLEAN_TYPE:
+                to->set_bool_value(from[idx].value<bool>(), id);
+                break;
+            case ::xtypes::TypeKind::CHAR_8_TYPE:
+                to->set_char8_value(from[idx].value<char>(), id);
+                break;
+            case ::xtypes::TypeKind::CHAR_16_TYPE:
+                to->set_char16_value(from[idx].value<char32_t>(), id);
+                break;
+            case ::xtypes::TypeKind::UINT_8_TYPE:
+                to->set_uint8_value(from[idx].value<uint8_t>(), id);
+                break;
+            case ::xtypes::TypeKind::INT_8_TYPE:
+                to->set_int8_value(from[idx].value<int8_t>(), id);
+                break;
+            case ::xtypes::TypeKind::INT_16_TYPE:
+                to->set_int16_value(from[idx].value<int16_t>(), id);
+                break;
+            case ::xtypes::TypeKind::UINT_16_TYPE:
+                to->set_uint16_value(from[idx].value<uint16_t>(), id);
+                break;
+            case ::xtypes::TypeKind::INT_32_TYPE:
+                to->set_int32_value(from[idx].value<int32_t>(), id);
+                break;
+            case ::xtypes::TypeKind::UINT_32_TYPE:
+                to->set_uint32_value(from[idx].value<uint32_t>(), id);
+                break;
+            case ::xtypes::TypeKind::INT_64_TYPE:
+                to->set_int64_value(from[idx].value<int64_t>(), id);
+                break;
+            case ::xtypes::TypeKind::UINT_64_TYPE:
+                to->set_uint64_value(from[idx].value<uint64_t>(), id);
+                break;
+            case ::xtypes::TypeKind::FLOAT_32_TYPE:
+                to->set_float32_value(from[idx].value<float>(), id);
+                break;
+            case ::xtypes::TypeKind::FLOAT_64_TYPE:
+                to->set_float64_value(from[idx].value<double>(), id);
+                break;
+            case ::xtypes::TypeKind::FLOAT_128_TYPE:
+                to->set_float128_value(from[idx].value<long double>(), id);
+                break;
+            case ::xtypes::TypeKind::STRING_TYPE:
+                to->set_string_value(from[idx].value<std::string>(), id);
+                break;
+            case ::xtypes::TypeKind::WSTRING_TYPE:
+                to->set_wstring_value(from[idx].value<std::wstring>(), id);
+                break;
+            case ::xtypes::TypeKind::ARRAY_TYPE:
+            {
+                set_array_data(from[idx], to, new_indexes);
+                break;
+            }
+            case ::xtypes::TypeKind::SEQUENCE_TYPE:
+            {
+                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner sequence builder
+                DynamicData* seq_data = factory->create_data(builder.get());
+                set_sequence_data(from[idx], seq_data);
+                to->set_complex_value(seq_data, id);
+                break;
+            }
+            case ::xtypes::TypeKind::STRUCTURE_TYPE:
+            {
+                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner struct builder
+                DynamicData* st_data = factory->create_data(builder.get());
+                soss_to_dds(from[idx], st_data);
+                to->set_complex_value(st_data, id);
+                break;
+            }
+            default:
+            {
+                std::stringstream ss;
+                ss << "Unexpected data type: " << from.type().name() << ".";
+                throw DDSMiddlewareException(ss.str());
+            }
+        }
+    }
+}
+
+void Conversion::set_sequence_data(
+        const xtypes::DynamicData& from,
+        DynamicData* to)
+{
+    const xtypes::SequenceType& type = static_cast<const xtypes::SequenceType&>(from.type());
+    MemberId id;
+    DynamicDataFactory* factory = DynamicDataFactory::get_instance();
+    for (uint32_t idx = 0; idx < from.size(); ++idx)
+    {
+        switch (type.content_type().kind())
+        {
+            case ::xtypes::TypeKind::BOOLEAN_TYPE:
+                to->insert_bool_value(from[idx].value<bool>(), id);
+                break;
+            case ::xtypes::TypeKind::CHAR_8_TYPE:
+                to->insert_char8_value(from[idx].value<char>(), id);
+                break;
+            case ::xtypes::TypeKind::CHAR_16_TYPE:
+                to->insert_char16_value(from[idx].value<char32_t>(), id);
+                break;
+            case ::xtypes::TypeKind::UINT_8_TYPE:
+                //to->insert_uint8_value(from[idx].value<uint8_t>(), id);
+                to->insert_byte_value(from[idx].value<uint8_t>(), id);
+                break;
+            case ::xtypes::TypeKind::INT_8_TYPE:
+                //to->insert_int8_value(from[idx].value<int8_t>(), id);
+                to->insert_byte_value(from[idx].value<int8_t>(), id);
+                break;
+            case ::xtypes::TypeKind::INT_16_TYPE:
+                to->insert_int16_value(from[idx].value<int16_t>(), id);
+                break;
+            case ::xtypes::TypeKind::UINT_16_TYPE:
+                to->insert_uint16_value(from[idx].value<uint16_t>(), id);
+                break;
+            case ::xtypes::TypeKind::INT_32_TYPE:
+                to->insert_int32_value(from[idx].value<int32_t>(), id);
+                break;
+            case ::xtypes::TypeKind::UINT_32_TYPE:
+                to->insert_uint32_value(from[idx].value<uint32_t>(), id);
+                break;
+            case ::xtypes::TypeKind::INT_64_TYPE:
+                to->insert_int64_value(from[idx].value<int64_t>(), id);
+                break;
+            case ::xtypes::TypeKind::UINT_64_TYPE:
+                to->insert_uint64_value(from[idx].value<uint64_t>(), id);
+                break;
+            case ::xtypes::TypeKind::FLOAT_32_TYPE:
+                to->insert_float32_value(from[idx].value<float>(), id);
+                break;
+            case ::xtypes::TypeKind::FLOAT_64_TYPE:
+                to->insert_float64_value(from[idx].value<double>(), id);
+                break;
+            case ::xtypes::TypeKind::FLOAT_128_TYPE:
+                to->insert_float128_value(from[idx].value<long double>(), id);
+                break;
+            case ::xtypes::TypeKind::STRING_TYPE:
+                to->insert_string_value(from[idx].value<std::string>(), id);
+                break;
+            case ::xtypes::TypeKind::WSTRING_TYPE:
+                to->insert_wstring_value(from[idx].value<std::wstring>(), id);
+                break;
+            case ::xtypes::TypeKind::ARRAY_TYPE:
+            {
+                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner array builder
+                DynamicData* array_data = factory->create_data(builder.get());
+                set_array_data(from[idx], array_data, std::vector<uint32_t>());
+                to->insert_complex_value(array_data, id);
+                break;
+            }
+            case ::xtypes::TypeKind::SEQUENCE_TYPE:
+            {
+                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner sequence builder
+                DynamicData* seq_data = factory->create_data(builder.get());
+                set_sequence_data(from[idx], seq_data);
+                to->insert_complex_value(seq_data, id);
+                break;
+            }
+            case ::xtypes::TypeKind::STRUCTURE_TYPE:
+            {
+                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner struct builder
+                DynamicData* st_data = factory->create_data(builder.get());
+                soss_to_dds(from[idx], st_data);
+                to->insert_complex_value(st_data, id);
+                break;
+            }
+            default:
+            {
+                std::stringstream ss;
+                ss << "Unexpected data type: " << from.type().name() << ".";
+                throw DDSMiddlewareException(ss.str());
+            }
+        }
+    }
+}
+
 bool Conversion::soss_to_dds(
         const ::xtypes::DynamicData& input,
         DynamicData* output)
@@ -79,64 +335,31 @@ bool Conversion::soss_to_dds(
 
            switch (node.type().kind())
            {
-                // TODO: Current dtparser sets ID for primitive types to 0 instead of MEMBER_ID_INVALID.
-                // If this parser is kept, we should fix this to use MEMBER_ID_INVALID (so we can omit it here).
+                case ::xtypes::TypeKind::BOOLEAN_TYPE:
                 case ::xtypes::TypeKind::CHAR_8_TYPE:
-                    current_data->set_char8_value(node.data().value<char>(), 0);
-                    break;
                 case ::xtypes::TypeKind::CHAR_16_TYPE:
-                    current_data->set_char16_value(node.data().value<char32_t>(), 0);
-                    break;
                 case ::xtypes::TypeKind::UINT_8_TYPE:
-                    current_data->set_uint8_value(node.data().value<uint8_t>(), 0);
-                    break;
                 case ::xtypes::TypeKind::INT_8_TYPE:
-                    current_data->set_int8_value(node.data().value<int8_t>(), 0);
-                    break;
                 case ::xtypes::TypeKind::INT_16_TYPE:
-                    current_data->set_int16_value(node.data().value<int16_t>(), 0);
-                    break;
                 case ::xtypes::TypeKind::UINT_16_TYPE:
-                    current_data->set_uint16_value(node.data().value<uint16_t>(), 0);
-                    break;
                 case ::xtypes::TypeKind::INT_32_TYPE:
-                    current_data->set_int32_value(node.data().value<int32_t>(), 0);
-                    break;
                 case ::xtypes::TypeKind::UINT_32_TYPE:
-                    current_data->set_uint32_value(node.data().value<uint32_t>(), 0);
-                    break;
                 case ::xtypes::TypeKind::INT_64_TYPE:
-                    current_data->set_int64_value(node.data().value<int64_t>(), 0);
-                    break;
                 case ::xtypes::TypeKind::UINT_64_TYPE:
-                    current_data->set_uint64_value(node.data().value<uint64_t>(), 0);
-                    break;
                 case ::xtypes::TypeKind::FLOAT_32_TYPE:
-                    current_data->set_float32_value(node.data().value<float>(), 0);
-                    break;
                 case ::xtypes::TypeKind::FLOAT_64_TYPE:
-                    current_data->set_float64_value(node.data().value<double>(), 0);
-                    break;
                 case ::xtypes::TypeKind::FLOAT_128_TYPE:
-                    current_data->set_float128_value(node.data().value<long double>(), 0);
-                    break;
                 case ::xtypes::TypeKind::STRING_TYPE:
-                    current_data->set_string_value(node.data().value<std::string>(), 0);
-                    break;
                 case ::xtypes::TypeKind::WSTRING_TYPE:
                 {
-                    current_data->set_wstring_value(node.data().value<std::wstring>(), 0);
+                    set_primitive_data(node.data(), current_data);
                     break;
                 }
                 case ::xtypes::TypeKind::ARRAY_TYPE:
-                    // TODO Implement
-                    ss << "Array type unsupported. Type: " << node.type().name();
-                    throw DDSMiddlewareException(ss.str());
+                    set_array_data(node.data(), current_data, std::vector<uint32_t>());
                     break;
                 case ::xtypes::TypeKind::SEQUENCE_TYPE:
-                    // TODO Implement
-                    ss << "Sequence type unsupported. Type: " << node.type().name();
-                    throw DDSMiddlewareException(ss.str());
+                    set_sequence_data(node.data(), current_data);
                     break;
                 case ::xtypes::TypeKind::STRUCTURE_TYPE:
                 {
@@ -158,15 +381,362 @@ bool Conversion::soss_to_dds(
     return true;
 }
 
+void Conversion::set_sequence_data(
+        const DynamicData* c_from,
+        xtypes::DynamicData& to)
+{
+    const xtypes::SequenceType& type = static_cast<const xtypes::SequenceType&>(to.type());
+    DynamicData* from = const_cast<DynamicData*>(c_from);
+
+    for (uint32_t idx = 0; idx < to.size(); ++idx)
+    {
+        MemberId id = from->get_member_id_at_index(idx);
+        ResponseCode ret = ResponseCode::RETCODE_ERROR;
+
+        switch (type.content_type().kind())
+        {
+            case ::xtypes::TypeKind::BOOLEAN_TYPE:
+            {
+                bool value;
+                ret = from->get_bool_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::CHAR_8_TYPE:
+            {
+                char value;
+                ret = from->get_char8_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::CHAR_16_TYPE:
+            {
+                wchar_t value;
+                ret = from->get_char16_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_8_TYPE:
+            {
+                uint8_t value;
+                ret = from->get_uint8_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::INT_8_TYPE:
+            {
+                int8_t value;
+                ret = from->get_int8_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::INT_16_TYPE:
+            {
+                int16_t value;
+                ret = from->get_int16_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_16_TYPE:
+            {
+                uint16_t value;
+                ret = from->get_uint16_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::INT_32_TYPE:
+            {
+                int32_t value;
+                ret = from->get_int32_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_32_TYPE:
+            {
+                uint32_t value;
+                ret = from->get_uint32_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::INT_64_TYPE:
+            {
+                int64_t value;
+                ret = from->get_int64_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_64_TYPE:
+            {
+                uint64_t value;
+                ret = from->get_uint64_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::FLOAT_32_TYPE:
+            {
+                float value;
+                ret = from->get_float32_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::FLOAT_64_TYPE:
+            {
+                double value;
+                ret = from->get_float64_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::FLOAT_128_TYPE:
+            {
+                long double value;
+                ret = from->get_float128_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::STRING_TYPE:
+            {
+                std::string value;
+                ret = from->get_string_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::WSTRING_TYPE:
+            {
+                std::wstring value;
+                ret = from->get_wstring_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::ARRAY_TYPE:
+            {
+                DynamicData* array = from->loan_value(id);
+                xtypes::DynamicData soss_array(type.content_type());
+                set_array_data(array, soss_array, std::vector<uint32_t>());
+                from->return_loaned_value(array);
+                to.push(soss_array);
+                break;
+            }
+            case ::xtypes::TypeKind::SEQUENCE_TYPE:
+            {
+                DynamicData* seq = from->loan_value(id);
+                xtypes::DynamicData soss_seq(type.content_type());
+                set_sequence_data(seq, soss_seq);
+                from->return_loaned_value(seq);
+                to.push(soss_seq);
+                break;
+            }
+            case ::xtypes::TypeKind::STRUCTURE_TYPE:
+            {
+                DynamicData* st = from->loan_value(id);
+                xtypes::DynamicData soss_st(type.content_type());
+                dds_to_soss(st, soss_st);
+                from->return_loaned_value(st);
+                to.push(soss_st);
+                break;
+            }
+            default:
+            {
+                std::stringstream ss;
+                ss << "Unexpected data type: " << to.type().name() << ".";
+                throw DDSMiddlewareException(ss.str());
+            }
+        }
+
+        if (ret != ResponseCode::RETCODE_OK)
+        {
+            std::stringstream ss;
+            ss << "Error parsing from dynamic type '" << to.type().name();
+            throw DDSMiddlewareException(ss.str());
+        }
+    }
+}
+
+void Conversion::set_array_data(
+        const DynamicData* c_from,
+        xtypes::DynamicData& to,
+        const std::vector<uint32_t>& indexes)
+{
+    const xtypes::ArrayType& type = static_cast<const xtypes::ArrayType&>(to.type());
+    const xtypes::DynamicType& inner_type = type.content_type();
+    DynamicData* from = const_cast<DynamicData*>(c_from);
+
+    for (uint32_t idx = 0; idx < type.dimension(); ++idx)
+    {
+        std::vector<uint32_t> new_indexes = indexes;
+        new_indexes.push_back(idx);
+        MemberId id = from->get_array_index(new_indexes);
+        ResponseCode ret = ResponseCode::RETCODE_ERROR;
+        switch (inner_type.kind())
+        {
+            case ::xtypes::TypeKind::BOOLEAN_TYPE:
+            {
+                bool value;
+                ret = from->get_bool_value(value, id);
+                to[idx].value<bool>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::CHAR_8_TYPE:
+            {
+                char value;
+                ret = from->get_char8_value(value, id);
+                to[idx].value<char>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::CHAR_16_TYPE:
+            {
+                wchar_t value;
+                ret = from->get_char16_value(value, id);
+                to[idx].value<wchar_t>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_8_TYPE:
+            {
+                uint8_t value;
+                ret = from->get_uint8_value(value, id);
+                to[idx].value<uint8_t>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::INT_8_TYPE:
+            {
+                int8_t value;
+                ret = from->get_int8_value(value, id);
+                to[idx].value<int8_t>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::INT_16_TYPE:
+            {
+                int16_t value;
+                ret = from->get_int16_value(value, id);
+                to[idx].value<int16_t>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_16_TYPE:
+            {
+                uint16_t value;
+                ret = from->get_uint16_value(value, id);
+                to[idx].value<uint16_t>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::INT_32_TYPE:
+            {
+                int32_t value;
+                ret = from->get_int32_value(value, id);
+                to[idx].value<int32_t>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_32_TYPE:
+            {
+                uint32_t value;
+                ret = from->get_uint32_value(value, id);
+                to[idx].value<uint32_t>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::INT_64_TYPE:
+            {
+                int64_t value;
+                ret = from->get_int64_value(value, id);
+                to[idx].value<int64_t>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_64_TYPE:
+            {
+                uint64_t value;
+                ret = from->get_uint64_value(value, id);
+                to[idx].value<uint64_t>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::FLOAT_32_TYPE:
+            {
+                float value;
+                ret = from->get_float32_value(value, id);
+                to[idx].value<float>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::FLOAT_64_TYPE:
+            {
+                double value;
+                ret = from->get_float64_value(value, id);
+                to[idx].value<double>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::FLOAT_128_TYPE:
+            {
+                long double value;
+                ret = from->get_float128_value(value, id);
+                to[idx].value<long double>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::STRING_TYPE:
+            {
+                std::string value;
+                ret = from->get_string_value(value, id);
+                to[idx].value<std::string>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::WSTRING_TYPE:
+            {
+                std::wstring value;
+                ret = from->get_wstring_value(value, id);
+                to[idx].value<std::wstring>(value);
+            }
+            break;
+            case ::xtypes::TypeKind::ARRAY_TYPE:
+            {
+                DynamicData* array = from->loan_value(id);
+                xtypes::DynamicData soss_array(type.content_type());
+                set_array_data(array, soss_array, new_indexes);
+                from->return_loaned_value(array);
+                to[idx] = soss_array;
+                break;
+            }
+            case ::xtypes::TypeKind::SEQUENCE_TYPE:
+            {
+                DynamicData* seq = from->loan_value(id);
+                xtypes::DynamicData soss_seq(type.content_type());
+                set_sequence_data(seq, soss_seq);
+                from->return_loaned_value(seq);
+                to[idx] = soss_seq;
+                break;
+            }
+            case ::xtypes::TypeKind::STRUCTURE_TYPE:
+            {
+                DynamicData* st = from->loan_value(id);
+                xtypes::DynamicData soss_st(type.content_type());
+                dds_to_soss(st, soss_st);
+                from->return_loaned_value(st);
+                to[idx] = soss_st;
+                break;
+            }
+            default:
+            {
+                std::stringstream ss;
+                ss << "Unexpected data type: " << to.type().name() << ".";
+                throw DDSMiddlewareException(ss.str());
+            }
+        }
+
+        if (ret != ResponseCode::RETCODE_OK)
+        {
+            std::stringstream ss;
+            ss << "Error parsing from dynamic type '" << to.type().name();
+            throw DDSMiddlewareException(ss.str());
+        }
+    }
+
+}
+
 // TODO: Can we receive a type without members as root?
 bool Conversion::dds_to_soss(
-        DynamicData* input,
+        const DynamicData* c_input,
         ::xtypes::DynamicData& output)
 {
     std::stringstream ss;
     uint32_t id = 0;
     uint32_t i = 0;
     MemberDescriptor descriptor;
+
+    // We promise to not modify it, but we need it non-const, so we can call loan_value freely.
+    DynamicData* input = const_cast<DynamicData*>(c_input);
 
     while (id != MEMBER_ID_INVALID)
     {
@@ -274,11 +844,19 @@ bool Conversion::dds_to_soss(
                 }
                 else if (member_type == types::TK_ARRAY)
                 {
-                    // TODO
+                    DynamicData* array = input->loan_value(id);
+                    xtypes::DynamicData data = output[descriptor.get_name()];
+                    set_array_data(array, data, std::vector<uint32_t>());
+                    input->return_loaned_value(array);
+                    output[descriptor.get_name()] = data;
                 }
                 else if (member_type == types::TK_SEQUENCE)
                 {
-                    // TODO
+                    DynamicData* seq = input->loan_value(id);
+                    xtypes::DynamicData data = output[descriptor.get_name()];
+                    set_sequence_data(seq, data);
+                    input->return_loaned_value(seq);
+                    output[descriptor.get_name()] = data;
                 }
                 else if (member_type == types::TK_STRUCTURE)
                 {
