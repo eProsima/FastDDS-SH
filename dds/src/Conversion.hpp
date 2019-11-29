@@ -64,30 +64,42 @@ private:
 
     // soss -> dds
     static void set_primitive_data(
-        const xtypes::DynamicData& from,
-        DynamicData* to);
+        xtypes::ReadableDynamicDataRef from,
+        DynamicData* to,
+        eprosima::fastrtps::types::MemberId id);
 
     // soss -> dds
     static void set_sequence_data(
-        const xtypes::DynamicData& from,
+        xtypes::ReadableDynamicDataRef from,
         DynamicData* to);
 
     // soss -> dds
     static void set_array_data(
-        const xtypes::DynamicData& from,
+        xtypes::ReadableDynamicDataRef from,
         DynamicData* to,
         const std::vector<uint32_t>& indexes);
 
+    // soss -> dds
+    static bool set_struct_data(
+        xtypes::ReadableDynamicDataRef input,
+        DynamicData* output);
+
     // dds -> soss
     static void set_sequence_data(
         const DynamicData* from,
-        xtypes::DynamicData& to);
+        xtypes::WritableDynamicDataRef to);
 
     // dds -> soss
     static void set_array_data(
         const DynamicData* from,
-        xtypes::DynamicData& to,
+        xtypes::WritableDynamicDataRef to,
         const std::vector<uint32_t>& indexes);
+
+    // dds -> soss
+    static bool set_struct_data(
+            const DynamicData* input,
+            ::xtypes::WritableDynamicDataRef output);
+
 };
 
 
