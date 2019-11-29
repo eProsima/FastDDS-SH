@@ -33,6 +33,7 @@
 #include <fastrtps/types/DynamicTypeMember.h>
 #include <fastrtps/types/DynamicTypePtr.h>
 #include <fastrtps/attributes/PublisherAttributes.h>
+#include <fastrtps/TopicDataType.h>
 
 namespace soss {
 namespace dds {

@@ -32,7 +32,7 @@ std::map<std::string, DynamicPubSubType*> Conversion::registered_types_;
 std::map<std::string, DynamicTypeBuilder_ptr> Conversion::builders_;
 
 void Conversion::set_primitive_data(
-        xtypes::ReadableDynamicDataRef from,
+        ::xtypes::ReadableDynamicDataRef from,
         DynamicData* to,
         MemberId id)
 {
@@ -99,12 +99,12 @@ void Conversion::set_primitive_data(
 }
 
 void Conversion::set_array_data(
-        xtypes::ReadableDynamicDataRef from,
+        ::xtypes::ReadableDynamicDataRef from,
         DynamicData* to,
         const std::vector<uint32_t>& indexes)
 {
-    const xtypes::ArrayType& type = static_cast<const xtypes::ArrayType&>(from.type());
-    const xtypes::DynamicType& inner_type = type.content_type();
+    const ::xtypes::ArrayType& type = static_cast<const ::xtypes::ArrayType&>(from.type());
+    const ::xtypes::DynamicType& inner_type = type.content_type();
     DynamicDataFactory* factory = DynamicDataFactory::get_instance();
     MemberId id;
     for (uint32_t idx = 0; idx < from.size(); ++idx)
@@ -211,10 +211,10 @@ void Conversion::set_array_data(
 }
 
 void Conversion::set_sequence_data(
-        xtypes::ReadableDynamicDataRef from,
+        ::xtypes::ReadableDynamicDataRef from,
         DynamicData* to)
 {
-    const xtypes::SequenceType& type = static_cast<const xtypes::SequenceType&>(from.type());
+    const ::xtypes::SequenceType& type = static_cast<const ::xtypes::SequenceType&>(from.type());
     MemberId id;
     DynamicDataFactory* factory = DynamicDataFactory::get_instance();
     for (uint32_t idx = 0; idx < from.size(); ++idx)
@@ -314,14 +314,14 @@ bool Conversion::soss_to_dds(
 }
 
 bool Conversion::set_struct_data(
-        xtypes::ReadableDynamicDataRef input,
+        ::xtypes::ReadableDynamicDataRef input,
         DynamicData* output)
 {
     std::stringstream ss;
 
-    const xtypes::StructType& type = static_cast<const xtypes::StructType&>(input.type());
+    const ::xtypes::StructType& type = static_cast<const ::xtypes::StructType&>(input.type());
 
-    for (const xtypes::Member& member : type.members())
+    for (const ::xtypes::Member& member : type.members())
     {
         MemberId id = output->get_member_id_by_name(member.name());
         switch (member.type().kind())
@@ -378,9 +378,9 @@ bool Conversion::set_struct_data(
 
 void Conversion::set_sequence_data(
         const DynamicData* c_from,
-        xtypes::WritableDynamicDataRef to)
+        ::xtypes::WritableDynamicDataRef to)
 {
-    const xtypes::SequenceType& type = static_cast<const xtypes::SequenceType&>(to.type());
+    const ::xtypes::SequenceType& type = static_cast<const ::xtypes::SequenceType&>(to.type());
     DynamicData* from = const_cast<DynamicData*>(c_from);
 
     for (uint32_t idx = 0; idx < c_from->get_item_count(); ++idx)
@@ -505,7 +505,7 @@ void Conversion::set_sequence_data(
             case ::xtypes::TypeKind::ARRAY_TYPE:
             {
                 DynamicData* array = from->loan_value(id);
-                xtypes::DynamicData soss_array(type.content_type());
+                ::xtypes::DynamicData soss_array(type.content_type());
                 set_array_data(array, soss_array.ref(), std::vector<uint32_t>());
                 from->return_loaned_value(array);
                 to.push(soss_array);
@@ -515,7 +515,7 @@ void Conversion::set_sequence_data(
             case ::xtypes::TypeKind::SEQUENCE_TYPE:
             {
                 DynamicData* seq = from->loan_value(id);
-                xtypes::DynamicData soss_seq(type.content_type());
+                ::xtypes::DynamicData soss_seq(type.content_type());
                 set_sequence_data(seq, soss_seq.ref());
                 from->return_loaned_value(seq);
                 to.push(soss_seq);
@@ -525,7 +525,7 @@ void Conversion::set_sequence_data(
             case ::xtypes::TypeKind::STRUCTURE_TYPE:
             {
                 DynamicData* st = from->loan_value(id);
-                xtypes::DynamicData soss_st(type.content_type());
+                ::xtypes::DynamicData soss_st(type.content_type());
                 set_struct_data(st, soss_st.ref());
                 from->return_loaned_value(st);
                 to.push(soss_st);
@@ -551,11 +551,11 @@ void Conversion::set_sequence_data(
 
 void Conversion::set_array_data(
         const DynamicData* c_from,
-        xtypes::WritableDynamicDataRef to,
+        ::xtypes::WritableDynamicDataRef to,
         const std::vector<uint32_t>& indexes)
 {
-    const xtypes::ArrayType& type = static_cast<const xtypes::ArrayType&>(to.type());
-    const xtypes::DynamicType& inner_type = type.content_type();
+    const ::xtypes::ArrayType& type = static_cast<const ::xtypes::ArrayType&>(to.type());
+    const ::xtypes::DynamicType& inner_type = type.content_type();
     DynamicData* from = const_cast<DynamicData*>(c_from);
     MemberId id;
 
@@ -696,7 +696,7 @@ void Conversion::set_array_data(
             break;
             case ::xtypes::TypeKind::ARRAY_TYPE:
             {
-                xtypes::DynamicData soss_array(type.content_type());
+                ::xtypes::DynamicData soss_array(type.content_type());
                 set_array_data(from, soss_array.ref(), new_indexes);
                 to[idx] = soss_array;
                 ret = ResponseCode::RETCODE_OK;
@@ -706,7 +706,7 @@ void Conversion::set_array_data(
             {
                 id = from->get_array_index(new_indexes);
                 DynamicData* seq = from->loan_value(id);
-                xtypes::DynamicData soss_seq(type.content_type());
+                ::xtypes::DynamicData soss_seq(type.content_type());
                 set_sequence_data(seq, soss_seq.ref());
                 from->return_loaned_value(seq);
                 to[idx] = soss_seq;
@@ -717,7 +717,7 @@ void Conversion::set_array_data(
             {
                 id = from->get_array_index(new_indexes);
                 DynamicData* st = from->loan_value(id);
-                xtypes::DynamicData soss_st(type.content_type());
+                ::xtypes::DynamicData soss_st(type.content_type());
                 set_struct_data(st, soss_st.ref());
                 from->return_loaned_value(st);
                 to[idx] = soss_st;
@@ -951,7 +951,7 @@ bool Conversion::set_struct_data(
 }
 
 DynamicTypeBuilder* Conversion::create_builder(
-        const xtypes::DynamicType& type)
+        const ::xtypes::DynamicType& type)
 {
     if (builders_.count(type.name()) > 0)
     {
@@ -971,7 +971,7 @@ DynamicTypeBuilder* Conversion::create_builder(
 }
 
 DynamicTypeBuilder_ptr Conversion::get_builder(
-        const xtypes::DynamicType& type)
+        const ::xtypes::DynamicType& type)
 {
     DynamicTypeBuilderFactory* factory = DynamicTypeBuilderFactory::get_instance();
     switch (type.kind())
@@ -1049,7 +1049,7 @@ DynamicTypeBuilder_ptr Conversion::get_builder(
         */
         case ::xtypes::TypeKind::ARRAY_TYPE:
         {
-            const xtypes::ArrayType& c_type = static_cast<const xtypes::ArrayType&>(type);
+            const ::xtypes::ArrayType& c_type = static_cast<const ::xtypes::ArrayType&>(type);
             std::pair<std::vector<uint32_t>, DynamicTypeBuilder_ptr> pair;
             get_array_specs(c_type, pair);
             DynamicTypeBuilder_ptr result = factory->create_array_builder(pair.second->build(), pair.first);
@@ -1057,19 +1057,19 @@ DynamicTypeBuilder_ptr Conversion::get_builder(
         }
         case ::xtypes::TypeKind::SEQUENCE_TYPE:
         {
-            const xtypes::SequenceType& c_type = static_cast<const xtypes::SequenceType&>(type);
+            const ::xtypes::SequenceType& c_type = static_cast<const ::xtypes::SequenceType&>(type);
             DynamicTypeBuilder_ptr content = get_builder(c_type.content_type());
             DynamicTypeBuilder_ptr result = factory->create_sequence_builder(content->build(), c_type.bounds());
             return result;
         }
         case ::xtypes::TypeKind::STRING_TYPE:
         {
-            const xtypes::StringType& c_type = static_cast<const xtypes::StringType&>(type);
+            const ::xtypes::StringType& c_type = static_cast<const ::xtypes::StringType&>(type);
             return factory->create_string_builder(c_type.bounds());
         }
         case ::xtypes::TypeKind::WSTRING_TYPE:
         {
-            const xtypes::WStringType& c_type = static_cast<const xtypes::WStringType&>(type);
+            const ::xtypes::WStringType& c_type = static_cast<const ::xtypes::WStringType&>(type);
             return factory->create_wstring_builder(c_type.bounds());
         }
         case ::xtypes::TypeKind::MAP_TYPE:
@@ -1083,11 +1083,11 @@ DynamicTypeBuilder_ptr Conversion::get_builder(
         case ::xtypes::TypeKind::STRUCTURE_TYPE:
         {
             DynamicTypeBuilder_ptr result = factory->create_struct_builder();
-            const xtypes::StructType& from = static_cast<const xtypes::StructType&>(type);
+            const ::xtypes::StructType& from = static_cast<const ::xtypes::StructType&>(type);
 
             for (size_t idx = 0; idx < from.members().size(); ++idx)
             {
-                const xtypes::Member& member = from.member(idx);
+                const ::xtypes::Member& member = from.member(idx);
                 DynamicTypeBuilder_ptr member_builder = get_builder(member.type());
                 result->add_member(idx, member.name(), member_builder->build());
             }
@@ -1100,13 +1100,13 @@ DynamicTypeBuilder_ptr Conversion::get_builder(
 }
 
 void Conversion::get_array_specs(
-        const xtypes::ArrayType& array,
+        const ::xtypes::ArrayType& array,
         std::pair<std::vector<uint32_t>, DynamicTypeBuilder_ptr>& result)
 {
     result.first.push_back(array.dimension());
     if (array.content_type().kind() == ::xtypes::TypeKind::ARRAY_TYPE)
     {
-        get_array_specs(static_cast<const xtypes::ArrayType&>(array.content_type()), result);
+        get_array_specs(static_cast<const ::xtypes::ArrayType&>(array.content_type()), result);
     }
     else
     {
