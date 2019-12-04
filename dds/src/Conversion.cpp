@@ -186,7 +186,8 @@ void Conversion::set_array_data(
             {
                 id = to->get_array_index(new_indexes);
                 DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner sequence builder
-                DynamicData* seq_data = factory->create_data(builder.get());
+                DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
+                DynamicData* seq_data = factory->create_data(builder_ptr->build());
                 set_sequence_data(from[idx], seq_data);
                 to->set_complex_value(seq_data, id);
                 break;
@@ -195,7 +196,8 @@ void Conversion::set_array_data(
             {
                 id = to->get_array_index(new_indexes);
                 DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner struct builder
-                DynamicData* st_data = factory->create_data(builder.get());
+                DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
+                DynamicData* st_data = factory->create_data(builder_ptr->build());
                 set_struct_data(from[idx], st_data);
                 to->set_complex_value(st_data, id);
                 break;
@@ -275,7 +277,8 @@ void Conversion::set_sequence_data(
             case ::xtypes::TypeKind::ARRAY_TYPE:
             {
                 DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner array builder
-                DynamicData* array_data = factory->create_data(builder.get());
+                DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
+                DynamicData* array_data = factory->create_data(builder_ptr->build());
                 set_array_data(from[idx], array_data, std::vector<uint32_t>());
                 to->set_complex_value(array_data, id);
                 break;
@@ -283,7 +286,8 @@ void Conversion::set_sequence_data(
             case ::xtypes::TypeKind::SEQUENCE_TYPE:
             {
                 DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner sequence builder
-                DynamicData* seq_data = factory->create_data(builder.get());
+                DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
+                DynamicData* seq_data = factory->create_data(builder_ptr->build());
                 set_sequence_data(from[idx], seq_data);
                 to->set_complex_value(seq_data, id);
                 break;
@@ -291,7 +295,8 @@ void Conversion::set_sequence_data(
             case ::xtypes::TypeKind::STRUCTURE_TYPE:
             {
                 DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner struct builder
-                DynamicData* st_data = factory->create_data(builder.get());
+                DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
+                DynamicData* st_data = factory->create_data(builder_ptr->build());
                 set_struct_data(from[idx], st_data);
                 to->set_complex_value(st_data, id);
                 break;
@@ -960,12 +965,12 @@ DynamicTypeBuilder* Conversion::create_builder(
         std::cout << "[soss-dds]: Registed type: '" << registered_types_[topic_name]->getName()
                   << "' but trying to register type: '" << type.name() << "'." << std::endl;
         */
-        return builders_[type.name()].get();
+        return static_cast<DynamicTypeBuilder*>(builders_[type.name()].get());
     }
 
     DynamicTypeBuilder_ptr builder = get_builder(type);
-    builder->set_name(type.name());
-    DynamicTypeBuilder* result = builder.get();
+    DynamicTypeBuilder* result = static_cast<DynamicTypeBuilder*>(builder.get());
+    result->set_name(type.name());
     builders_.emplace(type.name(), std::move(builder));
     return result;
 }
@@ -1052,14 +1057,16 @@ DynamicTypeBuilder_ptr Conversion::get_builder(
             const ::xtypes::ArrayType& c_type = static_cast<const ::xtypes::ArrayType&>(type);
             std::pair<std::vector<uint32_t>, DynamicTypeBuilder_ptr> pair;
             get_array_specs(c_type, pair);
-            DynamicTypeBuilder_ptr result = factory->create_array_builder(pair.second->build(), pair.first);
+            DynamicTypeBuilder* builder = static_cast<DynamicTypeBuilder*>(pair.second.get());
+            DynamicTypeBuilder_ptr result = factory->create_array_builder(builder, pair.first);
             return result;
         }
         case ::xtypes::TypeKind::SEQUENCE_TYPE:
         {
             const ::xtypes::SequenceType& c_type = static_cast<const ::xtypes::SequenceType&>(type);
             DynamicTypeBuilder_ptr content = get_builder(c_type.content_type());
-            DynamicTypeBuilder_ptr result = factory->create_sequence_builder(content->build(), c_type.bounds());
+            DynamicTypeBuilder* builder = static_cast<DynamicTypeBuilder*>(content.get());
+            DynamicTypeBuilder_ptr result = factory->create_sequence_builder(builder, c_type.bounds());
             return result;
         }
         case ::xtypes::TypeKind::STRING_TYPE:
@@ -1089,7 +1096,9 @@ DynamicTypeBuilder_ptr Conversion::get_builder(
             {
                 const ::xtypes::Member& member = from.member(idx);
                 DynamicTypeBuilder_ptr member_builder = get_builder(member.type());
-                result->add_member(idx, member.name(), member_builder->build());
+                DynamicTypeBuilder* builder = static_cast<DynamicTypeBuilder*>(member_builder.get());
+                DynamicTypeBuilder* result_ptr = static_cast<DynamicTypeBuilder*>(result.get());
+                result_ptr->add_member(idx, member.name(), builder);
             }
             return result;
         }

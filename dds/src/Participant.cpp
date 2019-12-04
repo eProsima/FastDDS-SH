@@ -89,19 +89,22 @@ void Participant::register_dynamic_type(
     {
         // Type known, add the entry in the map topic->type
         topic_to_type_.emplace(topic_name, builder->get_name());
+        std::cout << "[soss-dds][participant]: Adding type '" << builder->get_name() << "' to topic '"
+                  << topic_name << "'." << std::endl;
         return;
     }
 
     DynamicType_ptr dtptr = builder->build();
+    DynamicType* dt = static_cast<DynamicType*>(dtptr.get());
 
     if(dtptr != nullptr)
     {
-        auto pair = topics_.emplace(dtptr->get_name(), fastrtps::types::DynamicPubSubType(dtptr));
-        topic_to_type_.emplace(topic_name, dtptr->get_name());
+        auto pair = topics_.emplace(dt->get_name(), fastrtps::types::DynamicPubSubType(dtptr));
+        topic_to_type_.emplace(topic_name, dt->get_name());
 
         // Check if already registered
         eprosima::fastrtps::TopicDataType* p_type = nullptr;
-        if (!fastrtps::Domain::getRegisteredType(dds_participant_, dtptr->get_name().c_str(), &p_type))
+        if (!fastrtps::Domain::getRegisteredType(dds_participant_, dt->get_name().c_str(), &p_type))
         {
             // Register it in fastrtps
             if (pair.second && !fastrtps::Domain::registerType(dds_participant_, &pair.first->second))
@@ -114,13 +117,13 @@ void Participant::register_dynamic_type(
 
         if (pair.second)
         {
-            std::cout << "[soss-dds][participant]: Registered type '" << dtptr->get_name() << "' in topic '"
+            std::cout << "[soss-dds][participant]: Registered type '" << dt->get_name() << "' in topic '"
                       << topic_name << "'." << std::endl;
             Conversion::register_type(topic_name, &pair.first->second);
         }
         else
         {
-            std::cout << "[soss-dds][participant]: Failed registering type '" << dtptr->get_name() << "' in topic '"
+            std::cout << "[soss-dds][participant]: Failed registering type '" << dt->get_name() << "' in topic '"
                       << topic_name << "'." << std::endl;
         }
     }

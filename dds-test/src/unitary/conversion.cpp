@@ -17,12 +17,13 @@
 
 #include "Conversion.hpp"
 #include <xtypes/xtypes.hpp>
+/*
 #include <fastrtps/types/DynamicTypeBuilder.h>
 #include <fastrtps/types/DynamicTypePtr.h>
 #include <fastrtps/types/DynamicData.h>
 #include <fastrtps/types/DynamicDataPtr.h>
 #include <fastrtps/types/DynamicDataFactory.h>
-
+*/
 #include <catch2/catch.hpp>
 
 namespace soss {
@@ -31,9 +32,12 @@ namespace soss {
 }
 
 namespace dds {
-    using namespace eprosima::fastrtps;
-    using namespace eprosima::fastrtps::rtps;
-    using namespace eprosima::fastrtps::types;
+    using DynamicData = ::soss::dds::DynamicData;
+    using DynamicData_ptr = ::soss::dds::DynamicData_ptr;
+    using DynamicDataFactory = ::soss::dds::DynamicDataFactory;
+    using DynamicTypeBuilder = ::soss::dds::DynamicTypeBuilder;
+    using DynamicType_ptr = ::soss::dds::DynamicType_ptr;
+    using MemberId = ::eprosima::fastrtps::types::MemberId;
 }
 
 static const std::string soss_types = "soss_types.idl";
@@ -377,17 +381,18 @@ TEST_CASE("Convert between soss and dds", "[dds]")
         dds::DynamicTypeBuilder* builder = Conversion::create_builder(*soss_struct);
         REQUIRE(builder != nullptr);
         dds::DynamicType_ptr dds_struct = builder->build();
-        dds::DynamicData_ptr dds_data(dds::DynamicDataFactory::get_instance()->create_data(dds_struct));
+        dds::DynamicData_ptr dds_data_ptr(dds::DynamicDataFactory::get_instance()->create_data(dds_struct));
+        dds::DynamicData* dds_data = static_cast<dds::DynamicData*>(dds_data_ptr.get());
         soss::DynamicData soss_data(*soss_struct);
         // Fill soss_data
         fill_basic_struct(soss_data);
         // Convert to dds_data
-        Conversion::soss_to_dds(soss_data, dds_data.get());
+        Conversion::soss_to_dds(soss_data, dds_data);
         // Check data in dds_data
-        check_basic_struct(dds_data.get());
+        check_basic_struct(dds_data);
         // The other way
         soss::DynamicData wayback(*soss_struct);
-        Conversion::dds_to_soss(dds_data.get(), wayback);
+        Conversion::dds_to_soss(dds_data, wayback);
         check_basic_struct(wayback);
     }
 
@@ -399,19 +404,20 @@ TEST_CASE("Convert between soss and dds", "[dds]")
         dds::DynamicTypeBuilder* builder = Conversion::create_builder(*soss_struct);
         REQUIRE(builder != nullptr);
         dds::DynamicType_ptr dds_struct = builder->build();
-        dds::DynamicData_ptr dds_data(dds::DynamicDataFactory::get_instance()->create_data(dds_struct));
+        dds::DynamicData_ptr dds_data_ptr(dds::DynamicDataFactory::get_instance()->create_data(dds_struct));
+        dds::DynamicData* dds_data = static_cast<dds::DynamicData*>(dds_data_ptr.get());
         soss::DynamicData soss_data(*soss_struct);
         // Fill soss_data
         fill_nested_sequence(soss_data["my_seq_seq"]);
         // Convert to dds_data
-        Conversion::soss_to_dds(soss_data, dds_data.get());
+        Conversion::soss_to_dds(soss_data, dds_data);
         // Check data in dds_data
         dds::DynamicData* inner_seq = dds_data->loan_value(dds_data->get_member_id_by_name("my_seq_seq"));
         check_nested_sequence(inner_seq);
         dds_data->return_loaned_value(inner_seq);
         // The other way
         soss::DynamicData wayback(*soss_struct);
-        Conversion::dds_to_soss(dds_data.get(), wayback);
+        Conversion::dds_to_soss(dds_data, wayback);
         check_nested_sequence(wayback["my_seq_seq"]);
     }
 
@@ -423,19 +429,20 @@ TEST_CASE("Convert between soss and dds", "[dds]")
         dds::DynamicTypeBuilder* builder = Conversion::create_builder(*soss_struct);
         REQUIRE(builder != nullptr);
         dds::DynamicType_ptr dds_struct = builder->build();
-        dds::DynamicData_ptr dds_data(dds::DynamicDataFactory::get_instance()->create_data(dds_struct));
+        dds::DynamicData_ptr dds_data_ptr(dds::DynamicDataFactory::get_instance()->create_data(dds_struct));
+        dds::DynamicData* dds_data = static_cast<dds::DynamicData*>(dds_data_ptr.get());
         soss::DynamicData soss_data(*soss_struct);
         // Fill soss_data
         fill_nested_array(soss_data["my_arr_arr"]);
         // Convert to dds_data
-        Conversion::soss_to_dds(soss_data, dds_data.get());
+        Conversion::soss_to_dds(soss_data, dds_data);
         // Check data in dds_data
         dds::DynamicData* inner_arr = dds_data->loan_value(dds_data->get_member_id_by_name("my_arr_arr"));
         check_nested_array(inner_arr);
         dds_data->return_loaned_value(inner_arr);
         // The other way
         soss::DynamicData wayback(*soss_struct);
-        Conversion::dds_to_soss(dds_data.get(), wayback);
+        Conversion::dds_to_soss(dds_data, wayback);
         check_nested_array(wayback["my_arr_arr"]);
     }
 
@@ -447,17 +454,18 @@ TEST_CASE("Convert between soss and dds", "[dds]")
         dds::DynamicTypeBuilder* builder = Conversion::create_builder(*soss_struct);
         REQUIRE(builder != nullptr);
         dds::DynamicType_ptr dds_struct = builder->build();
-        dds::DynamicData_ptr dds_data(dds::DynamicDataFactory::get_instance()->create_data(dds_struct));
+        dds::DynamicData_ptr dds_data_ptr(dds::DynamicDataFactory::get_instance()->create_data(dds_struct));
+        dds::DynamicData* dds_data = static_cast<dds::DynamicData*>(dds_data_ptr.get());
         soss::DynamicData soss_data(*soss_struct);
         // Fill soss_data
         fill_mixed_struct(soss_data);
         // Convert to dds_data
-        Conversion::soss_to_dds(soss_data, dds_data.get());
+        Conversion::soss_to_dds(soss_data, dds_data);
         // Check data in dds_data
-        check_mixed_struct(dds_data.get());
+        check_mixed_struct(dds_data);
         // The other way
         soss::DynamicData wayback(*soss_struct);
-        Conversion::dds_to_soss(dds_data.get(), wayback);
+        Conversion::dds_to_soss(dds_data, wayback);
         check_mixed_struct(wayback);
     }
 }
