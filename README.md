@@ -139,8 +139,6 @@ from `soss_profile_client` to `soss_profile_server`.
 
 ### YAML dynamic types
 
-*eProsima*'s *xtypes::idl::Parser* can create xtypes from an IDL defined in the YAML file,
-allowing the user to define new xtypes for each run without the need of rebuilding the project.
 
 The IDL content is provided in the YAML file as follows:
 
