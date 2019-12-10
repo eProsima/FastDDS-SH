@@ -75,12 +75,16 @@ in order to establish the connection between two or more systems that the user w
 An example of a YAML configuration file to connect ROS2 to DDS could be the following:
 
 ```YAML
+types:
+    - idl: >
+        struct std_msgs__String // This name can't have any '/', as explained later on this section.
+        {
+            string data;
+        };
+
 systems:
     dds:
       type: dds
-      dynamic types:
-        struct std_msgs__String: # This name can't have any '/', as explained later on this section.
-          string: "data"
       participant: # Optional
         file_path: "path/to/dds_config_file.xml"
         profile_name: "participant profile name"
@@ -135,18 +139,20 @@ from `soss_profile_client` to `soss_profile_server`.
 
 ### YAML dynamic types
 
-*eProsima*'s *dtparser* can create dynamic types from a YAML map,
-allowing the user to define new dynamic types for each run without the need of rebuilding the project.
 
-Dynamic types are defined in the YAML map as follows:
+The IDL content is provided in the YAML file as follows:
 
 ```YAML
-type name:
-    member_1_type: "member_1_name"
-    member_2_type: "member_2_name"
+types:
+    - idl: >
+        struct name
+        {
+            idl_type1 member_1_name;
+            idl_type2 member_2_name;
+        };
 ```
 
-The main 'type' for the general dynamic type must be a struct, as xtypes are defined as structures.
+The main 'type' for the IDL must be a struct, as xtypes are defined as structures.
 
 The name for each type can be whatever the user wants, with the two following rules:
 
@@ -155,43 +161,42 @@ The name for each type can be whatever the user wants, with the two following ru
 Remember that the system handle will map each `/` for `__`, as mentioned in the configuration section,
 to allow an easy connection with ROS2 types.
 
-Each of the members of the dynamic type can be defined just by its type and name, such as `int32: "my_integer"`.
+Currently, the `xtypes::idl::Parser` (or xtypes) doesn't support the following IDL 4.2 characteristics:
 
-*eProsima*'s *dtparser* supports the following basic types:
+- Any
+- Interfaces
+- Value Types
+- CORBA related features
+- Components related features
+- CCM related features
+- Template Modules
+- Extended Data-Types
+- Anonymous Types
+- Annotations
 
-- boolean
-- char8
-- char16
-- byte
-- int16
-- int32
-- int64
-- uint16
-- uint32
-- uint64
-- float32
-- float64
-- float128
-- string
-
-The dynamic types parser also allow nested structures.
-To create a nested structure, there must be a definition of the basic structure and a reference to the basic structure
-in the member of the nested structure, using the name of the simple structure.
+For more details about IDL definition, please refer to [IDL documentation](https://www.omg.org/spec/IDL/4.2/PDF).
 
 The following is an example of a full configuration file that uses the ROS2 nested type
 [std_msgs/Header](http://docs.ros.org/melodic/api/std_msgs/html/msg/Header.html):
 
 ```YAML
+types:
+    - idl: >
+        struct stamp
+        {
+            int32 sec;
+            uint32 nanosec;
+        };
+
+        struct std_msgs__Header
+        {
+            string frame_id;
+            stamp stamp;
+        };
+
 systems:
     dds:
       type: dds
-      dynamic types:
-        struct stamp:
-          int32: "sec"
-          uint32: "nanosec"
-        struct std_msgs__Header:
-          string: "frame_id"
-          stamp: "stamp"
 
     ros2:
       type: ros2
@@ -208,10 +213,6 @@ topics:
       type: "std_msgs/Header"
       route: dds_to_ros2
 ```
-
-Notice how in the definition of the dynamic types, the structure "stamp" is used as a member type in the structure
-"std_msgs__Header", and is defined just before the nested structure.
-The order is not actually important, so the type "stamp" could have been defined after "std_msgs__Header".
 
 ### TCP tunnel
 

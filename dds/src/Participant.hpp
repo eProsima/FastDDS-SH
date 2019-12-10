@@ -64,6 +64,12 @@ public:
         return static_cast<const DynamicType*>(it->second.GetDynamicType().get());
     }
 
+    const std::string& get_topic_type(
+            const std::string& topic) const
+    {
+        return topic_to_type_.at(topic);
+    }
+
 private:
 
     void onParticipantDiscovery(
@@ -72,6 +78,7 @@ private:
 
     eprosima::fastrtps::Participant* dds_participant_;
     std::map<std::string, DynamicPubSubType> topics_;
+    std::map<std::string, std::string> topic_to_type_;
 };
 
 

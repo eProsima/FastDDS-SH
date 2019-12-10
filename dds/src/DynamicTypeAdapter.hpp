@@ -33,6 +33,7 @@
 #include <fastrtps/types/DynamicTypeMember.h>
 #include <fastrtps/types/DynamicTypePtr.h>
 #include <fastrtps/attributes/PublisherAttributes.h>
+#include <fastrtps/TopicDataType.h>
 
 namespace soss {
 namespace dds {
@@ -101,8 +102,16 @@ public:
 
 };
 
-using MemberDescriptor = eprosima::fastrtps::types::MemberDescriptor;
+class MemberDescriptor : public eprosima::fastrtps::types::MemberDescriptor
+{
+public:
+    eprosima::fastrtps::types::DynamicType_ptr get_type() const
+    {
+        return type_;
+    }
+};
 
+using DynamicTypeBuilder_ptr = eprosima::fastrtps::types::DynamicTypeBuilder_ptr;
 #else
 
 #define EPROSIMA_XTYPES_CRYSTAL
@@ -112,6 +121,7 @@ using eprosima::fastrtps::ALIVE;
 using octet = eprosima::fastrtps::octet;
 
 using ResponseCode = eprosima::fastrtps::types::ResponseCode;
+using DynamicTypeBuilder_ptr = eprosima::fastrtps::types::DynamicTypeBuilder_ptr;
 
 class DynamicData : public eprosima::fastrtps::types::DynamicData
 {
@@ -463,6 +473,23 @@ public:
 
     ResponseCode set_uint8_value(
             uint8_t value,
+            eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
+    {
+        return eprosima::fastrtps::types::DynamicData::SetByteValue(static_cast<octet>(value), id);
+    }
+
+    ResponseCode get_int8_value(
+            int8_t& value,
+            eprosima::fastrtps::types::MemberId id) const
+    {
+        octet aux;
+        ResponseCode result = eprosima::fastrtps::types::DynamicData::GetByteValue(aux, id);
+        value = static_cast<int8_t>(aux);
+        return result;
+    }
+
+    ResponseCode set_int8_value(
+            int8_t value,
             eprosima::fastrtps::types::MemberId id = MEMBER_ID_INVALID)
     {
         return eprosima::fastrtps::types::DynamicData::SetByteValue(static_cast<octet>(value), id);
@@ -1003,15 +1030,20 @@ public:
 class DynamicTypeBuilder : public eprosima::fastrtps::types::DynamicTypeBuilder
 {
 public:
-    eprosima::fastrtps::types::DynamicType_ptr build()
+    DynamicType_ptr build()
     {
-        return eprosima::fastrtps::types::DynamicTypeBuilder::Build();
+        return static_cast<DynamicType_ptr>(eprosima::fastrtps::types::DynamicTypeBuilder::Build());
     }
 
     ResponseCode set_name(
             const std::string& name)
     {
         return eprosima::fastrtps::types::DynamicTypeBuilder::SetName(name);
+    }
+
+    std::string get_name() const
+    {
+        return eprosima::fastrtps::types::DynamicTypeBuilder::GetName();
     }
 
     ResponseCode add_empty_member(
@@ -1144,6 +1176,14 @@ public:
     {
         return static_cast<DynamicTypeBuilder*>(
             eprosima::fastrtps::types::DynamicTypeBuilderFactory::CreateArrayBuilder(element_type, bounds));
+    }
+
+    DynamicTypeBuilder* create_sequence_builder(
+            const DynamicTypeBuilder* element_type,
+            uint32_t bounds)
+    {
+        return static_cast<DynamicTypeBuilder*>(
+            eprosima::fastrtps::types::DynamicTypeBuilderFactory::CreateSequenceBuilder(element_type, bounds));
     }
 
     DynamicTypeBuilder* create_enum_builder()

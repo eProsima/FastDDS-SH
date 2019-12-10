@@ -22,6 +22,7 @@
 #include "DynamicTypeAdapter.hpp"
 #include <soss/Message.hpp>
 #include <map>
+#include <vector>
 
 namespace soss {
 namespace dds {
@@ -33,8 +34,7 @@ struct Conversion {
             DynamicData* output);
 
     static bool dds_to_soss(
-            const std::string type,
-            DynamicData* input,
+            const DynamicData* input,
             ::xtypes::DynamicData& output);
 
     static ::xtypes::DynamicData dynamic_data(
@@ -45,19 +45,61 @@ struct Conversion {
             DynamicPubSubType* type)
     {
         registered_types_.emplace(type_name, type);
-        //convert_type(type->GetDynamicType().get());
     }
 
-    static ::xtypes::DynamicType::Ptr convert_type(
-            const DynamicType* type);
-
+    static DynamicTypeBuilder* create_builder(
+            const xtypes::DynamicType& type);
 private:
     ~Conversion() = default;
     static std::map<std::string, ::xtypes::DynamicType::Ptr> types_;
     static std::map<std::string, DynamicPubSubType*> registered_types_;
+    static std::map<std::string, DynamicTypeBuilder_ptr> builders_;
 
-    static ::xtypes::DynamicType::Ptr create_type(
-            const DynamicType* type);
+    static DynamicTypeBuilder_ptr get_builder(
+        const xtypes::DynamicType& type);
+
+    static void get_array_specs(
+        const xtypes::ArrayType& array,
+        std::pair<std::vector<uint32_t>, DynamicTypeBuilder_ptr>& result);
+
+    // soss -> dds
+    static void set_primitive_data(
+        xtypes::ReadableDynamicDataRef from,
+        DynamicData* to,
+        eprosima::fastrtps::types::MemberId id);
+
+    // soss -> dds
+    static void set_sequence_data(
+        xtypes::ReadableDynamicDataRef from,
+        DynamicData* to);
+
+    // soss -> dds
+    static void set_array_data(
+        xtypes::ReadableDynamicDataRef from,
+        DynamicData* to,
+        const std::vector<uint32_t>& indexes);
+
+    // soss -> dds
+    static bool set_struct_data(
+        xtypes::ReadableDynamicDataRef input,
+        DynamicData* output);
+
+    // dds -> soss
+    static void set_sequence_data(
+        const DynamicData* from,
+        xtypes::WritableDynamicDataRef to);
+
+    // dds -> soss
+    static void set_array_data(
+        const DynamicData* from,
+        xtypes::WritableDynamicDataRef to,
+        const std::vector<uint32_t>& indexes);
+
+    // dds -> soss
+    static bool set_struct_data(
+            const DynamicData* input,
+            ::xtypes::WritableDynamicDataRef output);
+
 };
 
 

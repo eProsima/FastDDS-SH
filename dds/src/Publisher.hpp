@@ -39,7 +39,7 @@ public:
     Publisher(
             Participant* participant,
             const std::string& topic_name,
-            const std::string& message_type);
+            const xtypes::DynamicType& message_type);
 
     virtual ~Publisher() override;
 
@@ -68,7 +68,6 @@ private:
     DynamicData_ptr dynamic_data_;
 
     const std::string topic_name_;
-    const std::string message_type_;
 };
 
 

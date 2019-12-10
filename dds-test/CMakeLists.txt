@@ -19,8 +19,11 @@ cmake_minimum_required(VERSION 3.5.0)
 project(soss-dds-test)
 
 find_package(soss-dds REQUIRED)
+find_package(soss-core REQUIRED)
 find_package(xtypes REQUIRED)
 find_package(soss-mock REQUIRED)
+find_package(fastrtps REQUIRED)
+
 if(WIN32)
     find_package(yaml-cpp)
 endif()
@@ -70,4 +73,40 @@ else()
         )
 endif()
 
+add_executable(${PROJECT_NAME}_conversion
+    src/main.cpp
+    src/unitary/conversion.cpp
+    ../dds/src/Conversion.cpp
+)
+
+set_target_properties(${PROJECT_NAME}_conversion
+    PROPERTIES
+        CXX_STANDARD 14
+        POSITION_INDEPENDENT_CODE ON
+)
+
+target_compile_options(${PROJECT_NAME}_conversion
+    PRIVATE
+        $<$<CXX_COMPILER_ID:GNU>:-Werror -Wall -Wextra -Wpedantic>
+)
+
+target_include_directories(${PROJECT_NAME}_conversion
+    PRIVATE
+        "${PROJECT_SOURCE_DIR}/thirdparty/catch2/include"
+        "${PROJECT_SOURCE_DIR}/../dds/src"
+)
+
+target_link_libraries(${PROJECT_NAME}_conversion
+    PRIVATE
+        fastrtps
+        soss::core
+)
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/src/unitary/resources/soss_types.idl
+    ${PROJECT_BINARY_DIR}/soss_types.idl
+    COPYONLY
+    )
+
 catch_discover_tests(${PROJECT_NAME})
+catch_discover_tests(${PROJECT_NAME}_conversion)
