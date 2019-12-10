@@ -55,6 +55,7 @@ static void fill_basic_struct(
     soss_data["my_wchar"] = L'G';
     soss_data["my_string"] = "Testing a string.";
     soss_data["my_wstring"] = L"Testing a wstring: \u20B1";
+    soss_data["my_enum"] = 2u; // C
 }
 
 static void check_basic_struct(
@@ -75,6 +76,7 @@ static void check_basic_struct(
     REQUIRE(dds_data->get_char16_value(dds_data->get_member_id_by_name("my_wchar")) == L'G');
     REQUIRE(dds_data->get_string_value(dds_data->get_member_id_by_name("my_string")) == "Testing a string.");
     REQUIRE(dds_data->get_wstring_value(dds_data->get_member_id_by_name("my_wstring")) == L"Testing a wstring: \u20B1");
+    REQUIRE(dds_data->get_enum_value(dds_data->get_member_id_by_name("my_enum")) == "C"); // 2u == "C"
 }
 
 static void check_basic_struct(
@@ -95,6 +97,7 @@ static void check_basic_struct(
     REQUIRE(soss_data["my_wchar"].value<wchar_t>() == L'G');
     REQUIRE(soss_data["my_string"].value<std::string>() == "Testing a string.");
     REQUIRE(soss_data["my_wstring"].value<std::wstring>() == L"Testing a wstring: \u20B1");
+    REQUIRE(soss_data["my_enum"].value<uint32_t>() == 2u);
 }
 
 static void fill_nested_sequence(

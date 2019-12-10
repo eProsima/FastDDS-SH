@@ -84,10 +84,11 @@ void Conversion::set_primitive_data(
             to->set_string_value(from.value<std::string>(), id);
             break;
         case ::xtypes::TypeKind::WSTRING_TYPE:
-        {
             to->set_wstring_value(from.value<std::wstring>(), id);
             break;
-        }
+        case ::xtypes::TypeKind::ENUMERATION_TYPE:
+            to->set_enum_value(from.value<uint32_t>(), id);
+            break;
         default:
         {
             std::stringstream ss;
@@ -175,6 +176,10 @@ void Conversion::set_array_data(
             case ::xtypes::TypeKind::WSTRING_TYPE:
                 id = to->get_array_index(new_indexes);
                 to->set_wstring_value(from[idx].value<std::wstring>(), id);
+                break;
+            case ::xtypes::TypeKind::ENUMERATION_TYPE:
+                id = to->get_array_index(new_indexes);
+                to->set_enum_value(from[idx].value<uint32_t>(), id);
                 break;
             case ::xtypes::TypeKind::ARRAY_TYPE:
             {
@@ -273,6 +278,9 @@ void Conversion::set_sequence_data(
             case ::xtypes::TypeKind::WSTRING_TYPE:
                 to->set_wstring_value(from[idx].value<std::wstring>(), id);
                 break;
+            case ::xtypes::TypeKind::ENUMERATION_TYPE:
+                to->set_enum_value(from[idx].value<uint32_t>(), id);
+                break;
             case ::xtypes::TypeKind::ARRAY_TYPE:
             {
                 DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner array builder
@@ -346,6 +354,7 @@ bool Conversion::set_struct_data(
             case ::xtypes::TypeKind::FLOAT_128_TYPE:
             case ::xtypes::TypeKind::STRING_TYPE:
             case ::xtypes::TypeKind::WSTRING_TYPE:
+            case ::xtypes::TypeKind::ENUMERATION_TYPE:
             {
                 set_primitive_data(input[member.name()], output, id);
                 break;
@@ -503,6 +512,13 @@ void Conversion::set_sequence_data(
             {
                 std::wstring value;
                 ret = from->get_wstring_value(value, id);
+                to.push(value);
+            }
+            break;
+            case ::xtypes::TypeKind::ENUMERATION_TYPE:
+            {
+                uint32_t value;
+                ret = from->get_enum_value(value, id);
                 to.push(value);
             }
             break;
@@ -698,6 +714,14 @@ void Conversion::set_array_data(
                 to[idx].value<std::wstring>(value);
             }
             break;
+            case ::xtypes::TypeKind::ENUMERATION_TYPE:
+            {
+                id = from->get_array_index(new_indexes);
+                uint32_t value;
+                ret = from->get_enum_value(value, id);
+                to[idx].value<uint32_t>(value);
+            }
+            break;
             case ::xtypes::TypeKind::ARRAY_TYPE:
             {
                 ::xtypes::DynamicData soss_array(type.content_type());
@@ -887,6 +911,13 @@ bool Conversion::set_struct_data(
                         output[descriptor.get_name()].value<std::wstring>(value);
                         break;
                     }
+                    case types::TK_ENUM:
+                    {
+                        uint32_t value;
+                        ret = input->get_enum_value(value, id);
+                        output[descriptor.get_name()].value<uint32_t>(value);
+                        break;
+                    }
                     case types::TK_ARRAY:
                     {
                         DynamicData* array = input->loan_value(id);
@@ -1030,7 +1061,16 @@ DynamicTypeBuilder_ptr Conversion::get_builder(
         }
         case ::xtypes::TypeKind::ENUMERATION_TYPE:
         {
-            // TODO
+            DynamicTypeBuilder* builder = factory->create_enum_builder();
+            builder->set_name(type.name());
+            const ::xtypes::EnumerationType<uint32_t>& enum_type =
+                static_cast<const ::xtypes::EnumerationType<uint32_t>&>(type);
+            const std::map<std::string, uint32_t>& enumerators = enum_type.enumerators();
+            for (auto pair : enumerators)
+            {
+                builder->add_empty_member(pair.second, pair.first);
+            }
+            return builder;
         }
         case ::xtypes::TypeKind::BITSET_TYPE:
         {
