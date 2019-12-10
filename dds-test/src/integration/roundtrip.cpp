@@ -156,8 +156,6 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
             xtypes::DynamicData msg_to_recv = roundtrip(topic_sent, topic_recv, msg_to_sent);
 
             REQUIRE(msg_to_sent == msg_to_recv);
-            // TODO
-            // REQUIRE(msg_to_sent.type() == msg_to_recv.type());
             REQUIRE(0 == instance.quit().wait_for(1s));
         }
 
@@ -195,14 +193,10 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
             // Road: [mock -> dds-client] -> [dds-server -> mock]
             xtypes::DynamicData msg_to_recv = roundtrip(client_to_server_topic, client_to_server_topic, msg_to_sent);
             REQUIRE(msg_to_sent == msg_to_recv);
-            // TODO
-            // REQUIRE(msg_to_sent.type() == msg_to_recv.type());
 
             // Road: [mock <- dds-client] <- [dds-server <- mock]
             msg_to_recv = roundtrip(server_to_client_topic, server_to_client_topic, msg_to_sent);
             REQUIRE(msg_to_sent == msg_to_recv);
-            // TODO
-            // REQUIRE(msg_to_sent.type() == msg_to_recv.type());
 
             REQUIRE(0 == client_instance.quit().wait_for(1s));
             REQUIRE(0 == server_instance.quit().wait_for(1s));
