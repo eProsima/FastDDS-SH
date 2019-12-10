@@ -1,3 +1,10 @@
+enum MyEnum
+{
+    A,
+    B,
+    C
+};
+
 struct BasicStruct
 {
     boolean my_bool;
@@ -15,6 +22,7 @@ struct BasicStruct
     wchar my_wchar;
     string my_string;
     wstring my_wstring;
+    MyEnum my_enum;
 };
 
 struct NestedSequence
