@@ -38,7 +38,6 @@ void Conversion::set_primitive_data(
 {
     switch (from.type().kind())
     {
-        // TODO 0 or MEMBER_ID_INVALID?
         case ::xtypes::TypeKind::BOOLEAN_TYPE:
             to->set_bool_value(from.value<bool>(), id);
             break;
@@ -960,11 +959,6 @@ DynamicTypeBuilder* Conversion::create_builder(
 {
     if (builders_.count(type.name()) > 0)
     {
-        /*
-        std::cout << "[soss-dds]: Topic '" << topic_name << "' has a type already registered." << std::endl;
-        std::cout << "[soss-dds]: Registed type: '" << registered_types_[topic_name]->getName()
-                  << "' but trying to register type: '" << type.name() << "'." << std::endl;
-        */
         return static_cast<DynamicTypeBuilder*>(builders_[type.name()].get());
     }
 

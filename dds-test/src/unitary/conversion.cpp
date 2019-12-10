@@ -17,13 +17,6 @@
 
 #include "Conversion.hpp"
 #include <xtypes/xtypes.hpp>
-/*
-#include <fastrtps/types/DynamicTypeBuilder.h>
-#include <fastrtps/types/DynamicTypePtr.h>
-#include <fastrtps/types/DynamicData.h>
-#include <fastrtps/types/DynamicDataPtr.h>
-#include <fastrtps/types/DynamicDataFactory.h>
-*/
 #include <catch2/catch.hpp>
 
 namespace soss {

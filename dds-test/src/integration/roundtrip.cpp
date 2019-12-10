@@ -49,11 +49,6 @@ std::string gen_config_yaml(
 
     s += "systems:\n";
     s += "    dds:\n";
-    /*
-    s += "        dynamic types:\n";
-    s += "            struct dds_test_string:\n";
-    s += "                string: \"data\"\n";
-    */
 
     if (dds_config_file_path != "")
     {
