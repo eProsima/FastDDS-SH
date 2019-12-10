@@ -41,6 +41,10 @@ Publisher::Publisher(
     {
         participant->register_dynamic_type(topic_name, builder);
     }
+    else
+    {
+        throw DDSMiddlewareException("Cannot create builder for type " + message_type.name());
+    }
 
     dynamic_data_ = participant->create_dynamic_data(topic_name);
 

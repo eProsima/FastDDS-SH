@@ -49,6 +49,11 @@ struct Conversion {
 
     static DynamicTypeBuilder* create_builder(
             const xtypes::DynamicType& type);
+
+    // This function patches the problem of dynamic types, which do not admit '/' in their type name.
+    static std::string convert_type_name(
+            const std::string& message_type);
+
 private:
     ~Conversion() = default;
     static std::map<std::string, ::xtypes::DynamicType::Ptr> types_;

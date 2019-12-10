@@ -31,6 +31,20 @@ std::map<std::string, ::xtypes::DynamicType::Ptr> Conversion::types_;
 std::map<std::string, DynamicPubSubType*> Conversion::registered_types_;
 std::map<std::string, DynamicTypeBuilder_ptr> Conversion::builders_;
 
+// This function patches the problem of dynamic types, which do not admit '/' in their type name.
+std::string Conversion::convert_type_name(
+        const std::string& message_type)
+{
+    std::string type = message_type;
+
+    for (size_t i = type.find('/'); i != std::string::npos; i = type.find('/', i))
+    {
+        type.replace(i, 1, "__");
+    }
+
+    return type;
+}
+
 void Conversion::set_primitive_data(
         ::xtypes::ReadableDynamicDataRef from,
         DynamicData* to,
@@ -994,8 +1008,12 @@ DynamicTypeBuilder* Conversion::create_builder(
     }
 
     DynamicTypeBuilder_ptr builder = get_builder(type);
+    if (builder == nullptr)
+    {
+        return nullptr;
+    }
     DynamicTypeBuilder* result = static_cast<DynamicTypeBuilder*>(builder.get());
-    result->set_name(type.name());
+    result->set_name(convert_type_name(type.name()));
     builders_.emplace(type.name(), std::move(builder));
     return result;
 }
@@ -1062,7 +1080,7 @@ DynamicTypeBuilder_ptr Conversion::get_builder(
         case ::xtypes::TypeKind::ENUMERATION_TYPE:
         {
             DynamicTypeBuilder* builder = factory->create_enum_builder();
-            builder->set_name(type.name());
+            builder->set_name(convert_type_name(type.name()));
             const ::xtypes::EnumerationType<uint32_t>& enum_type =
                 static_cast<const ::xtypes::EnumerationType<uint32_t>&>(type);
             const std::map<std::string, uint32_t>& enumerators = enum_type.enumerators();
