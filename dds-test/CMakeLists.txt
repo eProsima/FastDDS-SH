@@ -25,6 +25,8 @@ find_package(soss-mock REQUIRED)
 find_package(fastrtps REQUIRED)
 
 if(WIN32)
+    find_file(MOCKDLL NAMES "soss-mock.dll" PATHS "${soss-mock_DIR}" PATH_SUFFIXES "lib" ) #pending to check
+    install (FILES ${MOCKDLL} DESTINATION "${CMAKE_INSTALL_PREFIX}/../bin") #pending to check
     find_package(yaml-cpp)
 endif()
 
