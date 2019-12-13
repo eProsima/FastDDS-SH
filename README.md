@@ -8,7 +8,7 @@ System handle to connect [*SOSS*][soss] to *eProsima*'s open-source implementati
 
 To install this package, just clone this repository into a workspace already containing SOSS and build it:
 ```
-$ cd <soss workspace folder>/src
+$ cd <soss workspace folder>
 $ git clone https://github.com/eProsima/SOSS-DDS.git src/soss-dds
 
 $ colcon build --packages-up-to soss-dds
@@ -53,8 +53,10 @@ $ colcon build --packages-up-to soss-dds
 
 6. In the workspace folder, execute colcon:
     ```
-    $ colcon build --packages-up-to soss-dds soss-ros2-test
+    $ colcon build --packages-up-to soss-dds soss-ros2
     ```
+   Note: If you are goint to use ros2 types used in soss-ros2-test (as std_msgs/String),
+   you can compile with `soss-ros2-test`.
 
 7. Source the current environment
     ```
