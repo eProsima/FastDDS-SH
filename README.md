@@ -55,7 +55,7 @@ $ colcon build --packages-up-to soss-dds
     ```
     $ colcon build --packages-up-to soss-dds soss-ros2
     ```
-   Note: If you are goint to use ros2 types used in soss-ros2-test (as std_msgs/String),
+   Note: If you are going to use ros2 types used in soss-ros2-test (as std_msgs/String),
    you can compile with `soss-ros2-test`.
 
 7. Source the current environment
