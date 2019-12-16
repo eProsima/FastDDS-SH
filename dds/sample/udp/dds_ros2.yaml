@@ -1,17 +1,12 @@
 systems:
-    dds:
-      type: dds
-      dynamic types:
-        struct std_msgs__String:
-          string: "data"
-
-    ros2:
-      type: ros2
+    dds: { type: dds, types-from: ros2 }
+    ros2: { type: ros2 }
 
 routes:
     ros2_to_dds: { from: ros2, to: dds }
     dds_to_ros2: { from: dds, to: ros2 }
 
+# The type with '/' is modified with '__' by soss-dds
 topics:
     hello_ros2: { type: "std_msgs/String", route: dds_to_ros2 }
     hello_dds: { type: "std_msgs/String", route: ros2_to_dds }

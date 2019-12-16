@@ -1,22 +1,22 @@
+types:
+    - idl: >
+        struct std_msgs__String {
+            string data;
+        };
+
 systems:
+    fiware: { type: fiware, host: "192.168.1.59", port: 1026 }
+
     dds:
       type: dds
-      dynamic types:
-        struct std_msgs__String:
-          string: "data"
       participant:
         file_path: "install/soss-dds/sample/tcp/config.xml"
         profile_name: soss_profile_server
-
-    fiware:
-      type: fiware
-      host: "192.168.1.59"
-      port: 1026
 
 routes:
     fiware_to_dds: { from: fiware, to: dds }
     dds_to_fiware: { from: dds, to: fiware }
 
 topics:
-    hello_ros2: { type: "std_msgs/String", route: fiware_to_dds }
-    hello_fiware: { type: "std_msgs/String", route: dds_to_fiware }
+    hello_ros2: { type: "std_msgs__String", route: fiware_to_dds }
+    hello_fiware: { type: "std_msgs__String", route: dds_to_fiware }

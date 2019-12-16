@@ -6,11 +6,11 @@ System handle to connect [*SOSS*][soss] to *eProsima*'s open-source implementati
 
 ## Installation
 
-To install this package into a workspace already containing SOSS,
-just clone this repository into the sources directory and build it:
+To install this package, just clone this repository into a workspace already containing SOSS and build it:
 ```
 $ cd <soss workspace folder>
 $ git clone https://github.com/eProsima/SOSS-DDS.git src/soss-dds
+
 $ colcon build --packages-up-to soss-dds
 ```
 
@@ -38,7 +38,9 @@ $ colcon build --packages-up-to soss-dds
             ├── soss (repo)
             │   └── ... (other soss project subfolders)
             │   └── packages
-            │       └── soss-ros2 (ROS2 system handle)
+            │       │── soss-ros2 (ROS2 system handle)
+            │       │── soss-ros2-test
+            │       └── ... (other packages)
             └── soss-dds (repo)
                     ├── dds (soss-dds colcon pkg)
                     └── dds-test (soss-dds-test colcon pkg)
@@ -53,6 +55,8 @@ $ colcon build --packages-up-to soss-dds
     ```
     $ colcon build --packages-up-to soss-dds soss-ros2
     ```
+   Note: If you are going to use ros2 types used in soss-ros2-test (as std_msgs/String),
+   you can compile with `soss-ros2-test`.
 
 7. Source the current environment
     ```
@@ -76,26 +80,21 @@ An example of a YAML configuration file to connect ROS2 to DDS could be the foll
 
 ```YAML
 types:
-    - idl: >
-        struct std_msgs__String // This name can't have any '/', as explained later on this section.
-        {
-            string data;
-        };
-
 systems:
+    ros2: { type: ros2 }
     dds:
       type: dds
+      types-from: ros2  #includes the types loaded by the ros2 middleware
       participant: # Optional
         file_path: "path/to/dds_config_file.xml"
         profile_name: "participant profile name"
-
-    ros2:
-      type: ros2
 
 routes:
     ros2_to_dds: { from: ros2, to: dds }
     dds_to_ros2: { from: dds, to: ros2 }
 
+
+# The type with '/' is modified with '__' by soss-dds
 topics:
     hello_ros2: { type: "std_msgs/String", route: dds_to_ros2 }
     hello_dds: { type: "std_msgs/String", route: ros2_to_dds }
@@ -103,17 +102,7 @@ topics:
 
 To see how general SOSS systems, users and topics are configured, please refer to [SOSS' documentation][soss].
 
-For the DDS system handle the user must add two extra YAML maps to the configuration file as seen above,
-which are `dynamic types` and `participant`:
-
-* The `dynamic types` map tells the DDS system handle how a certain type is mapped.
-This is necessary to convert the type from a *xtypes*, which is the type used inside soss,
-to a *dynamic type*, which is the type internally used in DDS.
-This conversion is done dynamically at runtime.
-To have a guide on how dynamic types are defined in YAML files,
-see the [YAML dynamic types](#yaml-dynamic-types) section.
-
-  **The dynamic types standard does not allow certain characters in its names**.
+**The DDS standard does not allow certain characters in its names**.
 For this reason, if a type defined in the topics section of the configuration file has in its name a `/`,
 the dds system handle will map that character into two underscores.
 That's why the type inside the dynamic types map is `std_msgs__String`,
@@ -135,84 +124,7 @@ one to be used in the client side and other for the server side,
 so the YAML file used to configure SOSS in the server computer must change the `profile_name` in the example above
 from `soss_profile_client` to `soss_profile_server`.
 
-  The `participant` map is optional. If it is not given, the dds system handle will create a default UDP profile.
-
-### YAML dynamic types
-
-
-The IDL content is provided in the YAML file as follows:
-
-```YAML
-types:
-    - idl: >
-        struct name
-        {
-            idl_type1 member_1_name;
-            idl_type2 member_2_name;
-        };
-```
-
-The main 'type' for the IDL must be a struct, as xtypes are defined as structures.
-
-The name for each type can be whatever the user wants, with the two following rules:
-
-1. The name can not have spaces in it.
-1. The name must be formed only by letters, numbers and underscores.
-Remember that the system handle will map each `/` for `__`, as mentioned in the configuration section,
-to allow an easy connection with ROS2 types.
-
-Currently, the `xtypes::idl::Parser` (or xtypes) doesn't support the following IDL 4.2 characteristics:
-
-- Any
-- Interfaces
-- Value Types
-- CORBA related features
-- Components related features
-- CCM related features
-- Template Modules
-- Extended Data-Types
-- Anonymous Types
-- Annotations
-
-For more details about IDL definition, please refer to [IDL documentation](https://www.omg.org/spec/IDL/4.2/PDF).
-
-The following is an example of a full configuration file that uses the ROS2 nested type
-[std_msgs/Header](http://docs.ros.org/melodic/api/std_msgs/html/msg/Header.html):
-
-```YAML
-types:
-    - idl: >
-        struct stamp
-        {
-            int32 sec;
-            uint32 nanosec;
-        };
-
-        struct std_msgs__Header
-        {
-            string frame_id;
-            stamp stamp;
-        };
-
-systems:
-    dds:
-      type: dds
-
-    ros2:
-      type: ros2
-
-routes:
-    ros2_to_dds: { from: ros2, to: dds }
-    dds_to_ros2: { from: dds, to: ros2 }
-
-topics:
-    hello_dds:
-      type: "std_msgs/Header"
-      route: ros2_to_dds
-    hello_ros2:
-      type: "std_msgs/Header"
-      route: dds_to_ros2
-```
+The `participant` map is optional. If it is not given, the dds system handle will create a default UDP profile.
 
 ### TCP tunnel
 
@@ -238,6 +150,10 @@ If we take as an example the communication between ROS2 and FIWARE, the communic
 - For a fast usage, you can use the [`Dockerfile`](Dockerfile)
 
 ## Changelog
+
+### v1.0.0
+- Updated to work with soss_v3 (xtypes support).
+- Support several Fast-RTPS versions, used in Crystal, Dashing and Eloquent.
 
 ### v0.1.0
 
