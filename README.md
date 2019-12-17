@@ -118,7 +118,7 @@ and what profile must be used from the many that can be defined in that XML.
 This profile is used to set the DDS quality of services' parameters.
 A guide on how this XML files are configured can be found in
 [Fast-RTPS' documentation](https://fast-rtps.docs.eprosima.com/en/v1.7.2/xmlprofiles.html).
-An example of an XML configuration file can be found [in this repository](dds/sample/tcp/config.xml).
+An example of an XML configuration file can be found [in this repository](examples/tcp/config.xml).
 Notice that this example file has two participant profiles defined in it,
 one to be used in the client side and other for the server side,
 so the YAML file used to configure SOSS in the server computer must change the `profile_name` in the example above
@@ -138,7 +138,7 @@ are going to be communicated.
 Each of those instances will have a system handle for the system they want to communicate in the WAN network,
 and other to communicate with Fast-RTPS' DDS implementation.
 
-You can see the YAML's configuration files related to TCP tunnel configuration in the [sample folder](dds/sample/tcp).
+You can see the YAML's configuration files related to TCP tunnel configuration in the [sample folder](examples/tcp).
 
 If we take as an example the communication between ROS2 and FIWARE, the communication scheme will look like this:
 
