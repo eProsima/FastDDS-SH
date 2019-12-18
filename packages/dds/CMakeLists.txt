@@ -125,8 +125,7 @@ else()
 
     # Fast RTPS.
     unset(fastrtps_DIR CACHE) # Reviewer! Do we need to clear CACHE? Copied from uXRCE-DDS-Agent
-    find_package(fastrtps QUIET)
-    #find_package(fastrtps ${_fastrtps_version} EXACT QUIET)
+    # find_package(fastrtps ${_fastrtps_version} EXACT QUIET) #TODO
     if(NOT fastrtps_FOUND)
         ExternalProject_Add(fastrtps
             GIT_REPOSITORY
