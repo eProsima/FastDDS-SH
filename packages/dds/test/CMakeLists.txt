@@ -16,24 +16,37 @@
 
 cmake_minimum_required(VERSION 3.5.0)
 
-project(soss-dds-test)
+project(soss-dds)
 
-find_package(soss-dds REQUIRED)
 find_package(soss-core REQUIRED)
 find_package(xtypes REQUIRED)
-find_package(soss-mock REQUIRED)
-
 if(WIN32)
     find_package(yaml-cpp)
 endif()
 
-include(CTest)
-include(${PROJECT_SOURCE_DIR}/thirdparty/catch2/cmake/Catch.cmake)
+########################################################################
+# Find FastRTPS
+find_package(fastrtps QUIET)
 
-add_executable(${PROJECT_NAME}
-    src/main.cpp
-    src/integration/roundtrip.cpp
-)
+if(fastrtps_DIR)
+    message(STATUS "Found a fastrtps")
+else()
+    message(STATUS "Using the fastrtps thirdparty")
+    option (THIRDPARTY "Activate internal build of dependencies" ON)
+    add_subdirectory(thirdparty/fastrtps)
+endif()
+
+########################################################################
+# Library
+set(SRC
+    src/Conversion.cpp
+    src/Publisher.cpp
+    src/Subscriber.cpp
+    src/Participant.cpp
+    src/SystemHandle.cpp
+    )
+
+add_library(${PROJECT_NAME} SHARED ${SRC})
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
@@ -48,29 +61,26 @@ target_compile_options(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
     PRIVATE
-        "${PROJECT_SOURCE_DIR}/thirdparty/catch2/include"
+        include
 )
 
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
-        soss::mock
+        soss::core
+        fastrtps
         $<$<PLATFORM_ID:Windows>:yaml-cpp>
 )
 
-option(CRYSTAL "Test against ROS2 Crystal" OFF)
-if(CRYSTAL)
-    configure_file(
-        ${PROJECT_SOURCE_DIR}/resources/tcp_config_crystal.xml
-        ${PROJECT_BINARY_DIR}/resources/tcp_config.xml
-        COPYONLY
-        )
-else()
-    configure_file(
-        ${PROJECT_SOURCE_DIR}/resources/tcp_config_dashing.xml
-        ${PROJECT_BINARY_DIR}/resources/tcp_config.xml
-        COPYONLY
-        )
-endif()
+########################################################################
+# Installation
+soss_install_middleware_plugin(
+    MIDDLEWARE dds
+    TARGET soss-dds
+)
 
-catch_discover_tests(${PROJECT_NAME})
+install(
+    FILES ${PROJECT_SOURCE_DIR}/sample/tcp/config.xml
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/../sample/tcp
+    COMPONENT soss-dds
+    )
 
