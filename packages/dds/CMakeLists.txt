@@ -180,6 +180,7 @@ else()
                     libfastrtps
                     soss::core
             )
+        endif()
 
         install(
             DIRECTORY ${PROJECT_BINARY_DIR}/temp_install/fastrtps/lib/
@@ -187,7 +188,6 @@ else()
             COMPONENT soss-dds
             )
 
-        endif()
     endif()
 endif()
 
