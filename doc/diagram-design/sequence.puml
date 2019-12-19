@@ -1,6 +1,6 @@
 @startuml
 actor other_sh
-actor core
+actor soss_core
 participant SystemHandle
 participant Participant
 participant Publisher
@@ -9,7 +9,7 @@ participant Conversion
 entity dds
 
 == initialization ==
-core -> SystemHandle: configure
+soss_core -> SystemHandle: configure
 activate SystemHandle
 SystemHandle -> Participant: __init__()
 SystemHandle -> Participant: register_dynamic_type()
@@ -17,24 +17,24 @@ activate Participant
 Participant -> Participant: register_type()
 SystemHandle <-- Participant: status
 deactivate Participant
-core <-- SystemHandle: status
+soss_core <-- SystemHandle: status
 deactivate SystemHandle
 
-core -> SystemHandle: advertise
+soss_core -> SystemHandle: advertise
 activate SystemHandle
 SystemHandle -> Publisher: __init__()
-core <-- SystemHandle: TopicPublisher
+soss_core <-- SystemHandle: TopicPublisher
 deactivate SystemHandle
 
-core -> SystemHandle: subscribe
+soss_core -> SystemHandle: subscribe
 activate SystemHandle
 SystemHandle -> Subscriber: __init__()
-core <-- SystemHandle: status
+soss_core <-- SystemHandle: status
 deactivate SystemHandle
 
-core -> SystemHandle: spin_once
+soss_core -> SystemHandle: spin_once
 activate SystemHandle
-core <-- SystemHandle: status
+soss_core <-- SystemHandle: status
 deactivate SystemHandle
 
 == to dds ==
@@ -58,8 +58,15 @@ deactivate Conversion
 Subscriber -> other_sh: soss_subscription_cb
 deactivate Subscriber
 
+== while running ==
+soss_core -> SystemHandle: spin_once
+activate SystemHandle
+SystemHandle -> SystemHandle: wait_100ms()
+soss_core <-- SystemHandle: status
+deactivate SystemHandle
+
 == destruction ==
-core -> SystemHandle: __destroy__()
+soss_core -> SystemHandle: __destroy__()
 activate SystemHandle
 SystemHandle -> Subscriber: __destroy__()
 SystemHandle -> Publisher: __destroy__()
