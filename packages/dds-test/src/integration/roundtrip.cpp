@@ -41,11 +41,12 @@ std::string gen_config_yaml(
 
     std::string s;
     s += "types:\n";
-    s += "    - idl: >\n";
-    s += "        struct dds_test_string\n";
-    s += "        {\n";
-    s += "            string data;\n";
-    s += "        };\n";
+    s += "    idls:\n";
+    s += "        - >\n";
+    s += "            struct dds_test_string\n";
+    s += "            {\n";
+    s += "                string data;\n";
+    s += "            };\n";
 
     s += "systems:\n";
     s += "    dds:\n";

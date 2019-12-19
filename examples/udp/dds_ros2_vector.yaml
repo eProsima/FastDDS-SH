@@ -1,9 +1,10 @@
 types:
-    - idl: >
-        struct Vector2i {
-            long x;
-            long y;
-        };
+    idls:
+        - >
+            struct Vector2i {
+                long x;
+                long y;
+            };
 
 systems:
     dds: { type: dds }
