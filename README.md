@@ -138,7 +138,7 @@ are going to be communicated.
 Each of those instances will have a system handle for the system they want to communicate in the WAN network,
 and other to communicate with Fast-RTPS' DDS implementation.
 
-You can see the YAML's configuration files related to TCP tunnel configuration in the [sample folder](examples/tcp).
+You can see the YAML's configuration files related to TCP tunnel configuration in the [examples folder](examples/tcp).
 
 If we take as an example the communication between ROS2 and FIWARE, the communication scheme will look like this:
 
@@ -146,7 +146,7 @@ If we take as an example the communication between ROS2 and FIWARE, the communic
 
 ### More information
 
-- You can have a look at the [internal design](dds/doc/design.md)
+- You can have a look at the [internal design](doc/design.md)
 - For a fast usage, you can use the [`Dockerfile`](Dockerfile)
 
 ## Changelog
