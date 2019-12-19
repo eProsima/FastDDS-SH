@@ -3,7 +3,6 @@
 SystemHandler "0..n" *--> Publisher
 SystemHandler "0..n" *--> Subscriber
 SystemHandler *--> Participant
-SystemHandler ..> dtparser
 
 Participant <-- Publisher
 Participant <-- Subscriber
@@ -20,31 +19,35 @@ class SystemHandler {
 }
 
 class Participant {
-    - dds::participant
-    - map<dds::dynamic_types>
+    - fast::participant participant
+    - map<string, fast::DynamicPubSubType> topics
+    - map<string, string> topic_to_type
+    + get_dds_participant()
     + register_dynamic_type(name, builder)
     + create_dynamic_data(name)
+    + get_dynamic_type(name)
 }
 
 class Publisher {
-    - dds::Publisher
-    - dds::dynamic_data
-    - topic_name
-    - message_type
-    + publish(DynamicData)
+    - fast::Publisher
+    - fast:DynamicData
+    - std::string topic_name
+    + publish(xtypes::DynamicData) override
 }
 
 class Subscriber {
-    - dds::subscriber
-    - dds::dynamic_data
-    - topic_name
-    - message_type
-    + receive(dynamic_type_message)
+    - fast::Subscriber
+    - fast:DynamicData
+    - std::string topic_name
+    - DynamicType message_type
+    - SubscriptionCallback
+    - std::vector<std::thread> reception_threads_
+    + receive(fast::DynamicData)
 }
 
 class Conversion << (S,#FF7700) Singleton >> {
-    + dds_message soss_to_dds(DynamicData)
-    + DynamicData dds_to_soss(dds_message)
+    + fast::DynamicData soss_to_dds(xtypes::DynamicData)
+    + xtypes::DynamicData dds_to_soss(fast::DynamicData)
 }
 
 @enduml

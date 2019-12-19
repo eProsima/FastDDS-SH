@@ -6,17 +6,12 @@ participant Participant
 participant Publisher
 participant Subscriber
 participant Conversion
-participant dtparser
 entity dds
 
 == initialization ==
 core -> SystemHandle: configure
 activate SystemHandle
 SystemHandle -> Participant: __init__()
-SystemHandle -> dtparser: load()
-activate dtparser
-SystemHandle <-- dtparser: dynamic_types
-deactivate dtparser
 SystemHandle -> Participant: register_dynamic_type()
 activate Participant
 Participant -> Participant: register_type()
