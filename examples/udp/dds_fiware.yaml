@@ -1,8 +1,9 @@
 types:
-    - idl: >
-        struct String {
-            string data;
-        };
+    idls:
+        - >
+            struct String {
+                string data;
+            };
 
 systems:
     dds: type: dds
