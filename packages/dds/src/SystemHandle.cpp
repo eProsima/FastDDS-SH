@@ -38,6 +38,10 @@ public:
         const YAML::Node& configuration,
         TypeRegistry& /*type_registry*/)
     {
+        /*
+         * SOSS-DDS doesn't define new types. Needed types will be defined in the 'types' section
+         * of the YAML file, and hence, already registered in the 'TypeRegistry' by soss-core.
+         */
         try
         {
             if (configuration["participant"])
