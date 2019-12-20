@@ -76,6 +76,8 @@ if (SOSS-DDS_BUILD_TESTS)
         )
 
     catch_discover_tests(${PROJECT_NAME}_test_conversion)
+
+    add_test(NAME ${PROJECT_NAME}_test_conversion COMMAND ${PROJECT_NAME}_test_conversion)
 endif()
 
 ########################################################################
