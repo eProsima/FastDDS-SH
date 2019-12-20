@@ -142,7 +142,7 @@ You can see the YAML's configuration files related to TCP tunnel configuration i
 
 If we take as an example the communication between ROS2 and FIWARE, the communication scheme will look like this:
 
-![](dds/doc/images/ROS2_TCP_tunnel.png)
+![](doc/images/ROS2_TCP_tunnel.png)
 
 ### More information
 
