@@ -142,7 +142,7 @@ If we run now the publisher and subscriber, they will not match among them.
 
 ### Deploy
 For deploy all the system we will need 5 terminals at the same time:
-![](diagram-design/terminal_deploy.png)
+![](images/terminal_deploy.png)
 
 #### Terminal 1
 To publish the topic from ros2, only need to write the following commands:
