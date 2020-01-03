@@ -148,7 +148,7 @@ For deploy all the system we will need 5 terminals at the same time:
 To publish the topic from ros2, only need to write the following commands:
 ```
 source ~/ros2_eloquent/ros2-linux/setup.bash
-ros2 topic pub /hello_dds std_msgs/String "This is a message from ros2 to dds"
+ros2 topic pub /hello_dds std_msgs/String "{\"This is a message from ros2 to dds\"}"
 ```
 
 #### Terminal 2
