@@ -165,7 +165,7 @@ Placed into the build folder where you have generated the HelloWorld publisher a
 ```
 
 #### Terminal 4
-As in terminal 3, run the dds world subscriber:
+As in terminal 3, run the dds subscriber:
 ```
 ./HelloWorld subscriber
 ```
