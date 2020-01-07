@@ -159,7 +159,7 @@ ros2 topic echo /hello_ros std_msgs/String
 ```
 
 #### Terminal 3
-Placed into the build folder where you have generated the HelloWorld publisher and subscriber, run the dds world publisher
+Placed into the build folder where you have generated the HelloWorld publisher and subscriber, run the dds publisher
 ```
 ./HelloWorld publisher
 ```
