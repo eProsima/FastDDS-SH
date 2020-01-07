@@ -64,7 +64,7 @@ colcon build
 
 ## DDS-ROS2 use case
 In our use case we want communicate a ros2 world that is using the `std_msgs/String` type,
-with a dds world that is using a dds type defined in the `HelloWorld.idl` file found in the _fastrtps getting started_.
+with a dds world that is using a type defined in the `HelloWorld.idl` file found in the _fastrtps getting started_.
 
 Both types have a `string` member, so they are compatible.
 The type name and the member name are different but it does not matter because soss will take care of it
@@ -181,4 +181,3 @@ soss src/soss-dds/examples/udp/dds_ros2_string.yaml
 ```
 
 After that, both the `ros2` and the `dds` subscriber should receive messages from their corresponding publishers.
-
