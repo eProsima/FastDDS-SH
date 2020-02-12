@@ -6,7 +6,7 @@ types:
             };
 
 systems:
-    dds: type: dds
+    dds: { type: dds }
     fiware: { type: fiware, host: "192.168.1.59", port: 1026 }
 
 routes:
