@@ -237,6 +237,7 @@ void Conversion::set_sequence_data(
     const ::xtypes::SequenceType& type = static_cast<const ::xtypes::SequenceType&>(from.type());
     MemberId id;
     DynamicDataFactory* factory = DynamicDataFactory::get_instance();
+    to->clear_all_values();
     for (uint32_t idx = 0; idx < from.size(); ++idx)
     {
         to->insert_sequence_data(id);
@@ -1176,4 +1177,3 @@ void Conversion::get_array_specs(
 }
 } // namespace dds
 } // namespace soss
-
