@@ -221,18 +221,16 @@ void Conversion::set_array_data(
                 to->set_complex_value(seq_data, id);
                 break;
             }
-            /*
             case ::xtypes::TypeKind::MAP_TYPE:
             {
-                id = to->get_map_index(new_indexes);
-                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner sequence builder
+                id = to->get_array_index(new_indexes);
+                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner map builder
                 DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
                 DynamicData* seq_data = factory->create_data(builder_ptr->build());
                 set_map_data(from[idx], seq_data);
                 to->set_complex_value(seq_data, id);
                 break;
             }
-            */
             case ::xtypes::TypeKind::STRUCTURE_TYPE:
             {
                 id = to->get_array_index(new_indexes);
@@ -347,17 +345,15 @@ void Conversion::set_sequence_data(
                 to->set_complex_value(seq_data, id);
                 break;
             }
-            /*
             case ::xtypes::TypeKind::MAP_TYPE:
             {
-                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner sequence builder
+                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner map builder
                 DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
                 DynamicData* seq_data = factory->create_data(builder_ptr->build());
                 set_map_data(from[idx], seq_data);
                 to->set_complex_value(seq_data, id);
                 break;
             }
-            */
             case ::xtypes::TypeKind::STRUCTURE_TYPE:
             {
                 DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner struct builder
@@ -377,118 +373,125 @@ void Conversion::set_sequence_data(
     }
 }
 
-/*
 void Conversion::set_map_data(
         ::xtypes::ReadableDynamicDataRef from,
         DynamicData* to)
 {
     const ::xtypes::MapType& type = static_cast<const ::xtypes::MapType&>(from.type());
+    const ::xtypes::PairType& pair_type = static_cast<const ::xtypes::PairType&>(type.content_type());
     MemberId id_key;
     MemberId id_value;
     DynamicDataFactory* factory = DynamicDataFactory::get_instance();
     to->clear_all_values();
-    for (uint32_t idx = 0; idx < from.size(); ++idx)
+
+    DynamicTypeBuilder_ptr key_builder = get_builder(pair_type.first());
+    DynamicTypeBuilder_ptr value_builder = get_builder(pair_type.second());
+
+    for (::xtypes::ReadableDynamicDataRef pair : from)
     {
-        to->insert_map_data(id_key, id_value);
-        switch (resolve_type(type.content_type()).kind())
+        // Convert key
+        DynamicData* key_data = factory->create_data(key_builder->build());
+        ::xtypes::ReadableDynamicDataRef key = pair[0];
+        MemberId id = MEMBER_ID_INVALID;
+
+        switch (resolve_type(pair_type.first()).kind())
         {
             case ::xtypes::TypeKind::BOOLEAN_TYPE:
-                to->set_bool_value(from[idx].value<bool>(), id);
+                key_data->set_bool_value(key, id);
                 break;
             case ::xtypes::TypeKind::CHAR_8_TYPE:
-                to->set_char8_value(from[idx].value<char>(), id);
+                key_data->set_char8_value(key, id);
                 break;
             case ::xtypes::TypeKind::CHAR_16_TYPE:
-                to->set_char16_value(from[idx].value<char32_t>(), id);
+                key_data->set_char16_value(key, id);
                 break;
             case ::xtypes::TypeKind::UINT_8_TYPE:
-                //to->set_uint8_value(from[idx].value<uint8_t>(), id);
-                to->set_byte_value(from[idx].value<uint8_t>(), id);
+                //key_data->set_uint8_value(from[key].value<uint8_t>(), id);
+                key_data->set_byte_value(key, id);
                 break;
             case ::xtypes::TypeKind::INT_8_TYPE:
-                //to->set_int8_value(from[idx].value<int8_t>(), id);
-                to->set_byte_value(from[idx].value<int8_t>(), id);
+                //key_data->set_int8_value(from[key].value<int8_t>(), id);
+                key_data->set_byte_value(key, id);
                 break;
             case ::xtypes::TypeKind::INT_16_TYPE:
-                to->set_int16_value(from[idx].value<int16_t>(), id);
+                key_data->set_int16_value(key, id);
                 break;
             case ::xtypes::TypeKind::UINT_16_TYPE:
-                to->set_uint16_value(from[idx].value<uint16_t>(), id);
+                key_data->set_uint16_value(key, id);
                 break;
             case ::xtypes::TypeKind::INT_32_TYPE:
-                to->set_int32_value(from[idx].value<int32_t>(), id);
+                key_data->set_int32_value(key, id);
                 break;
             case ::xtypes::TypeKind::UINT_32_TYPE:
-                to->set_uint32_value(from[idx].value<uint32_t>(), id);
+                key_data->set_uint32_value(key, id);
                 break;
             case ::xtypes::TypeKind::INT_64_TYPE:
-                to->set_int64_value(from[idx].value<int64_t>(), id);
+                key_data->set_int64_value(key, id);
                 break;
             case ::xtypes::TypeKind::UINT_64_TYPE:
-                to->set_uint64_value(from[idx].value<uint64_t>(), id);
+                key_data->set_uint64_value(key, id);
                 break;
             case ::xtypes::TypeKind::FLOAT_32_TYPE:
-                to->set_float32_value(from[idx].value<float>(), id);
+                key_data->set_float32_value(key, id);
                 break;
             case ::xtypes::TypeKind::FLOAT_64_TYPE:
-                to->set_float64_value(from[idx].value<double>(), id);
+                key_data->set_float64_value(key, id);
                 break;
             case ::xtypes::TypeKind::FLOAT_128_TYPE:
-                to->set_float128_value(from[idx].value<long double>(), id);
+                key_data->set_float128_value(key, id);
                 break;
             case ::xtypes::TypeKind::STRING_TYPE:
-                to->set_string_value(from[idx].value<std::string>(), id);
+                key_data->set_string_value(key, id);
                 break;
             case ::xtypes::TypeKind::WSTRING_TYPE:
-                to->set_wstring_value(from[idx].value<std::wstring>(), id);
+                key_data->set_wstring_value(key, id);
                 break;
             case ::xtypes::TypeKind::ENUMERATION_TYPE:
-                to->set_enum_value(from[idx].value<uint32_t>(), id);
+                key_data->set_enum_value(key.value<uint32_t>(), id);
                 break;
             case ::xtypes::TypeKind::ARRAY_TYPE:
             {
-                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner array builder
+                DynamicTypeBuilder_ptr builder = get_builder(key.type()); // The inner array builder
                 DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
                 DynamicData* array_data = factory->create_data(builder_ptr->build());
-                set_array_data(from[idx], array_data, std::vector<uint32_t>());
-                to->set_complex_value(array_data, id);
+                set_array_data(key, array_data, std::vector<uint32_t>());
+                key_data->set_complex_value(array_data, id);
                 break;
             }
             case ::xtypes::TypeKind::MAP_TYPE:
             {
-                // TODO
-                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner sequence builder
+                DynamicTypeBuilder_ptr builder = get_builder(key.type()); // The inner map builder
                 DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
                 DynamicData* seq_data = factory->create_data(builder_ptr->build());
-                set_sequence_data(from[idx], seq_data);
-                to->set_complex_value(seq_data, id);
+                set_map_data(key, seq_data);
+                key_data->set_complex_value(seq_data, id);
                 break;
             }
             case ::xtypes::TypeKind::SEQUENCE_TYPE:
             {
-                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner sequence builder
+                DynamicTypeBuilder_ptr builder = get_builder(key.type()); // The inner sequence builder
                 DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
                 DynamicData* seq_data = factory->create_data(builder_ptr->build());
-                set_sequence_data(from[idx], seq_data);
-                to->set_complex_value(seq_data, id);
+                set_sequence_data(key, seq_data);
+                key_data->set_complex_value(seq_data, id);
                 break;
             }
             case ::xtypes::TypeKind::STRUCTURE_TYPE:
             {
-                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner struct builder
+                DynamicTypeBuilder_ptr builder = get_builder(key.type()); // The inner struct builder
                 DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
                 DynamicData* st_data = factory->create_data(builder_ptr->build());
-                set_struct_data(from[idx], st_data);
-                to->set_complex_value(st_data, id);
+                set_struct_data(key, st_data);
+                key_data->set_complex_value(st_data, id);
                 break;
             }
             case ::xtypes::TypeKind::UNION_TYPE:
             {
-                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner struct builder
+                DynamicTypeBuilder_ptr builder = get_builder(key.type()); // The inner struct builder
                 DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
                 DynamicData* st_data = factory->create_data(builder_ptr->build());
-                set_union_data(from[idx], st_data);
-                to->set_complex_value(st_data, id);
+                set_union_data(key, st_data);
+                key_data->set_complex_value(st_data, id);
                 break;
             }
             default:
@@ -498,9 +501,104 @@ void Conversion::set_map_data(
                 throw DDSMiddlewareException(ss.str());
             }
         }
+
+        // Convert data
+        id = MEMBER_ID_INVALID;
+        DynamicData* value_data = factory->create_data(value_builder->build());
+        ::xtypes::ReadableDynamicDataRef value = pair[1];
+
+        switch (resolve_type(pair_type.second()).kind())
+        {
+            case ::xtypes::TypeKind::BOOLEAN_TYPE:
+                value_data->set_bool_value(value, id);
+                break;
+            case ::xtypes::TypeKind::CHAR_8_TYPE:
+                value_data->set_char8_value(value, id);
+                break;
+            case ::xtypes::TypeKind::CHAR_16_TYPE:
+                value_data->set_char16_value(value, id);
+                break;
+            case ::xtypes::TypeKind::UINT_8_TYPE:
+                //value_data->set_uint8_value(value, id);
+                value_data->set_byte_value(value, id);
+                break;
+            case ::xtypes::TypeKind::INT_8_TYPE:
+                //value_data->set_int8_value(value, id);
+                value_data->set_byte_value(value, id);
+                break;
+            case ::xtypes::TypeKind::INT_16_TYPE:
+                value_data->set_int16_value(value, id);
+                break;
+            case ::xtypes::TypeKind::UINT_16_TYPE:
+                value_data->set_uint16_value(value, id);
+                break;
+            case ::xtypes::TypeKind::INT_32_TYPE:
+                value_data->set_int32_value(value, id);
+                break;
+            case ::xtypes::TypeKind::UINT_32_TYPE:
+                value_data->set_uint32_value(value, id);
+                break;
+            case ::xtypes::TypeKind::INT_64_TYPE:
+                value_data->set_int64_value(value, id);
+                break;
+            case ::xtypes::TypeKind::UINT_64_TYPE:
+                value_data->set_uint64_value(value, id);
+                break;
+            case ::xtypes::TypeKind::FLOAT_32_TYPE:
+                value_data->set_float32_value(value, id);
+                break;
+            case ::xtypes::TypeKind::FLOAT_64_TYPE:
+                value_data->set_float64_value(value, id);
+                break;
+            case ::xtypes::TypeKind::FLOAT_128_TYPE:
+                value_data->set_float128_value(value, id);
+                break;
+            case ::xtypes::TypeKind::STRING_TYPE:
+                value_data->set_string_value(value, id);
+                break;
+            case ::xtypes::TypeKind::WSTRING_TYPE:
+                value_data->set_wstring_value(value, id);
+                break;
+            case ::xtypes::TypeKind::ENUMERATION_TYPE:
+                value_data->set_enum_value(value.value<uint32_t>(), id);
+                break;
+            case ::xtypes::TypeKind::ARRAY_TYPE:
+            {
+                set_array_data(value, value_data, std::vector<uint32_t>());
+                break;
+            }
+            case ::xtypes::TypeKind::MAP_TYPE:
+            {
+                set_map_data(value, value_data);
+                break;
+            }
+            case ::xtypes::TypeKind::SEQUENCE_TYPE:
+            {
+                set_sequence_data(value, value_data);
+                break;
+            }
+            case ::xtypes::TypeKind::STRUCTURE_TYPE:
+            {
+                set_struct_data(value, value_data);
+                break;
+            }
+            case ::xtypes::TypeKind::UNION_TYPE:
+            {
+                set_union_data(value, value_data);
+                break;
+            }
+            default:
+            {
+                std::stringstream ss;
+                ss << "Unexpected data type: " << from.type().name() << ".";
+                throw DDSMiddlewareException(ss.str());
+            }
+        }
+
+        // Add key value
+        to->insert_map_data(key_data, value_data, id_key, id_value);
     }
 }
-*/
 
 bool Conversion::soss_to_dds(
         const ::xtypes::DynamicData& input,
@@ -557,15 +655,13 @@ bool Conversion::set_struct_data(
                 output->return_loaned_value(seq_data);
                 break;
             }
-            /*
             case ::xtypes::TypeKind::MAP_TYPE:
             {
                 DynamicData* seq_data = output->loan_value(id);
-                set_sequence_data(input[member.name()], seq_data);
+                set_map_data(input[member.name()], seq_data);
                 output->return_loaned_value(seq_data);
                 break;
             }
-            */
             case ::xtypes::TypeKind::STRUCTURE_TYPE:
             {
                 DynamicData* st_data = output->loan_value(id);
@@ -685,7 +781,6 @@ bool Conversion::set_union_data(
             output->return_loaned_value(st_data);
             break;
         }
-        /*
         case ::xtypes::TypeKind::MAP_TYPE:
         {
             DynamicData* st_data = output->loan_value(id);
@@ -693,7 +788,6 @@ bool Conversion::set_union_data(
             output->return_loaned_value(st_data);
             break;
         }
-        */
         case ::xtypes::TypeKind::UNION_TYPE:
         {
             DynamicData* st_data = output->loan_value(id);
@@ -862,18 +956,16 @@ void Conversion::set_sequence_data(
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
-            /*
             case ::xtypes::TypeKind::MAP_TYPE:
             {
                 DynamicData* seq = from->loan_value(id);
                 ::xtypes::DynamicData soss_seq(type.content_type());
-                set_sequence_data(seq, soss_seq.ref());
+                set_map_data(seq, soss_seq.ref());
                 from->return_loaned_value(seq);
                 to.push(soss_seq);
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
-            */
             case ::xtypes::TypeKind::STRUCTURE_TYPE:
             {
                 DynamicData* st = from->loan_value(id);
@@ -908,6 +1000,397 @@ void Conversion::set_sequence_data(
             ss << "Error parsing from dynamic type '" << to.type().name();
             throw DDSMiddlewareException(ss.str());
         }
+    }
+}
+
+void Conversion::set_map_data(
+        const DynamicData* c_from,
+        ::xtypes::WritableDynamicDataRef to)
+{
+    const ::xtypes::MapType& map_type = static_cast<const ::xtypes::MapType&>(to.type());
+    const ::xtypes::PairType& pair_type = static_cast<const ::xtypes::PairType&>(map_type.content_type());
+    const ::xtypes::DynamicType& key_type = pair_type.first();
+    const ::xtypes::DynamicType& value_type = pair_type.second();
+    DynamicData* from = const_cast<DynamicData*>(c_from);
+
+    for (uint32_t idx = 0; idx < c_from->get_item_count(); ++idx)
+    {
+        MemberId key_id = idx * 2;
+        MemberId value_id = key_id + 1;
+        ResponseCode ret = ResponseCode::RETCODE_ERROR;
+
+        ::xtypes::DynamicData key_data(key_type);
+        ::xtypes::DynamicData value_data(value_type);
+
+        // Key
+        switch (resolve_type(key_type).kind())
+        {
+            case ::xtypes::TypeKind::BOOLEAN_TYPE:
+            {
+                bool value;
+                ret = from->get_bool_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::CHAR_8_TYPE:
+            {
+                char value;
+                ret = from->get_char8_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::CHAR_16_TYPE:
+            {
+                wchar_t value;
+                ret = from->get_char16_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_8_TYPE:
+            {
+                uint8_t value;
+                ret = from->get_uint8_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::INT_8_TYPE:
+            {
+                int8_t value;
+                ret = from->get_int8_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::INT_16_TYPE:
+            {
+                int16_t value;
+                ret = from->get_int16_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_16_TYPE:
+            {
+                uint16_t value;
+                ret = from->get_uint16_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::INT_32_TYPE:
+            {
+                int32_t value;
+                ret = from->get_int32_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_32_TYPE:
+            {
+                uint32_t value;
+                ret = from->get_uint32_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::INT_64_TYPE:
+            {
+                int64_t value;
+                ret = from->get_int64_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_64_TYPE:
+            {
+                uint64_t value;
+                ret = from->get_uint64_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::FLOAT_32_TYPE:
+            {
+                float value;
+                ret = from->get_float32_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::FLOAT_64_TYPE:
+            {
+                double value;
+                ret = from->get_float64_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::FLOAT_128_TYPE:
+            {
+                long double value;
+                ret = from->get_float128_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::STRING_TYPE:
+            {
+                std::string value;
+                ret = from->get_string_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::WSTRING_TYPE:
+            {
+                std::wstring value;
+                ret = from->get_wstring_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::ENUMERATION_TYPE:
+            {
+                uint32_t value;
+                ret = from->get_enum_value(value, key_id);
+                key_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::ARRAY_TYPE:
+            {
+                DynamicData* array = from->loan_value(key_id);
+                ::xtypes::DynamicData soss_array(key_type);
+                set_array_data(array, soss_array.ref(), std::vector<uint32_t>());
+                from->return_loaned_value(array);
+                key_data = soss_array;
+                ret = ResponseCode::RETCODE_OK;
+                break;
+            }
+            case ::xtypes::TypeKind::SEQUENCE_TYPE:
+            {
+                DynamicData* seq = from->loan_value(key_id);
+                ::xtypes::DynamicData soss_seq(key_type);
+                set_sequence_data(seq, soss_seq.ref());
+                from->return_loaned_value(seq);
+                key_data = soss_seq;
+                ret = ResponseCode::RETCODE_OK;
+                break;
+            }
+            case ::xtypes::TypeKind::MAP_TYPE:
+            {
+                DynamicData* seq = from->loan_value(key_id);
+                ::xtypes::DynamicData soss_seq(key_type);
+                set_map_data(seq, soss_seq.ref());
+                from->return_loaned_value(seq);
+                key_data = soss_seq;
+                ret = ResponseCode::RETCODE_OK;
+                break;
+            }
+            case ::xtypes::TypeKind::STRUCTURE_TYPE:
+            {
+                DynamicData* st = from->loan_value(key_id);
+                ::xtypes::DynamicData soss_st(key_type);
+                set_struct_data(st, soss_st.ref());
+                from->return_loaned_value(st);
+                key_data = soss_st;
+                ret = ResponseCode::RETCODE_OK;
+                break;
+            }
+            case ::xtypes::TypeKind::UNION_TYPE:
+            {
+                DynamicData* st = from->loan_value(key_id);
+                ::xtypes::DynamicData soss_st(key_type);
+                set_union_data(st, soss_st.ref());
+                from->return_loaned_value(st);
+                key_data = soss_st;
+                ret = ResponseCode::RETCODE_OK;
+                break;
+            }
+            default:
+            {
+                std::stringstream ss;
+                ss << "Unexpected data type: " << key_type.name() << ".";
+                throw DDSMiddlewareException(ss.str());
+            }
+        }
+
+        // Value
+        switch (resolve_type(value_type).kind())
+        {
+            case ::xtypes::TypeKind::BOOLEAN_TYPE:
+            {
+                bool value;
+                ret = from->get_bool_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::CHAR_8_TYPE:
+            {
+                char value;
+                ret = from->get_char8_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::CHAR_16_TYPE:
+            {
+                wchar_t value;
+                ret = from->get_char16_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_8_TYPE:
+            {
+                uint8_t value;
+                ret = from->get_uint8_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::INT_8_TYPE:
+            {
+                int8_t value;
+                ret = from->get_int8_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::INT_16_TYPE:
+            {
+                int16_t value;
+                ret = from->get_int16_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_16_TYPE:
+            {
+                uint16_t value;
+                ret = from->get_uint16_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::INT_32_TYPE:
+            {
+                int32_t value;
+                ret = from->get_int32_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_32_TYPE:
+            {
+                uint32_t value;
+                ret = from->get_uint32_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::INT_64_TYPE:
+            {
+                int64_t value;
+                ret = from->get_int64_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::UINT_64_TYPE:
+            {
+                uint64_t value;
+                ret = from->get_uint64_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::FLOAT_32_TYPE:
+            {
+                float value;
+                ret = from->get_float32_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::FLOAT_64_TYPE:
+            {
+                double value;
+                ret = from->get_float64_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::FLOAT_128_TYPE:
+            {
+                long double value;
+                ret = from->get_float128_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::STRING_TYPE:
+            {
+                std::string value;
+                ret = from->get_string_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::WSTRING_TYPE:
+            {
+                std::wstring value;
+                ret = from->get_wstring_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::ENUMERATION_TYPE:
+            {
+                uint32_t value;
+                ret = from->get_enum_value(value, value_id);
+                value_data = value;
+            }
+            break;
+            case ::xtypes::TypeKind::ARRAY_TYPE:
+            {
+                DynamicData* array = from->loan_value(value_id);
+                ::xtypes::DynamicData soss_array(value_type);
+                set_array_data(array, soss_array.ref(), std::vector<uint32_t>());
+                from->return_loaned_value(array);
+                value_data = soss_array;
+                ret = ResponseCode::RETCODE_OK;
+                break;
+            }
+            case ::xtypes::TypeKind::SEQUENCE_TYPE:
+            {
+                DynamicData* seq = from->loan_value(value_id);
+                ::xtypes::DynamicData soss_seq(value_type);
+                set_sequence_data(seq, soss_seq.ref());
+                from->return_loaned_value(seq);
+                value_data = soss_seq;
+                ret = ResponseCode::RETCODE_OK;
+                break;
+            }
+            case ::xtypes::TypeKind::MAP_TYPE:
+            {
+                DynamicData* seq = from->loan_value(value_id);
+                ::xtypes::DynamicData soss_seq(value_type);
+                set_map_data(seq, soss_seq.ref());
+                from->return_loaned_value(seq);
+                value_data = soss_seq;
+                ret = ResponseCode::RETCODE_OK;
+                break;
+            }
+            case ::xtypes::TypeKind::STRUCTURE_TYPE:
+            {
+                DynamicData* st = from->loan_value(value_id);
+                ::xtypes::DynamicData soss_st(value_type);
+                set_struct_data(st, soss_st.ref());
+                from->return_loaned_value(st);
+                value_data = soss_st;
+                ret = ResponseCode::RETCODE_OK;
+                break;
+            }
+            case ::xtypes::TypeKind::UNION_TYPE:
+            {
+                DynamicData* st = from->loan_value(value_id);
+                ::xtypes::DynamicData soss_st(value_type);
+                set_union_data(st, soss_st.ref());
+                from->return_loaned_value(st);
+                value_data = soss_st;
+                ret = ResponseCode::RETCODE_OK;
+                break;
+            }
+            default:
+            {
+                std::stringstream ss;
+                ss << "Unexpected data type: " << value_type.name() << ".";
+                throw DDSMiddlewareException(ss.str());
+            }
+        }
+
+        if (ret != ResponseCode::RETCODE_OK)
+        {
+            std::stringstream ss;
+            ss << "Error parsing from dynamic type '" << to.type().name();
+            throw DDSMiddlewareException(ss.str());
+        }
+
+        // Add entry
+        to[key_data] = value_data;
     }
 }
 
@@ -1083,19 +1566,17 @@ void Conversion::set_array_data(
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
-            /*
             case ::xtypes::TypeKind::MAP_TYPE:
             {
                 id = from->get_array_index(new_indexes);
                 DynamicData* seq = from->loan_value(id);
                 ::xtypes::DynamicData soss_seq(type.content_type());
-                set_sequence_data(seq, soss_seq.ref());
+                set_map_data(seq, soss_seq.ref());
                 from->return_loaned_value(seq);
                 to[idx] = soss_seq;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
-            */
             case ::xtypes::TypeKind::STRUCTURE_TYPE:
             {
                 id = from->get_array_index(new_indexes);
@@ -1307,15 +1788,13 @@ bool Conversion::set_struct_data(
                         input->return_loaned_value(seq);
                         break;
                     }
-                    /*
                     case types::TK_MAP:
                     {
                         DynamicData* seq = input->loan_value(id);
-                        set_sequence_data(seq, output[descriptor.get_name()]);
+                        set_map_data(seq, output[descriptor.get_name()]);
                         input->return_loaned_value(seq);
                         break;
                     }
-                    */
                     case types::TK_STRUCTURE:
                     {
                         DynamicData* nested_msg_dds = input->loan_value(id);
@@ -1518,15 +1997,13 @@ bool Conversion::set_union_data(
                 input->return_loaned_value(seq);
                 break;
             }
-            /*
             case types::TK_MAP:
             {
                 DynamicData* seq = input->loan_value(id);
-                set_sequence_data(seq, output[descriptor.get_name()]);
+                set_map_data(seq, output[descriptor.get_name()]);
                 input->return_loaned_value(seq);
                 break;
             }
-            */
             case types::TK_STRUCTURE:
             {
                 DynamicData* nested_msg_dds = input->loan_value(id);

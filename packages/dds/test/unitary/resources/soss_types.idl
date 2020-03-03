@@ -58,4 +58,5 @@ union MyUnion switch (uint8)
 struct MyUnionStruct
 {
     MyUnion my_union;
+    map<string, AliasBasicStruct> my_map;
 };

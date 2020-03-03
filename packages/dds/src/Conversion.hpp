@@ -84,12 +84,10 @@ private:
         xtypes::ReadableDynamicDataRef from,
         DynamicData* to);
 
-    /*
     // soss -> dds
     static void set_map_data(
         xtypes::ReadableDynamicDataRef from,
         DynamicData* to);
-    */
 
     // soss -> dds
     static void set_array_data(
@@ -112,12 +110,10 @@ private:
         const DynamicData* from,
         xtypes::WritableDynamicDataRef to);
 
-    /*
     // dds -> soss
     static void set_map_data(
         const DynamicData* from,
         xtypes::WritableDynamicDataRef to);
-    */
 
     // dds -> soss
     static void set_array_data(

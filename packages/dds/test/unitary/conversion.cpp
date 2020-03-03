@@ -389,6 +389,15 @@ static void fill_union_struct(
             fill_basic_struct(soss_data["my_union"]["abs"]);
             break;
     }
+    //map<string, AliasBasicStruct> my_map;
+    soss::StringType key_type;
+    soss::DynamicData key(key_type);
+    key = "Luis";
+    fill_basic_struct(soss_data["my_map"][key]);
+    key = "Gasco";
+    fill_basic_struct(soss_data["my_map"][key]);
+    key = "Rulz";
+    fill_basic_struct(soss_data["my_map"][key]);
 }
 
 static void check_union_struct(
@@ -433,6 +442,52 @@ static void check_union_struct(
             break;
     }
     dds_data->return_loaned_value(union_data);
+    //map<string, AliasBasicStruct> my_map;
+    dds::DynamicData* map_data = dds_data->loan_value(1);
+    ::soss::dds::DynamicDataSOSS* map_soss = static_cast<::soss::dds::DynamicDataSOSS*>(map_data);
+    MemberId keyId = 0;
+    MemberId elemId = 1;
+    std::string key;
+    dds::DynamicData* v;
+
+    uint32_t luis = 0;
+    uint32_t gasco = 0;
+    uint32_t rulz = 0;
+    uint32_t other = 0;
+
+    // map is ordered by hash!
+    for (uint32_t i = 0; i < 3; ++i)
+    {
+        keyId = i * 2;
+        elemId = keyId + 1;
+        key = map_soss->get_string_value(keyId);
+        v = map_soss->loan_value(elemId);
+
+        if (key == "Luis")
+        {
+            ++luis;
+        }
+        else if (key == "Gasco")
+        {
+            ++gasco;
+        }
+        else if (key == "Rulz")
+        {
+            ++rulz;
+        }
+        else
+        {
+            ++other;
+        }
+
+
+        check_basic_struct(v);
+        map_soss->return_loaned_value(v);
+    }
+
+    REQUIRE(((luis == gasco) && (gasco == rulz) && (rulz == 1u) && (other == 0u)));
+
+    dds_data->return_loaned_value(map_data);
 }
 
 static void check_union_struct(
@@ -461,6 +516,15 @@ static void check_union_struct(
             check_basic_struct(soss_data["my_union"]["abs"]);
             break;
     }
+    //map<string, AliasBasicStruct> my_map;
+    soss::StringType key_type;
+    soss::DynamicData key(key_type);
+    key = "Luis";
+    check_basic_struct(soss_data["my_map"].at(key));
+    key = "Gasco";
+    check_basic_struct(soss_data["my_map"].at(key));
+    key = "Rulz";
+    check_basic_struct(soss_data["my_map"].at(key));
 }
 
 TEST_CASE("Convert between soss and dds", "[dds]")
