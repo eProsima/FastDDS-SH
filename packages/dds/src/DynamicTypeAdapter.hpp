@@ -100,6 +100,11 @@ public:
         }
     }
 
+    eprosima::fastrtps::types::MemberId get_union_id() const
+    {
+        return union_id_;
+    }
+
 };
 
 class MemberDescriptor : public eprosima::fastrtps::types::MemberDescriptor
