@@ -363,6 +363,15 @@ void Conversion::set_sequence_data(
                 to->set_complex_value(st_data, id);
                 break;
             }
+            case ::xtypes::TypeKind::UNION_TYPE:
+            {
+                DynamicTypeBuilder_ptr builder = get_builder(from[idx].type()); // The inner union builder
+                DynamicTypeBuilder* builder_ptr = static_cast<DynamicTypeBuilder*>(builder.get());
+                DynamicData* st_data = factory->create_data(builder_ptr->build());
+                set_union_data(from[idx], st_data);
+                to->set_complex_value(st_data, id);
+                break;
+            }
             default:
             {
                 std::stringstream ss;
