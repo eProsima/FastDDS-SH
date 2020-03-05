@@ -60,6 +60,12 @@ private:
     static std::map<std::string, DynamicPubSubType*> registered_types_;
     static std::map<std::string, DynamicTypeBuilder_ptr> builders_;
 
+    static const xtypes::DynamicType& resolve_type(
+        const xtypes::DynamicType& type);
+
+    static TypeKind resolve_type(
+        const DynamicType_ptr type);
+
     static DynamicTypeBuilder_ptr get_builder(
         const xtypes::DynamicType& type);
 
@@ -79,6 +85,11 @@ private:
         DynamicData* to);
 
     // soss -> dds
+    static void set_map_data(
+        xtypes::ReadableDynamicDataRef from,
+        DynamicData* to);
+
+    // soss -> dds
     static void set_array_data(
         xtypes::ReadableDynamicDataRef from,
         DynamicData* to,
@@ -89,8 +100,18 @@ private:
         xtypes::ReadableDynamicDataRef input,
         DynamicData* output);
 
+    // soss -> dds
+    static bool set_union_data(
+        xtypes::ReadableDynamicDataRef input,
+        DynamicData* output);
+
     // dds -> soss
     static void set_sequence_data(
+        const DynamicData* from,
+        xtypes::WritableDynamicDataRef to);
+
+    // dds -> soss
+    static void set_map_data(
         const DynamicData* from,
         xtypes::WritableDynamicDataRef to);
 
@@ -102,6 +123,11 @@ private:
 
     // dds -> soss
     static bool set_struct_data(
+            const DynamicData* input,
+            ::xtypes::WritableDynamicDataRef output);
+
+    // dds -> soss
+    static bool set_union_data(
             const DynamicData* input,
             ::xtypes::WritableDynamicDataRef output);
 

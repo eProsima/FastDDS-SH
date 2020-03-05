@@ -361,6 +361,172 @@ static void check_mixed_struct(
     }
 }
 
+static void fill_union_struct(
+        soss::DynamicData& soss_data,
+        uint8_t disc)
+{
+    using namespace soss;
+    //MyUnion my_union;
+    /*
+    union MyUnion switch (uint8)
+    {
+        case 0: float my_float32;
+        case 1:
+        case 2: string my_string;
+        case 3: AliasBasicStruct abs;
+    };
+    */
+    switch(disc)
+    {
+        case 0:
+            soss_data["my_union"]["my_float32"] = 123.456f;
+            break;
+        case 1:
+        case 2:
+            soss_data["my_union"]["my_string"] = "Union String";
+            break;
+        case 3:
+            fill_basic_struct(soss_data["my_union"]["abs"]);
+            break;
+    }
+    //map<string, AliasBasicStruct> my_map;
+    soss::StringType key_type;
+    soss::DynamicData key(key_type);
+    key = "Luis";
+    fill_basic_struct(soss_data["my_map"][key]);
+    key = "Gasco";
+    fill_basic_struct(soss_data["my_map"][key]);
+    key = "Rulz";
+    fill_basic_struct(soss_data["my_map"][key]);
+}
+
+static void check_union_struct(
+        dds::DynamicData* dds_data)
+{
+    using namespace dds;
+    dds::DynamicData* union_data = dds_data->loan_value(0);
+    ::soss::dds::DynamicDataSOSS* dd_soss = static_cast<::soss::dds::DynamicDataSOSS*>(union_data);
+    MemberId id = dd_soss->get_union_id();
+    uint64_t label = dd_soss->get_union_label();
+    //MyUnion my_union;
+    /*
+    union MyUnion switch (uint8)
+    {
+        case 0: float my_float32;
+        case 1:
+        case 2: string my_string;
+        case 3: AliasBasicStruct abs;
+    };
+    */
+    switch (label)
+    {
+        case 0:
+            {
+                float v = dd_soss->get_float32_value(id);
+                REQUIRE(v == 123.456f);
+            }
+            break;
+        case 1:
+        case 2:
+            {
+                std::string v = dd_soss->get_string_value(id);
+                REQUIRE(v == "Union String");
+            }
+            break;
+        case 3:
+            {
+                dds::DynamicData* v = dd_soss->loan_value(id);
+                check_basic_struct(v);
+                dd_soss->return_loaned_value(v);
+            }
+            break;
+    }
+    dds_data->return_loaned_value(union_data);
+    //map<string, AliasBasicStruct> my_map;
+    dds::DynamicData* map_data = dds_data->loan_value(1);
+    ::soss::dds::DynamicDataSOSS* map_soss = static_cast<::soss::dds::DynamicDataSOSS*>(map_data);
+    MemberId keyId = 0;
+    MemberId elemId = 1;
+    std::string key;
+    dds::DynamicData* v;
+
+    uint32_t luis = 0;
+    uint32_t gasco = 0;
+    uint32_t rulz = 0;
+    uint32_t other = 0;
+
+    // map is ordered by hash!
+    for (uint32_t i = 0; i < 3; ++i)
+    {
+        keyId = i * 2;
+        elemId = keyId + 1;
+        key = map_soss->get_string_value(keyId);
+        v = map_soss->loan_value(elemId);
+
+        if (key == "Luis")
+        {
+            ++luis;
+        }
+        else if (key == "Gasco")
+        {
+            ++gasco;
+        }
+        else if (key == "Rulz")
+        {
+            ++rulz;
+        }
+        else
+        {
+            ++other;
+        }
+
+
+        check_basic_struct(v);
+        map_soss->return_loaned_value(v);
+    }
+
+    REQUIRE(((luis == gasco) && (gasco == rulz) && (rulz == 1u) && (other == 0u)));
+
+    dds_data->return_loaned_value(map_data);
+}
+
+static void check_union_struct(
+        soss::ReadableDynamicDataRef soss_data)
+{
+    //MyUnion my_union;
+    /*
+    union MyUnion switch (uint8)
+    {
+        case 0: float my_float32;
+        case 1:
+        case 2: string my_string;
+        case 3: AliasBasicStruct abs;
+    };
+    */
+    switch (soss_data["my_union"].d().value<uint8_t>())
+    {
+        case 0:
+            REQUIRE(soss_data["my_union"]["my_float32"].value<float>() == 123.456f);
+            break;
+        case 1:
+        case 2:
+            REQUIRE(soss_data["my_union"]["my_string"].value<std::string>() == "Union String");
+            break;
+        case 3:
+            check_basic_struct(soss_data["my_union"]["abs"]);
+            break;
+    }
+    //map<string, AliasBasicStruct> my_map;
+    soss::StringType key_type;
+    soss::DynamicData key(key_type);
+    key = "Luis";
+    check_basic_struct(soss_data["my_map"].at(key));
+    key = "Gasco";
+    check_basic_struct(soss_data["my_map"].at(key));
+    key = "Rulz";
+    check_basic_struct(soss_data["my_map"].at(key));
+}
+
 TEST_CASE("Convert between soss and dds", "[dds]")
 {
     static soss::Context context = soss::parse_file(soss_types);
@@ -463,5 +629,54 @@ TEST_CASE("Convert between soss and dds", "[dds]")
         soss::DynamicData wayback(*soss_struct);
         Conversion::dds_to_soss(dds_data, wayback);
         check_mixed_struct(wayback);
+    }
+
+    SECTION("union")
+    {
+        const soss::DynamicType* soss_union = result["MyUnionStruct"].get();
+        REQUIRE(soss_union != nullptr);
+        // Convert type from soss to dds
+        dds::DynamicTypeBuilder* builder = Conversion::create_builder(*soss_union);
+        REQUIRE(builder != nullptr);
+        dds::DynamicType_ptr dds_struct = builder->build();
+        dds::DynamicData_ptr dds_data_ptr(dds::DynamicDataFactory::get_instance()->create_data(dds_struct));
+        dds::DynamicData* dds_data = static_cast<dds::DynamicData*>(dds_data_ptr.get());
+        soss::DynamicData soss_data(*soss_union);
+        {
+            // Fill soss_data
+            fill_union_struct(soss_data, 0);
+            // Convert to dds_data
+            Conversion::soss_to_dds(soss_data, dds_data);
+            // Check data in dds_data
+            check_union_struct(dds_data);
+            // The other way
+            soss::DynamicData wayback(*soss_union);
+            Conversion::dds_to_soss(dds_data, wayback);
+            check_union_struct(wayback);
+        }
+        {
+            // Fill soss_data
+            fill_union_struct(soss_data, 1);
+            // Convert to dds_data
+            Conversion::soss_to_dds(soss_data, dds_data);
+            // Check data in dds_data
+            check_union_struct(dds_data);
+            // The other way
+            soss::DynamicData wayback(*soss_union);
+            Conversion::dds_to_soss(dds_data, wayback);
+            check_union_struct(wayback);
+        }
+        {
+            // Fill soss_data
+            fill_union_struct(soss_data, 3);
+            // Convert to dds_data
+            Conversion::soss_to_dds(soss_data, dds_data);
+            // Check data in dds_data
+            check_union_struct(dds_data);
+            // The other way
+            soss::DynamicData wayback(*soss_union);
+            Conversion::dds_to_soss(dds_data, wayback);
+            check_union_struct(wayback);
+        }
     }
 }

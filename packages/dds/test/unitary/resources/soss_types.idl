@@ -44,3 +44,19 @@ struct MixedStruct
     NestedSequence my_stseq_arr[4];
     NestedArray my_starr_arr[5];
 };
+
+typedef BasicStruct AliasBasicStruct;
+
+union MyUnion switch (uint8)
+{
+    case 0: float my_float32;
+    case 1:
+    case 2: string my_string;
+    case 3: AliasBasicStruct abs;
+};
+
+struct MyUnionStruct
+{
+    MyUnion my_union;
+    map<string, AliasBasicStruct> my_map;
+};
