@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include "Subscriber.hpp"
 #include "Conversion.hpp"
@@ -45,9 +45,10 @@ Subscriber::Subscriber(
     , reception_threads_{}
 {
     DynamicTypeBuilder* builder = Conversion::create_builder(message_type);
+
     if (builder != nullptr)
     {
-        participant->register_dynamic_type(topic_name, builder);
+        participant->register_dynamic_type(topic_name, message_type.name(), builder);
     }
     else
     {
@@ -85,7 +86,8 @@ Subscriber::~Subscriber()
     fastrtps::Domain::removeSubscriber(dds_subscriber_);
 }
 
-void Subscriber::receive(const fastrtps::types::DynamicData_ptr dds_message)
+void Subscriber::receive(
+        const fastrtps::types::DynamicData_ptr dds_message)
 {
     std::cout << "[soss-dds][subscriber]: translate message: dds -> soss "
         "(" << topic_name_ << ") " << std::endl;
@@ -101,7 +103,7 @@ void Subscriber::receive(const fastrtps::types::DynamicData_ptr dds_message)
     else
     {
         std::cerr << "Error converting message from soss message to dynamic types." << std::endl;
-   }
+    }
 }
 
 void Subscriber::onSubscriptionMatched(
@@ -126,7 +128,6 @@ void Subscriber::onNewDataMessage(
         }
     }
 }
-
 
 } // namespace dds
 } // namespace soss

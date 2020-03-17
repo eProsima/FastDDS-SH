@@ -47,7 +47,8 @@ public:
     }
 
     void register_dynamic_type(
-            const std::string& name,
+            const std::string& topic_name,
+            const std::string& type_name,
             DynamicTypeBuilder* builder);
 
     DynamicData_ptr create_dynamic_data(

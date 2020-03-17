@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include "Publisher.hpp"
 #include "Conversion.hpp"
@@ -37,9 +37,10 @@ Publisher::Publisher(
     : topic_name_{topic_name}
 {
     DynamicTypeBuilder* builder = Conversion::create_builder(message_type);
+
     if (builder != nullptr)
     {
-        participant->register_dynamic_type(topic_name, builder);
+        participant->register_dynamic_type(topic_name, message_type.name(), builder);
     }
     else
     {
@@ -96,7 +97,6 @@ void Publisher::onPublicationMatched(
     std::cout << "[soss-dds][publisher]: " << matching <<
         " (" << topic_name_ << ") " << std::endl;
 }
-
 
 } // namespace dds
 } // namespace soss
