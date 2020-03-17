@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include "Participant.hpp"
 #include "Conversion.hpp"
@@ -37,7 +37,8 @@ Participant::Participant()
     dds_participant_ = fastrtps::Domain::createParticipant(attributes);
 }
 
-Participant::Participant(const YAML::Node& config)
+Participant::Participant(
+        const YAML::Node& config)
 {
     using eprosima::fastrtps::xmlparser::XMLP_ret;
     using eprosima::fastrtps::xmlparser::XMLProfileManager;
@@ -45,7 +46,7 @@ Participant::Participant(const YAML::Node& config)
     if (!config.IsMap() || !config["file_path"] || !config["profile_name"])
     {
         std::string err_msg = "The node 'Participant' in the configuration must be a map containing two keys: "
-                              "'file_path' and 'profile_name'. ";
+                "'file_path' and 'profile_name'. ";
         throw DDSMiddlewareException(err_msg);
     }
 
@@ -76,6 +77,7 @@ Participant::~Participant()
 
 void Participant::register_dynamic_type(
         const std::string& topic_name,
+        const std::string& type_name,
         DynamicTypeBuilder* builder)
 {
     auto type_it = topic_to_type_.find(topic_name);
@@ -84,28 +86,28 @@ void Participant::register_dynamic_type(
         return; // Already registered.
     }
 
-    auto it = topics_.find(builder->get_name());
+    auto it = topics_.find(type_name);
     if (topics_.end() != it)
     {
         // Type known, add the entry in the map topic->type
-        topic_to_type_.emplace(topic_name, builder->get_name());
-        std::cout << "[soss-dds][participant]: Adding type '" << builder->get_name() << "' to topic '"
+        topic_to_type_.emplace(topic_name, type_name);
+        std::cout << "[soss-dds][participant]: Adding type '" << type_name << "' to topic '"
                   << topic_name << "'." << std::endl;
         return;
     }
 
     DynamicType_ptr dtptr = builder->build();
-    DynamicType* dt = static_cast<DynamicType*>(dtptr.get());
 
-    if(dtptr != nullptr)
+    if (dtptr != nullptr)
     {
-        auto pair = topics_.emplace(dt->get_name(), fastrtps::types::DynamicPubSubType(dtptr));
-        topic_to_type_.emplace(topic_name, dt->get_name());
+        auto pair = topics_.emplace(type_name, fastrtps::types::DynamicPubSubType(dtptr));
+        topic_to_type_.emplace(topic_name, type_name);
 
         // Check if already registered
         eprosima::fastrtps::TopicDataType* p_type = nullptr;
-        if (!fastrtps::Domain::getRegisteredType(dds_participant_, dt->get_name().c_str(), &p_type))
+        if (!fastrtps::Domain::getRegisteredType(dds_participant_, type_name.c_str(), &p_type))
         {
+            pair.first->second.setName(type_name.c_str());
             // Register it in fastrtps
             if (pair.second && !fastrtps::Domain::registerType(dds_participant_, &pair.first->second))
             {
@@ -117,13 +119,13 @@ void Participant::register_dynamic_type(
 
         if (pair.second)
         {
-            std::cout << "[soss-dds][participant]: Registered type '" << dt->get_name() << "' in topic '"
+            std::cout << "[soss-dds][participant]: Registered type '" << type_name << "' in topic '"
                       << topic_name << "'." << std::endl;
             Conversion::register_type(topic_name, &pair.first->second);
         }
         else
         {
-            std::cout << "[soss-dds][participant]: Failed registering type '" << dt->get_name() << "' in topic '"
+            std::cout << "[soss-dds][participant]: Failed registering type '" << type_name << "' in topic '"
                       << topic_name << "'." << std::endl;
         }
     }
@@ -162,7 +164,5 @@ void Participant::onParticipantDiscovery(
 {
 }
 
-
 } //namespace dds
 } //namespace soss
-

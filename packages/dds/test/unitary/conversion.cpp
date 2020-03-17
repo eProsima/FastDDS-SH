@@ -13,24 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
-#include "Conversion.hpp"
+#include <Conversion.hpp>
 #include <xtypes/xtypes.hpp>
 #include <catch2/catch.hpp>
 
 namespace soss {
-    using namespace eprosima::xtypes;
-    using namespace eprosima::xtypes::idl;
+using namespace eprosima::xtypes;
+using namespace eprosima::xtypes::idl;
 }
 
 namespace dds {
-    using DynamicData = ::soss::dds::DynamicData;
-    using DynamicData_ptr = ::soss::dds::DynamicData_ptr;
-    using DynamicDataFactory = ::soss::dds::DynamicDataFactory;
-    using DynamicTypeBuilder = ::soss::dds::DynamicTypeBuilder;
-    using DynamicType_ptr = ::soss::dds::DynamicType_ptr;
-    using MemberId = ::eprosima::fastrtps::types::MemberId;
+using DynamicData = ::soss::dds::DynamicData;
+using DynamicData_ptr = ::soss::dds::DynamicData_ptr;
+using DynamicDataFactory = ::soss::dds::DynamicDataFactory;
+using DynamicTypeBuilder = ::soss::dds::DynamicTypeBuilder;
+using DynamicType_ptr = ::soss::dds::DynamicType_ptr;
+using MemberId = ::eprosima::fastrtps::types::MemberId;
 }
 
 static const std::string soss_types = "soss_types.idl";
@@ -121,7 +121,7 @@ static void check_nested_sequence(
 {
     for (uint32_t i = 0; i < 3; ++i)
     {
-        dds::DynamicData* inner_seq= dds_data->loan_value(i);
+        dds::DynamicData* inner_seq = dds_data->loan_value(i);
         for (uint32_t j = 0; j < 2; ++j)
         {
             int32_t temp = inner_seq->get_int32_value(j);
@@ -368,15 +368,15 @@ static void fill_union_struct(
     using namespace soss;
     //MyUnion my_union;
     /*
-    union MyUnion switch (uint8)
-    {
+       union MyUnion switch (uint8)
+       {
         case 0: float my_float32;
         case 1:
         case 2: string my_string;
         case 3: AliasBasicStruct abs;
-    };
-    */
-    switch(disc)
+       };
+     */
+    switch (disc)
     {
         case 0:
             soss_data["my_union"]["my_float32"] = 123.456f;
@@ -410,36 +410,36 @@ static void check_union_struct(
     uint64_t label = dd_soss->get_union_label();
     //MyUnion my_union;
     /*
-    union MyUnion switch (uint8)
-    {
+       union MyUnion switch (uint8)
+       {
         case 0: float my_float32;
         case 1:
         case 2: string my_string;
         case 3: AliasBasicStruct abs;
-    };
-    */
+       };
+     */
     switch (label)
     {
         case 0:
-            {
-                float v = dd_soss->get_float32_value(id);
-                REQUIRE(v == 123.456f);
-            }
-            break;
+        {
+            float v = dd_soss->get_float32_value(id);
+            REQUIRE(v == 123.456f);
+        }
+        break;
         case 1:
         case 2:
-            {
-                std::string v = dd_soss->get_string_value(id);
-                REQUIRE(v == "Union String");
-            }
-            break;
+        {
+            std::string v = dd_soss->get_string_value(id);
+            REQUIRE(v == "Union String");
+        }
+        break;
         case 3:
-            {
-                dds::DynamicData* v = dd_soss->loan_value(id);
-                check_basic_struct(v);
-                dd_soss->return_loaned_value(v);
-            }
-            break;
+        {
+            dds::DynamicData* v = dd_soss->loan_value(id);
+            check_basic_struct(v);
+            dd_soss->return_loaned_value(v);
+        }
+        break;
     }
     dds_data->return_loaned_value(union_data);
     //map<string, AliasBasicStruct> my_map;
@@ -495,14 +495,14 @@ static void check_union_struct(
 {
     //MyUnion my_union;
     /*
-    union MyUnion switch (uint8)
-    {
+       union MyUnion switch (uint8)
+       {
         case 0: float my_float32;
         case 1:
         case 2: string my_string;
         case 3: AliasBasicStruct abs;
-    };
-    */
+       };
+     */
     switch (soss_data["my_union"].d().value<uint8_t>())
     {
         case 0:
@@ -531,7 +531,7 @@ TEST_CASE("Convert between soss and dds", "[dds]")
 {
     static soss::Context context = soss::parse_file(soss_types);
     REQUIRE(context.success);
-    std::map<std::string, soss::DynamicType::Ptr> result = context.get_all_types();
+    std::map<std::string, soss::DynamicType::Ptr> result = context.get_all_scoped_types();
 
     REQUIRE(!result.empty());
 
@@ -678,5 +678,30 @@ TEST_CASE("Convert between soss and dds", "[dds]")
             Conversion::dds_to_soss(dds_data, wayback);
             check_union_struct(wayback);
         }
+    }
+
+    SECTION("namespaced_type")
+    {
+        const soss::DynamicType* soss_namespaced_type = result["soss::types::NamespacedType"].get();
+        REQUIRE(soss_namespaced_type != nullptr);
+        // Convert type from soss to dds
+        dds::DynamicTypeBuilder* builder = Conversion::create_builder(*soss_namespaced_type);
+        REQUIRE(builder != nullptr);
+        dds::DynamicType_ptr dds_namespaced_type = builder->build();
+        dds::DynamicData_ptr dds_data_ptr(dds::DynamicDataFactory::get_instance()->create_data(dds_namespaced_type));
+        dds::DynamicData* dds_data = static_cast<dds::DynamicData*>(dds_data_ptr.get());
+        soss::DynamicData soss_data(*soss_namespaced_type);
+        // Fill soss_data
+        fill_basic_struct(soss_data["basic"]);
+        // Convert to dds_data
+        Conversion::soss_to_dds(soss_data, dds_data);
+        // Check data in dds_data
+        dds::DynamicData* dds_basic_data = dds_data->loan_value(dds_data->get_member_id_by_name("basic"));
+        check_basic_struct(dds_basic_data);
+        dds_data->return_loaned_value(dds_basic_data);
+        // The other way
+        soss::DynamicData wayback(*soss_namespaced_type);
+        Conversion::dds_to_soss(dds_data, wayback);
+        check_basic_struct(wayback["basic"]);
     }
 }

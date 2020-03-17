@@ -60,3 +60,14 @@ struct MyUnionStruct
     MyUnion my_union;
     map<string, AliasBasicStruct> my_map;
 };
+
+module soss
+{
+    module types
+    {
+        struct NamespacedType
+        {
+            BasicStruct basic;
+        };
+    };
+};

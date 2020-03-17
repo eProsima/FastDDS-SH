@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include "Conversion.hpp"
 #include <fastrtps/types/TypeDescriptor.h>
@@ -36,6 +36,13 @@ std::string Conversion::convert_type_name(
         const std::string& message_type)
 {
     std::string type = message_type;
+
+    //TODO(Ricardo) Remove when old dyntypes support namespaces.
+    size_t npos = type.rfind(":");
+    if (std::string::npos != npos)
+    {
+        type = type.substr(npos + 1);
+    }
 
     for (size_t i = type.find('/'); i != std::string::npos; i = type.find('/', i))
     {
@@ -2160,7 +2167,7 @@ DynamicTypeBuilder_ptr Conversion::get_builder(
             DynamicTypeBuilder* builder = factory->create_enum_builder();
             builder->set_name(convert_type_name(type.name()));
             const ::xtypes::EnumerationType<uint32_t>& enum_type =
-                static_cast<const ::xtypes::EnumerationType<uint32_t>&>(type);
+                    static_cast<const ::xtypes::EnumerationType<uint32_t>&>(type);
             const std::map<std::string, uint32_t>& enumerators = enum_type.enumerators();
             for (auto pair : enumerators)
             {
@@ -2176,18 +2183,18 @@ DynamicTypeBuilder_ptr Conversion::get_builder(
         case ::xtypes::TypeKind::ALIAS_TYPE:
         {
             /* Real alias... doesn't returns a builder, but a type
-            DynamicTypeBuilder_ptr content = get_builder(static_cast<const ::xtypes::AliasType&>(type).get());
-            DynamicTypeBuilder* ptr = content.get();
-            return factory->create_alias_type(ptr, type.name());
-            */
+               DynamicTypeBuilder_ptr content = get_builder(static_cast<const ::xtypes::AliasType&>(type).get());
+               DynamicTypeBuilder* ptr = content.get();
+               return factory->create_alias_type(ptr, type.name());
+             */
             return get_builder(static_cast<const ::xtypes::AliasType&>(type).rget()); // Resolve alias
         }
         /*
-        case ::xtypes::TypeKind::BITMASK_TYPE:
-        {
+           case ::xtypes::TypeKind::BITMASK_TYPE:
+           {
             // TODO
-        }
-        */
+           }
+         */
         case ::xtypes::TypeKind::ARRAY_TYPE:
         {
             const ::xtypes::ArrayType& c_type = static_cast<const ::xtypes::ArrayType&>(type);
@@ -2281,5 +2288,6 @@ void Conversion::get_array_specs(
         result.second = get_builder(array.content_type());
     }
 }
+
 } // namespace dds
 } // namespace soss
