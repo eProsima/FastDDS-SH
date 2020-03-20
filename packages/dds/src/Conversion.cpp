@@ -25,6 +25,7 @@ using eprosima::fastrtps::types::MemberId;
 namespace soss {
 namespace dds {
 
+namespace xtypes = eprosima::xtypes;
 using namespace eprosima::fastrtps;
 
 std::map<std::string, ::xtypes::DynamicType::Ptr> Conversion::types_;
