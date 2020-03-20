@@ -32,8 +32,8 @@ namespace dds {
 Publisher::Publisher(
         Participant* participant,
         const std::string& topic_name,
-        const ::xtypes::DynamicType& message_type)
-
+        const ::xtypes::DynamicType& message_type,
+        const YAML::Node& config)
     : topic_name_{topic_name}
 {
     DynamicTypeBuilder* builder = Conversion::create_builder(message_type);
@@ -53,6 +53,14 @@ Publisher::Publisher(
     attributes.topic.topicKind = NO_KEY; //Check this
     attributes.topic.topicName = topic_name_;
     attributes.topic.topicDataType = message_type.name();
+
+    if (config["service_instance_name"])
+    {
+        eprosima::fastrtps::rtps::Property instance_property;
+        instance_property.name("dds.rpc.service_instance_name");
+        instance_property.value(config["service_instance_name"].as<std::string>());
+        attributes.properties.properties().push_back(instance_property);
+    }
 
     dds_publisher_ = fastrtps::Domain::createPublisher(participant->get_dds_participant(), attributes, this);
 
