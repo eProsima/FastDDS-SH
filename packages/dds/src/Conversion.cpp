@@ -1690,7 +1690,22 @@ bool Conversion::set_struct_data(
                     {
                         uint8_t value;
                         ret = input->get_byte_value(value, id);
-                        output[descriptor.get_name()].value<uint8_t>(value);
+                        switch (output[descriptor.get_name()].type().kind())
+                        {
+                        case ::xtypes::TypeKind::UINT_8_TYPE:
+                            output[descriptor.get_name()].value<uint8_t>(value);
+                            break;
+                        case ::xtypes::TypeKind::CHAR_8_TYPE:
+                            output[descriptor.get_name()].value<char>(static_cast<char>(value));
+                            break;
+                        case ::xtypes::TypeKind::INT_8_TYPE:
+                            output[descriptor.get_name()].value<int8_t>(static_cast<int8_t>(value));
+                            break;
+                        default:
+                            std::stringstream ss;
+                            ss << "Error parsing from dynamic type '" << input->get_name();
+                            throw DDSMiddlewareException(ss.str());
+                        }
                         break;
                     }
                     case types::TK_INT16:
