@@ -621,7 +621,15 @@ bool Conversion::soss_to_dds(
         const ::xtypes::DynamicData& input,
         DynamicData* output)
 {
-    return set_struct_data(input, output);
+    if (input.type().kind() == ::xtypes::TypeKind::STRUCTURE_TYPE)
+    {
+        return set_struct_data(input, output);
+    }
+    else if (input.type().kind() == ::xtypes::TypeKind::UNION_TYPE)
+    {
+        return set_union_data(input, output);
+    }
+    throw DDSMiddlewareException("Unsupported data to convert (expected Structure or Union).");
 }
 
 bool Conversion::set_struct_data(
@@ -1639,7 +1647,16 @@ bool Conversion::dds_to_soss(
         const DynamicData* c_input,
         ::xtypes::DynamicData& output)
 {
-    return set_struct_data(c_input, output.ref());
+    if (output.type().kind() == ::xtypes::TypeKind::STRUCTURE_TYPE)
+    {
+        return set_struct_data(c_input, output.ref());
+    }
+    else if (output.type().kind() == ::xtypes::TypeKind::UNION_TYPE)
+    {
+        return set_union_data(c_input, output.ref());
+    }
+    throw DDSMiddlewareException("Unsupported data to convert (expected Structure or Union).");
+    //return set_struct_data(c_input, output.ref());
 }
 
 TypeKind Conversion::resolve_type(

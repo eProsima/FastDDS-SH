@@ -20,6 +20,8 @@
 #include "Participant.hpp"
 #include "Publisher.hpp"
 #include "Subscriber.hpp"
+#include "Server.hpp"
+#include "Client.hpp"
 #include "Conversion.hpp"
 
 #include <fastrtps/Domain.h>
@@ -30,14 +32,14 @@
 namespace soss {
 namespace dds {
 
-class SystemHandle : public virtual TopicSystem
+class SystemHandle : public virtual FullSystem
 {
 public:
 
     bool configure(
             const RequiredTypes& /* types */,
             const YAML::Node& configuration,
-            TypeRegistry& /*type_registry*/)
+            TypeRegistry& /*type_registry*/) override
     {
         /*
          * SOSS-DDS doesn't define new types. Needed types will be defined in the 'types' section
@@ -67,12 +69,12 @@ public:
         return true;
     }
 
-    bool okay() const
+    bool okay() const override
     {
         return true;
     }
 
-    bool spin_once()
+    bool spin_once() override
     {
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(100ms);
@@ -83,7 +85,7 @@ public:
             const std::string& topic_name,
             const xtypes::DynamicType& message_type,
             SubscriptionCallback callback,
-            const YAML::Node& /* configuration */)
+            const YAML::Node& /* configuration */) override
     {
         try
         {
@@ -108,7 +110,7 @@ public:
     std::shared_ptr<TopicPublisher> advertise(
             const std::string& topic_name,
             const xtypes::DynamicType& message_type,
-            const YAML::Node& configuration)
+            const YAML::Node& configuration) override
     {
         try
         {
@@ -128,11 +130,66 @@ public:
         }
     }
 
+    bool create_client_proxy(
+            const std::string& service_name,
+            const xtypes::DynamicType& service_type,
+            RequestCallback callback,
+            const YAML::Node& configuration) override
+    {
+        try
+        {
+            auto client = std::make_shared<Client>(
+                participant_.get(),
+                service_name,
+                service_type,
+                callback,
+                configuration);
+            clients_.emplace_back(std::move(client));
+
+            std::cout << "[soss-dds]: client created. "
+                "service: " << service_name << ", "
+                "type: " << service_type.name() << std::endl;
+
+            return true;
+
+        }
+        catch (DDSMiddlewareException& e)
+        {
+            std::cerr << "[soss-dds]: " << e.what() << std::endl;
+            return false;
+        }
+    }
+
+    std::shared_ptr<ServiceProvider> create_service_proxy(
+            const std::string& service_name,
+            const xtypes::DynamicType& service_type,
+            const YAML::Node& configuration) override
+    {
+        try
+        {
+            auto server = std::make_shared<Server>(participant_.get(), service_name, service_type, configuration);
+            servers_.emplace_back(std::move(server));
+
+            std::cout << "[soss-dds]: server created. "
+                "service: " << service_name << ", "
+                "type: " << service_type.name() << std::endl;
+
+            return servers_.back();
+        }
+        catch (DDSMiddlewareException& e)
+        {
+            std::cerr << "[soss-dds]: " << e.what() << std::endl;
+            return nullptr;
+        }
+    }
+
 private:
 
     std::unique_ptr<Participant> participant_;
     std::vector<std::shared_ptr<Publisher> > publishers_;
     std::vector<std::shared_ptr<Subscriber> > subscribers_;
+    std::vector<std::shared_ptr<Client> > clients_;
+    std::vector<std::shared_ptr<Server> > servers_;
 };
 
 
