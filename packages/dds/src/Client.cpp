@@ -139,7 +139,7 @@ void Client::onNewDataMessage(
     {
         if (ALIVE == info.sampleKind)
         {
-            auto sample_id = info.sample_identity; // TODO Verify (related_sample_identity?)
+            fastrtps::rtps::SampleIdentity sample_id = info.sample_identity; // TODO Verify (related_sample_identity?)
             ::xtypes::DynamicData received(message_type_);
             bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(dynamic_data_.get()), received);
 

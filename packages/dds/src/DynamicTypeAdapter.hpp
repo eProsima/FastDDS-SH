@@ -43,24 +43,27 @@ using DynamicType_ptr = eprosima::fastrtps::types::DynamicType_ptr;
 using DynamicPubSubType = eprosima::fastrtps::types::DynamicPubSubType;
 using TypeKind = eprosima::fastrtps::types::TypeKind;
 
-bool operator < (
-        const eprosima::fastrtps::rtps::SampleIdentity& lha,
-        const eprosima::fastrtps::rtps::SampleIdentity& rha)
+struct SampleIdentityComparator
 {
-    if (lha.writer_guid() < rha.writer_guid())
+    bool operator () (
+            const eprosima::fastrtps::rtps::SampleIdentity lha,
+            const eprosima::fastrtps::rtps::SampleIdentity rha) const
     {
-        return true;
-    }
-    if (rha.writer_guid() < lha.writer_guid()) // operator > doesn't exists for GUID_t
-    {
+        if (lha.writer_guid() < rha.writer_guid())
+        {
+            return true;
+        }
+        if (rha.writer_guid() < lha.writer_guid()) // operator > doesn't exists for GUID_t
+        {
+            return false;
+        }
+        if (lha.sequence_number() < rha.sequence_number())
+        {
+            return true;
+        }
         return false;
     }
-    if (lha.sequence_number() < rha.sequence_number())
-    {
-        return true;
-    }
-    return false;
-}
+};
 
 #if 1 < FASTRTPS_VERSION_MAJOR || (1 == FASTRTPS_VERSION_MAJOR && 8 <= FASTRTPS_VERSION_MINOR)
 

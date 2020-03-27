@@ -112,8 +112,9 @@ void Server::call_service(
         fastrtps::rtps::WriteParams params;
         success = dds_publisher_->write(dynamic_data_.get(), params);
         // TODO Retrieve sample_id from the publisher
-        auto sample = params.sample_identity();
+        fastrtps::rtps::SampleIdentity sample = params.sample_identity();
         sample_callhandle_[sample] = call_handle;
+        //sample_callhandle_.emplace(std::make_pair(sample, call_handle));
     }
     else
     {
@@ -149,8 +150,8 @@ void Server::onNewDataMessage(
         if (ALIVE == info.sampleKind)
         {
             //auto sample_id = info.sample_identity;
-            auto sample_id = info.related_sample_identity; // TODO Verify
-            auto call_handle = sample_callhandle_[sample_id];
+            fastrtps::rtps::SampleIdentity sample_id = info.related_sample_identity; // TODO Verify
+            std::shared_ptr<void> call_handle = sample_callhandle_[sample_id];
 
             ::xtypes::DynamicData received(message_type_);
             bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(dynamic_data_.get()), received);

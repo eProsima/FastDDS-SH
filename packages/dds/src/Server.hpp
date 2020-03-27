@@ -90,7 +90,8 @@ private:
 
     std::vector<std::thread> reception_threads_;
     std::map<std::shared_ptr<void>, ServiceClient*> callhandle_client_;
-    std::map<eprosima::fastrtps::rtps::SampleIdentity, std::shared_ptr<void>> sample_callhandle_;
+    std::map<eprosima::fastrtps::rtps::SampleIdentity, std::shared_ptr<void>, SampleIdentityComparator>
+        sample_callhandle_;
     std::map<std::string, std::string> discriminator_to_type_;
     std::map<std::string, std::string> type_to_discriminator_;
 };
