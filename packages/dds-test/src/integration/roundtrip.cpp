@@ -18,6 +18,9 @@
 #include <soss/mock/api.hpp>
 #include <soss/Instance.hpp>
 
+#include <fastrtps/fastrtps_all.h>
+#include "../../resources/test_service/test_servicePubSubTypes.h"
+
 #include <catch2/catch.hpp>
 
 #include <iostream>
@@ -25,6 +28,106 @@
 #include <ctime>
 
 using namespace std::chrono_literals;
+
+class FastDDSTestServer
+{
+public:
+    FastDDSTestServer()
+    {
+        using namespace eprosima::fastrtps;
+        ParticipantAttributes part_attr;
+        part_attr.rtps.setName("FastDDSTestServer");
+        part_ = Domain::createParticipant(part_attr);
+        Domain::registerType(part_, &psType_req_);
+        Domain::registerType(part_, &psType_rep_);
+
+        // Publisher of replies
+        PublisherAttributes pub_attr;
+        pub_attr.topic.topicDataType = psType_rep_.getName();
+        pub_attr.topic.topicName = "TestService_Reply";
+        pub_ = Domain::createPublisher(part_, pub_attr);
+
+        request_listener.publisher(pub_);
+
+        // Subscriber of requests
+        SubscriberAttributes sub_attr;
+        sub_attr.topic.topicDataType = psType_req_.getName();
+        sub_attr.topic.topicName = "TestService_Request";
+        sub_ = Domain::createSubscriber(part_, sub_attr, &request_listener);
+    }
+
+private:
+    eprosima::fastrtps::Participant* part_;
+    eprosima::fastrtps::Subscriber* sub_;
+    eprosima::fastrtps::Publisher* pub_;
+    TestService_RequestPubSubType psType_req_;
+    TestService_ReplyPubSubType psType_rep_;
+
+    class RequestListener : public eprosima::fastrtps::SubscriberListener
+    {
+    private:
+        eprosima::fastrtps::Publisher* pub_;
+
+    public:
+        void publisher(
+                eprosima::fastrtps::Publisher* pub)
+        {
+            pub_ = pub;
+        }
+
+        void onNewDataMessage(eprosima::fastrtps::Subscriber* sub) override
+        {
+            using namespace eprosima::fastrtps;
+            SampleInfo_t info;
+            TestService_Request req_msg;
+            TestService_Reply rep_msg;
+
+            if (sub->takeNextData(&req_msg, &info))
+            {
+                const Union_Request& request = req_msg.request();
+                Union_Reply& reply = rep_msg.reply();
+                rtps::WriteParams params;
+                params.related_sample_identity(info.sample_identity);
+
+                switch(request._d())
+                {
+                    case 0: // If the data is "TEST", then success will be true.
+                    {
+                        const Method0_Request& input = request.method0();
+                        Method0_Reply output;
+                        output.success(false);
+                        if (input.data() == "TEST")
+                        {
+                            output.success(true);
+                        }
+                        reply.method0(output);
+                        pub_->write(&rep_msg, params);
+                        break;
+                    }
+                    case 1: // a + b = result
+                    {
+                        const Method1_Request& input = request.method1();
+                        Method1_Reply output;
+                        output.result(input.a() + input.b());
+                        reply.method1(output);
+                        pub_->write(&rep_msg, params);
+                        break;
+                    }
+                    case 2: // Echoes data
+                    {
+                        const Method2_Request& input = request.method2();
+                        Method2_Reply output;
+                        output.data(input.data());
+                        reply.method2(output);
+                        pub_->write(&rep_msg, params);
+                        break;
+                    }
+
+                }
+            }
+        }
+    } request_listener;
+};
 
 std::string gen_config_yaml(
         const std::string& topic_type,
@@ -50,6 +153,49 @@ std::string gen_config_yaml(
 
     s += "systems:\n";
     s += "    dds:\n";
+
+    if (dds_config_file_path != "")
+    {
+        s += "        participant:\n";
+        s += "            file_path: " + dds_config_file_path + "\n";
+        s += "            profile_name: " + dds_profile_name + "\n";
+    }
+
+    s += "    mock: { type: mock, types-from: dds }\n";
+
+    s += "routes:\n";
+    s += "    mock_to_dds: { from: mock, to: dds }\n";
+    s += "    dds_to_mock: { from: dds, to: mock }\n";
+
+    s += "topics:\n";
+    s += "    " + topic_sent + ": { type: \"" + topic_type + "\", route: mock_to_dds" + remap + "}\n";
+    s += "    " + topic_recv + ": { type: \"" + topic_type + "\", route: dds_to_mock" + remap + "}\n";
+    return s;
+}
+
+std::string gen_config_method_yaml(
+        const std::string& topic_type,
+        const std::string& topic_sent,
+        const std::string& topic_recv,
+        const std::string& topic_mapped,
+        const std::string& dds_config_file_path,
+        const std::string& dds_profile_name)
+{
+    std::string remap = "";
+    if (topic_mapped != "") {
+        remap = ", remap: {dds: { topic: \"" + topic_mapped + "\" } }";
+    }
+
+    std::string s;
+    s += "types:\n";
+    s += "    idls:\n";
+    s += "        - >\n";
+    s += "            #include \"test_service.idl\"\n";
+
+    s += "systems:\n";
+    s += "    dds:\n";
+
+    //////////// TODO POR AQUI
 
     if (dds_config_file_path != "")
     {

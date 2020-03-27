@@ -1,0 +1,48 @@
+struct Method0_Request // If the data is "TEST", then success will be true.
+{
+    string data;
+};
+struct Method1_Request // a + b = result
+{
+    int32 a;
+    int32 b;
+};
+struct Method2_Request
+{
+    float data; // Echoes data
+};
+union Union_Request switch (uint32)
+{
+    case 0: Method0_Request method0;
+    case 1: Method1_Request method1;
+    case 2: Method2_Request method2;
+};
+
+struct Method0_Reply // If the data is "TEST", then success will be true.
+{
+    boolean success;
+};
+struct Method1_Reply
+{
+    int32 result; // a + b = result
+};
+struct Method2_Reply
+{
+    float data; // Echoes data
+};
+union Union_Reply switch (uint32)
+{
+    case 0: Method0_Reply method0;
+    case 1: Method1_Reply method1;
+    case 2: Method2_Reply method2;
+};
+
+struct TestService_Request
+{
+    Union_Request request;
+};
+
+struct TestService_Reply
+{
+    Union_Reply reply;
+};
