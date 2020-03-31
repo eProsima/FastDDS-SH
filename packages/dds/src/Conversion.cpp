@@ -2322,5 +2322,66 @@ void Conversion::get_array_specs(
     }
 }
 
+const xtypes::DynamicType& Conversion::resolve_discriminator_type(
+        const ::xtypes::DynamicType& service_type,
+        const std::string& discriminator)
+{
+    if (discriminator.find(".") == std::string::npos)
+    {
+        return service_type;
+    }
+
+    std::string path = discriminator;
+    const xtypes::DynamicType* type_ptr;
+    std::string type = path.substr(0, path.find("."));
+    std::string member;
+    type_ptr = &service_type;
+    while (path.find(".") != std::string::npos)
+    {
+        path = path.substr(path.find(".") + 1);
+        member = path.substr(0, path.find("."));
+        if (type_ptr->is_aggregation_type())
+        {
+            const xtypes::AggregationType& aggregation = static_cast<const xtypes::AggregationType&>(*type_ptr);
+            type_ptr = &aggregation.member(member).type();
+        }
+    }
+
+    return *type_ptr;
+}
+
+::xtypes::WritableDynamicDataRef Conversion::access_member_data(
+        ::xtypes::WritableDynamicDataRef membered_data,
+        const std::string& path)
+{
+    std::vector<std::string> nodes;
+    std::string token;
+    std::istringstream iss(path);
+
+    // Split the path
+    while (std::getline(iss, token, '.'))
+    {
+        nodes.push_back(token);
+    }
+
+    // Navigate
+    return access_member_data(membered_data, nodes, 1);
+}
+
+::xtypes::WritableDynamicDataRef Conversion::access_member_data(
+            ::xtypes::WritableDynamicDataRef membered_data,
+            const std::vector<std::string>& tokens,
+            size_t index)
+{
+    if (index == tokens.size())
+    {
+        return membered_data;
+    }
+    else
+    {
+        return access_member_data(membered_data[tokens[index]], tokens, index + 1);
+    }
+}
+
 } // namespace dds
 } // namespace soss

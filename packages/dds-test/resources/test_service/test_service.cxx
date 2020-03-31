@@ -32,28 +32,28 @@ using namespace eprosima::fastcdr::exception;
 
 #include <utility>
 
-Method0_Request::Method0_Request()
+Method0_In::Method0_In()
 {
     // m_data com.eprosima.idl.parser.typecode.StringTypeCode@5abca1e0
     m_data ="";
 
 }
 
-Method0_Request::~Method0_Request()
+Method0_In::~Method0_In()
 {
 }
 
-Method0_Request::Method0_Request(const Method0_Request &x)
+Method0_In::Method0_In(const Method0_In &x)
 {
     m_data = x.m_data;
 }
 
-Method0_Request::Method0_Request(Method0_Request &&x)
+Method0_In::Method0_In(Method0_In &&x)
 {
     m_data = std::move(x.m_data);
 }
 
-Method0_Request& Method0_Request::operator=(const Method0_Request &x)
+Method0_In& Method0_In::operator=(const Method0_In &x)
 {
 
     m_data = x.m_data;
@@ -61,7 +61,7 @@ Method0_Request& Method0_Request::operator=(const Method0_Request &x)
     return *this;
 }
 
-Method0_Request& Method0_Request::operator=(Method0_Request &&x)
+Method0_In& Method0_In::operator=(Method0_In &&x)
 {
 
     m_data = std::move(x.m_data);
@@ -69,7 +69,7 @@ Method0_Request& Method0_Request::operator=(Method0_Request &&x)
     return *this;
 }
 
-size_t Method0_Request::getMaxCdrSerializedSize(size_t current_alignment)
+size_t Method0_In::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
 
@@ -79,7 +79,7 @@ size_t Method0_Request::getMaxCdrSerializedSize(size_t current_alignment)
     return current_alignment - initial_alignment;
 }
 
-size_t Method0_Request::getCdrSerializedSize(const Method0_Request& data, size_t current_alignment)
+size_t Method0_In::getCdrSerializedSize(const Method0_In& data, size_t current_alignment)
 {
     (void)data;
     size_t initial_alignment = current_alignment;
@@ -90,13 +90,13 @@ size_t Method0_Request::getCdrSerializedSize(const Method0_Request& data, size_t
     return current_alignment - initial_alignment;
 }
 
-void Method0_Request::serialize(eprosima::fastcdr::Cdr &scdr) const
+void Method0_In::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
 
     scdr << m_data;
 }
 
-void Method0_Request::deserialize(eprosima::fastcdr::Cdr &dcdr)
+void Method0_In::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
 
     dcdr >> m_data;
@@ -106,7 +106,7 @@ void Method0_Request::deserialize(eprosima::fastcdr::Cdr &dcdr)
  * @brief This function copies the value in member data
  * @param _data New value to be copied in member data
  */
-void Method0_Request::data(const std::string &_data)
+void Method0_In::data(const std::string &_data)
 {
 m_data = _data;
 }
@@ -115,7 +115,7 @@ m_data = _data;
  * @brief This function moves the value in member data
  * @param _data New value to be moved in member data
  */
-void Method0_Request::data(std::string &&_data)
+void Method0_In::data(std::string &&_data)
 {
 m_data = std::move(_data);
 }
@@ -124,7 +124,7 @@ m_data = std::move(_data);
  * @brief This function returns a constant reference to member data
  * @return Constant reference to member data
  */
-const std::string& Method0_Request::data() const
+const std::string& Method0_In::data() const
 {
     return m_data;
 }
@@ -133,12 +133,12 @@ const std::string& Method0_Request::data() const
  * @brief This function returns a reference to member data
  * @return Reference to member data
  */
-std::string& Method0_Request::data()
+std::string& Method0_In::data()
 {
     return m_data;
 }
 
-size_t Method0_Request::getKeyMaxCdrSerializedSize(size_t current_alignment)
+size_t Method0_In::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t current_align = current_alignment;
 
@@ -147,18 +147,18 @@ size_t Method0_Request::getKeyMaxCdrSerializedSize(size_t current_alignment)
     return current_align;
 }
 
-bool Method0_Request::isKeyDefined()
+bool Method0_In::isKeyDefined()
 {
    return false;
 }
 
-void Method0_Request::serializeKey(eprosima::fastcdr::Cdr &scdr) const
+void Method0_In::serializeKey(eprosima::fastcdr::Cdr &scdr) const
 {
     (void) scdr;
      
 }
 
-Method1_Request::Method1_Request()
+Method1_In::Method1_In()
 {
     // m_a com.eprosima.idl.parser.typecode.PrimitiveTypeCode@1f28c152
     m_a = 0;
@@ -167,34 +167,25 @@ Method1_Request::Method1_Request()
 
 }
 
-Method1_Request::~Method1_Request()
+Method1_In::~Method1_In()
 {
 
 
 }
 
-Method1_Request::Method1_Request(const Method1_Request &x)
-{
-    m_a = x.m_a;
-    m_b = x.m_b;
-}
-
-Method1_Request::Method1_Request(Method1_Request &&x)
+Method1_In::Method1_In(const Method1_In &x)
 {
     m_a = x.m_a;
     m_b = x.m_b;
 }
 
-Method1_Request& Method1_Request::operator=(const Method1_Request &x)
+Method1_In::Method1_In(Method1_In &&x)
 {
-
     m_a = x.m_a;
     m_b = x.m_b;
-
-    return *this;
 }
 
-Method1_Request& Method1_Request::operator=(Method1_Request &&x)
+Method1_In& Method1_In::operator=(const Method1_In &x)
 {
 
     m_a = x.m_a;
@@ -203,7 +194,16 @@ Method1_Request& Method1_Request::operator=(Method1_Request &&x)
     return *this;
 }
 
-size_t Method1_Request::getMaxCdrSerializedSize(size_t current_alignment)
+Method1_In& Method1_In::operator=(Method1_In &&x)
+{
+
+    m_a = x.m_a;
+    m_b = x.m_b;
+
+    return *this;
+}
+
+size_t Method1_In::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
 
@@ -218,7 +218,7 @@ size_t Method1_Request::getMaxCdrSerializedSize(size_t current_alignment)
     return current_alignment - initial_alignment;
 }
 
-size_t Method1_Request::getCdrSerializedSize(const Method1_Request& data, size_t current_alignment)
+size_t Method1_In::getCdrSerializedSize(const Method1_In& data, size_t current_alignment)
 {
     (void)data;
     size_t initial_alignment = current_alignment;
@@ -234,14 +234,14 @@ size_t Method1_Request::getCdrSerializedSize(const Method1_Request& data, size_t
     return current_alignment - initial_alignment;
 }
 
-void Method1_Request::serialize(eprosima::fastcdr::Cdr &scdr) const
+void Method1_In::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
 
     scdr << m_a;
     scdr << m_b;
 }
 
-void Method1_Request::deserialize(eprosima::fastcdr::Cdr &dcdr)
+void Method1_In::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
 
     dcdr >> m_a;
@@ -252,7 +252,7 @@ void Method1_Request::deserialize(eprosima::fastcdr::Cdr &dcdr)
  * @brief This function sets a value in member a
  * @param _a New value for member a
  */
-void Method1_Request::a(int32_t _a)
+void Method1_In::a(int32_t _a)
 {
 m_a = _a;
 }
@@ -261,7 +261,7 @@ m_a = _a;
  * @brief This function returns the value of member a
  * @return Value of member a
  */
-int32_t Method1_Request::a() const
+int32_t Method1_In::a() const
 {
     return m_a;
 }
@@ -270,7 +270,7 @@ int32_t Method1_Request::a() const
  * @brief This function returns a reference to member a
  * @return Reference to member a
  */
-int32_t& Method1_Request::a()
+int32_t& Method1_In::a()
 {
     return m_a;
 }
@@ -279,7 +279,7 @@ int32_t& Method1_Request::a()
  * @brief This function sets a value in member b
  * @param _b New value for member b
  */
-void Method1_Request::b(int32_t _b)
+void Method1_In::b(int32_t _b)
 {
 m_b = _b;
 }
@@ -288,7 +288,7 @@ m_b = _b;
  * @brief This function returns the value of member b
  * @return Value of member b
  */
-int32_t Method1_Request::b() const
+int32_t Method1_In::b() const
 {
     return m_b;
 }
@@ -297,13 +297,13 @@ int32_t Method1_Request::b() const
  * @brief This function returns a reference to member b
  * @return Reference to member b
  */
-int32_t& Method1_Request::b()
+int32_t& Method1_In::b()
 {
     return m_b;
 }
 
 
-size_t Method1_Request::getKeyMaxCdrSerializedSize(size_t current_alignment)
+size_t Method1_In::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t current_align = current_alignment;
 
@@ -314,48 +314,40 @@ size_t Method1_Request::getKeyMaxCdrSerializedSize(size_t current_alignment)
     return current_align;
 }
 
-bool Method1_Request::isKeyDefined()
+bool Method1_In::isKeyDefined()
 {
    return false;
 }
 
-void Method1_Request::serializeKey(eprosima::fastcdr::Cdr &scdr) const
+void Method1_In::serializeKey(eprosima::fastcdr::Cdr &scdr) const
 {
     (void) scdr;
      
      
 }
 
-Method2_Request::Method2_Request()
+Method2_In::Method2_In()
 {
     // m_data com.eprosima.idl.parser.typecode.PrimitiveTypeCode@1d16f93d
     m_data = 0.0;
 
 }
 
-Method2_Request::~Method2_Request()
+Method2_In::~Method2_In()
 {
 }
 
-Method2_Request::Method2_Request(const Method2_Request &x)
-{
-    m_data = x.m_data;
-}
-
-Method2_Request::Method2_Request(Method2_Request &&x)
+Method2_In::Method2_In(const Method2_In &x)
 {
     m_data = x.m_data;
 }
 
-Method2_Request& Method2_Request::operator=(const Method2_Request &x)
+Method2_In::Method2_In(Method2_In &&x)
 {
-
     m_data = x.m_data;
-
-    return *this;
 }
 
-Method2_Request& Method2_Request::operator=(Method2_Request &&x)
+Method2_In& Method2_In::operator=(const Method2_In &x)
 {
 
     m_data = x.m_data;
@@ -363,7 +355,15 @@ Method2_Request& Method2_Request::operator=(Method2_Request &&x)
     return *this;
 }
 
-size_t Method2_Request::getMaxCdrSerializedSize(size_t current_alignment)
+Method2_In& Method2_In::operator=(Method2_In &&x)
+{
+
+    m_data = x.m_data;
+
+    return *this;
+}
+
+size_t Method2_In::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
 
@@ -374,7 +374,7 @@ size_t Method2_Request::getMaxCdrSerializedSize(size_t current_alignment)
     return current_alignment - initial_alignment;
 }
 
-size_t Method2_Request::getCdrSerializedSize(const Method2_Request& data, size_t current_alignment)
+size_t Method2_In::getCdrSerializedSize(const Method2_In& data, size_t current_alignment)
 {
     (void)data;
     size_t initial_alignment = current_alignment;
@@ -386,13 +386,13 @@ size_t Method2_Request::getCdrSerializedSize(const Method2_Request& data, size_t
     return current_alignment - initial_alignment;
 }
 
-void Method2_Request::serialize(eprosima::fastcdr::Cdr &scdr) const
+void Method2_In::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
 
     scdr << m_data;
 }
 
-void Method2_Request::deserialize(eprosima::fastcdr::Cdr &dcdr)
+void Method2_In::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
 
     dcdr >> m_data;
@@ -402,7 +402,7 @@ void Method2_Request::deserialize(eprosima::fastcdr::Cdr &dcdr)
  * @brief This function sets a value in member data
  * @param _data New value for member data
  */
-void Method2_Request::data(float _data)
+void Method2_In::data(float _data)
 {
 m_data = _data;
 }
@@ -411,7 +411,7 @@ m_data = _data;
  * @brief This function returns the value of member data
  * @return Value of member data
  */
-float Method2_Request::data() const
+float Method2_In::data() const
 {
     return m_data;
 }
@@ -420,13 +420,13 @@ float Method2_Request::data() const
  * @brief This function returns a reference to member data
  * @return Reference to member data
  */
-float& Method2_Request::data()
+float& Method2_In::data()
 {
     return m_data;
 }
 
 
-size_t Method2_Request::getKeyMaxCdrSerializedSize(size_t current_alignment)
+size_t Method2_In::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t current_align = current_alignment;
 
@@ -435,18 +435,18 @@ size_t Method2_Request::getKeyMaxCdrSerializedSize(size_t current_alignment)
     return current_align;
 }
 
-bool Method2_Request::isKeyDefined()
+bool Method2_In::isKeyDefined()
 {
    return false;
 }
 
-void Method2_Request::serializeKey(eprosima::fastcdr::Cdr &scdr) const
+void Method2_In::serializeKey(eprosima::fastcdr::Cdr &scdr) const
 {
     (void) scdr;
      
 }
 
-Union_Request::Union_Request()
+TestService_Call::TestService_Call()
 {
     m__d = 0;
     // m_method0 com.eprosima.fastrtps.idl.parser.typecode.StructTypeCode@23d2a7e8
@@ -457,11 +457,11 @@ Union_Request::Union_Request()
 
 }
 
-Union_Request::~Union_Request()
+TestService_Call::~TestService_Call()
 {
 }
 
-Union_Request::Union_Request(const Union_Request &x)
+TestService_Call::TestService_Call(const TestService_Call &x)
 {
     m__d = x.m__d;
 
@@ -481,7 +481,7 @@ Union_Request::Union_Request(const Union_Request &x)
     }
 }
 
-Union_Request::Union_Request(Union_Request &&x)
+TestService_Call::TestService_Call(TestService_Call &&x)
 {
     m__d = x.m__d;
 
@@ -501,7 +501,7 @@ Union_Request::Union_Request(Union_Request &&x)
     }
 }
 
-Union_Request& Union_Request::operator=(const Union_Request &x)
+TestService_Call& TestService_Call::operator=(const TestService_Call &x)
 {
     m__d = x.m__d;
 
@@ -523,7 +523,7 @@ Union_Request& Union_Request::operator=(const Union_Request &x)
     return *this;
 }
 
-Union_Request& Union_Request::operator=(Union_Request &&x)
+TestService_Call& TestService_Call::operator=(TestService_Call &&x)
 {
     m__d = x.m__d;
 
@@ -545,7 +545,7 @@ Union_Request& Union_Request::operator=(Union_Request &&x)
     return *this;
 }
 
-void Union_Request::_d(uint32_t __d)
+void TestService_Call::_d(uint32_t __d)
 {
     bool b = false;
 
@@ -591,29 +591,29 @@ void Union_Request::_d(uint32_t __d)
     m__d = __d;
 }
 
-uint32_t Union_Request::_d() const
+uint32_t TestService_Call::_d() const
 {
     return m__d;
 }
 
-uint32_t& Union_Request::_d()
+uint32_t& TestService_Call::_d()
 {
     return m__d;
 }
 
-void Union_Request::method0(const Method0_Request &_method0)
+void TestService_Call::method0(const Method0_In &_method0)
 {
     m_method0 = _method0;
     m__d = 0;
 }
 
-void Union_Request::method0(Method0_Request &&_method0)
+void TestService_Call::method0(Method0_In &&_method0)
 {
     m_method0 = std::move(_method0);
     m__d = 0;
 }
 
-const Method0_Request& Union_Request::method0() const
+const Method0_In& TestService_Call::method0() const
 {
     bool b = false;
 
@@ -633,7 +633,7 @@ const Method0_Request& Union_Request::method0() const
     return m_method0;
 }
 
-Method0_Request& Union_Request::method0()
+Method0_In& TestService_Call::method0()
 {
     bool b = false;
 
@@ -652,19 +652,19 @@ Method0_Request& Union_Request::method0()
 
     return m_method0;
 }
-void Union_Request::method1(const Method1_Request &_method1)
+void TestService_Call::method1(const Method1_In &_method1)
 {
     m_method1 = _method1;
     m__d = 1;
 }
 
-void Union_Request::method1(Method1_Request &&_method1)
+void TestService_Call::method1(Method1_In &&_method1)
 {
     m_method1 = std::move(_method1);
     m__d = 1;
 }
 
-const Method1_Request& Union_Request::method1() const
+const Method1_In& TestService_Call::method1() const
 {
     bool b = false;
 
@@ -684,7 +684,7 @@ const Method1_Request& Union_Request::method1() const
     return m_method1;
 }
 
-Method1_Request& Union_Request::method1()
+Method1_In& TestService_Call::method1()
 {
     bool b = false;
 
@@ -703,19 +703,19 @@ Method1_Request& Union_Request::method1()
 
     return m_method1;
 }
-void Union_Request::method2(const Method2_Request &_method2)
+void TestService_Call::method2(const Method2_In &_method2)
 {
     m_method2 = _method2;
     m__d = 2;
 }
 
-void Union_Request::method2(Method2_Request &&_method2)
+void TestService_Call::method2(Method2_In &&_method2)
 {
     m_method2 = std::move(_method2);
     m__d = 2;
 }
 
-const Method2_Request& Union_Request::method2() const
+const Method2_In& TestService_Call::method2() const
 {
     bool b = false;
 
@@ -735,7 +735,7 @@ const Method2_Request& Union_Request::method2() const
     return m_method2;
 }
 
-Method2_Request& Union_Request::method2()
+Method2_In& TestService_Call::method2()
 {
     bool b = false;
 
@@ -755,7 +755,7 @@ Method2_Request& Union_Request::method2()
     return m_method2;
 }
 
-size_t Union_Request::getMaxCdrSerializedSize(size_t current_alignment)
+size_t TestService_Call::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
     size_t reset_alignment = 0;
@@ -766,7 +766,7 @@ size_t Union_Request::getMaxCdrSerializedSize(size_t current_alignment)
 
         reset_alignment = current_alignment;
 
-        reset_alignment += Method0_Request::getMaxCdrSerializedSize(reset_alignment);
+        reset_alignment += Method0_In::getMaxCdrSerializedSize(reset_alignment);
 
         if(union_max_size_serialized < reset_alignment)
             union_max_size_serialized = reset_alignment;
@@ -774,7 +774,7 @@ size_t Union_Request::getMaxCdrSerializedSize(size_t current_alignment)
         
         reset_alignment = current_alignment;
 
-        reset_alignment += Method1_Request::getMaxCdrSerializedSize(reset_alignment);
+        reset_alignment += Method1_In::getMaxCdrSerializedSize(reset_alignment);
 
         if(union_max_size_serialized < reset_alignment)
             union_max_size_serialized = reset_alignment;
@@ -782,7 +782,7 @@ size_t Union_Request::getMaxCdrSerializedSize(size_t current_alignment)
         
         reset_alignment = current_alignment;
 
-        reset_alignment += Method2_Request::getMaxCdrSerializedSize(reset_alignment);
+        reset_alignment += Method2_In::getMaxCdrSerializedSize(reset_alignment);
 
         if(union_max_size_serialized < reset_alignment)
             union_max_size_serialized = reset_alignment;
@@ -793,7 +793,7 @@ size_t Union_Request::getMaxCdrSerializedSize(size_t current_alignment)
 }
 
 // TODO(Ricardo) Review
-size_t Union_Request::getCdrSerializedSize(const Union_Request& data, size_t current_alignment)
+size_t TestService_Call::getCdrSerializedSize(const TestService_Call& data, size_t current_alignment)
 {
     (void)data;
     size_t initial_alignment = current_alignment;
@@ -803,13 +803,13 @@ size_t Union_Request::getCdrSerializedSize(const Union_Request& data, size_t cur
     switch(data.m__d)
     {
         case 0:
-        current_alignment += Method0_Request::getCdrSerializedSize(data.method0(), current_alignment);
+        current_alignment += Method0_In::getCdrSerializedSize(data.method0(), current_alignment);
         break;
         case 1:
-        current_alignment += Method1_Request::getCdrSerializedSize(data.method1(), current_alignment);
+        current_alignment += Method1_In::getCdrSerializedSize(data.method1(), current_alignment);
         break;
         case 2:
-        current_alignment += Method2_Request::getCdrSerializedSize(data.method2(), current_alignment);
+        current_alignment += Method2_In::getCdrSerializedSize(data.method2(), current_alignment);
         break;
         default:
         break;
@@ -818,7 +818,7 @@ size_t Union_Request::getCdrSerializedSize(const Union_Request& data, size_t cur
     return current_alignment - initial_alignment;
 }
 
-void Union_Request::serialize(eprosima::fastcdr::Cdr &scdr) const
+void TestService_Call::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
     scdr << m__d;
 
@@ -838,7 +838,7 @@ void Union_Request::serialize(eprosima::fastcdr::Cdr &scdr) const
     }
 }
 
-void Union_Request::deserialize(eprosima::fastcdr::Cdr &dcdr)
+void TestService_Call::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
     dcdr >> m__d;
 
@@ -859,36 +859,28 @@ void Union_Request::deserialize(eprosima::fastcdr::Cdr &dcdr)
 }
 
 
-Method0_Reply::Method0_Reply()
+Method0_Result::Method0_Result()
 {
     // m_success com.eprosima.idl.parser.typecode.PrimitiveTypeCode@6043cd28
     m_success = false;
 
 }
 
-Method0_Reply::~Method0_Reply()
+Method0_Result::~Method0_Result()
 {
 }
 
-Method0_Reply::Method0_Reply(const Method0_Reply &x)
-{
-    m_success = x.m_success;
-}
-
-Method0_Reply::Method0_Reply(Method0_Reply &&x)
+Method0_Result::Method0_Result(const Method0_Result &x)
 {
     m_success = x.m_success;
 }
 
-Method0_Reply& Method0_Reply::operator=(const Method0_Reply &x)
+Method0_Result::Method0_Result(Method0_Result &&x)
 {
-
     m_success = x.m_success;
-
-    return *this;
 }
 
-Method0_Reply& Method0_Reply::operator=(Method0_Reply &&x)
+Method0_Result& Method0_Result::operator=(const Method0_Result &x)
 {
 
     m_success = x.m_success;
@@ -896,7 +888,15 @@ Method0_Reply& Method0_Reply::operator=(Method0_Reply &&x)
     return *this;
 }
 
-size_t Method0_Reply::getMaxCdrSerializedSize(size_t current_alignment)
+Method0_Result& Method0_Result::operator=(Method0_Result &&x)
+{
+
+    m_success = x.m_success;
+
+    return *this;
+}
+
+size_t Method0_Result::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
 
@@ -907,7 +907,7 @@ size_t Method0_Reply::getMaxCdrSerializedSize(size_t current_alignment)
     return current_alignment - initial_alignment;
 }
 
-size_t Method0_Reply::getCdrSerializedSize(const Method0_Reply& data, size_t current_alignment)
+size_t Method0_Result::getCdrSerializedSize(const Method0_Result& data, size_t current_alignment)
 {
     (void)data;
     size_t initial_alignment = current_alignment;
@@ -919,13 +919,13 @@ size_t Method0_Reply::getCdrSerializedSize(const Method0_Reply& data, size_t cur
     return current_alignment - initial_alignment;
 }
 
-void Method0_Reply::serialize(eprosima::fastcdr::Cdr &scdr) const
+void Method0_Result::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
 
     scdr << m_success;
 }
 
-void Method0_Reply::deserialize(eprosima::fastcdr::Cdr &dcdr)
+void Method0_Result::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
 
     dcdr >> m_success;
@@ -935,7 +935,7 @@ void Method0_Reply::deserialize(eprosima::fastcdr::Cdr &dcdr)
  * @brief This function sets a value in member success
  * @param _success New value for member success
  */
-void Method0_Reply::success(bool _success)
+void Method0_Result::success(bool _success)
 {
 m_success = _success;
 }
@@ -944,7 +944,7 @@ m_success = _success;
  * @brief This function returns the value of member success
  * @return Value of member success
  */
-bool Method0_Reply::success() const
+bool Method0_Result::success() const
 {
     return m_success;
 }
@@ -953,13 +953,13 @@ bool Method0_Reply::success() const
  * @brief This function returns a reference to member success
  * @return Reference to member success
  */
-bool& Method0_Reply::success()
+bool& Method0_Result::success()
 {
     return m_success;
 }
 
 
-size_t Method0_Reply::getKeyMaxCdrSerializedSize(size_t current_alignment)
+size_t Method0_Result::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t current_align = current_alignment;
 
@@ -968,47 +968,39 @@ size_t Method0_Reply::getKeyMaxCdrSerializedSize(size_t current_alignment)
     return current_align;
 }
 
-bool Method0_Reply::isKeyDefined()
+bool Method0_Result::isKeyDefined()
 {
    return false;
 }
 
-void Method0_Reply::serializeKey(eprosima::fastcdr::Cdr &scdr) const
+void Method0_Result::serializeKey(eprosima::fastcdr::Cdr &scdr) const
 {
     (void) scdr;
      
 }
 
-Method1_Reply::Method1_Reply()
+Method1_Result::Method1_Result()
 {
     // m_result com.eprosima.idl.parser.typecode.PrimitiveTypeCode@cb51256
     m_result = 0;
 
 }
 
-Method1_Reply::~Method1_Reply()
+Method1_Result::~Method1_Result()
 {
 }
 
-Method1_Reply::Method1_Reply(const Method1_Reply &x)
-{
-    m_result = x.m_result;
-}
-
-Method1_Reply::Method1_Reply(Method1_Reply &&x)
+Method1_Result::Method1_Result(const Method1_Result &x)
 {
     m_result = x.m_result;
 }
 
-Method1_Reply& Method1_Reply::operator=(const Method1_Reply &x)
+Method1_Result::Method1_Result(Method1_Result &&x)
 {
-
     m_result = x.m_result;
-
-    return *this;
 }
 
-Method1_Reply& Method1_Reply::operator=(Method1_Reply &&x)
+Method1_Result& Method1_Result::operator=(const Method1_Result &x)
 {
 
     m_result = x.m_result;
@@ -1016,7 +1008,15 @@ Method1_Reply& Method1_Reply::operator=(Method1_Reply &&x)
     return *this;
 }
 
-size_t Method1_Reply::getMaxCdrSerializedSize(size_t current_alignment)
+Method1_Result& Method1_Result::operator=(Method1_Result &&x)
+{
+
+    m_result = x.m_result;
+
+    return *this;
+}
+
+size_t Method1_Result::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
 
@@ -1027,7 +1027,7 @@ size_t Method1_Reply::getMaxCdrSerializedSize(size_t current_alignment)
     return current_alignment - initial_alignment;
 }
 
-size_t Method1_Reply::getCdrSerializedSize(const Method1_Reply& data, size_t current_alignment)
+size_t Method1_Result::getCdrSerializedSize(const Method1_Result& data, size_t current_alignment)
 {
     (void)data;
     size_t initial_alignment = current_alignment;
@@ -1039,13 +1039,13 @@ size_t Method1_Reply::getCdrSerializedSize(const Method1_Reply& data, size_t cur
     return current_alignment - initial_alignment;
 }
 
-void Method1_Reply::serialize(eprosima::fastcdr::Cdr &scdr) const
+void Method1_Result::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
 
     scdr << m_result;
 }
 
-void Method1_Reply::deserialize(eprosima::fastcdr::Cdr &dcdr)
+void Method1_Result::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
 
     dcdr >> m_result;
@@ -1055,7 +1055,7 @@ void Method1_Reply::deserialize(eprosima::fastcdr::Cdr &dcdr)
  * @brief This function sets a value in member result
  * @param _result New value for member result
  */
-void Method1_Reply::result(int32_t _result)
+void Method1_Result::result(int32_t _result)
 {
 m_result = _result;
 }
@@ -1064,7 +1064,7 @@ m_result = _result;
  * @brief This function returns the value of member result
  * @return Value of member result
  */
-int32_t Method1_Reply::result() const
+int32_t Method1_Result::result() const
 {
     return m_result;
 }
@@ -1073,13 +1073,13 @@ int32_t Method1_Reply::result() const
  * @brief This function returns a reference to member result
  * @return Reference to member result
  */
-int32_t& Method1_Reply::result()
+int32_t& Method1_Result::result()
 {
     return m_result;
 }
 
 
-size_t Method1_Reply::getKeyMaxCdrSerializedSize(size_t current_alignment)
+size_t Method1_Result::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t current_align = current_alignment;
 
@@ -1088,47 +1088,39 @@ size_t Method1_Reply::getKeyMaxCdrSerializedSize(size_t current_alignment)
     return current_align;
 }
 
-bool Method1_Reply::isKeyDefined()
+bool Method1_Result::isKeyDefined()
 {
    return false;
 }
 
-void Method1_Reply::serializeKey(eprosima::fastcdr::Cdr &scdr) const
+void Method1_Result::serializeKey(eprosima::fastcdr::Cdr &scdr) const
 {
     (void) scdr;
      
 }
 
-Method2_Reply::Method2_Reply()
+Method2_Result::Method2_Result()
 {
     // m_data com.eprosima.idl.parser.typecode.PrimitiveTypeCode@59906517
     m_data = 0.0;
 
 }
 
-Method2_Reply::~Method2_Reply()
+Method2_Result::~Method2_Result()
 {
 }
 
-Method2_Reply::Method2_Reply(const Method2_Reply &x)
-{
-    m_data = x.m_data;
-}
-
-Method2_Reply::Method2_Reply(Method2_Reply &&x)
+Method2_Result::Method2_Result(const Method2_Result &x)
 {
     m_data = x.m_data;
 }
 
-Method2_Reply& Method2_Reply::operator=(const Method2_Reply &x)
+Method2_Result::Method2_Result(Method2_Result &&x)
 {
-
     m_data = x.m_data;
-
-    return *this;
 }
 
-Method2_Reply& Method2_Reply::operator=(Method2_Reply &&x)
+Method2_Result& Method2_Result::operator=(const Method2_Result &x)
 {
 
     m_data = x.m_data;
@@ -1136,7 +1128,15 @@ Method2_Reply& Method2_Reply::operator=(Method2_Reply &&x)
     return *this;
 }
 
-size_t Method2_Reply::getMaxCdrSerializedSize(size_t current_alignment)
+Method2_Result& Method2_Result::operator=(Method2_Result &&x)
+{
+
+    m_data = x.m_data;
+
+    return *this;
+}
+
+size_t Method2_Result::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
 
@@ -1147,7 +1147,7 @@ size_t Method2_Reply::getMaxCdrSerializedSize(size_t current_alignment)
     return current_alignment - initial_alignment;
 }
 
-size_t Method2_Reply::getCdrSerializedSize(const Method2_Reply& data, size_t current_alignment)
+size_t Method2_Result::getCdrSerializedSize(const Method2_Result& data, size_t current_alignment)
 {
     (void)data;
     size_t initial_alignment = current_alignment;
@@ -1159,13 +1159,13 @@ size_t Method2_Reply::getCdrSerializedSize(const Method2_Reply& data, size_t cur
     return current_alignment - initial_alignment;
 }
 
-void Method2_Reply::serialize(eprosima::fastcdr::Cdr &scdr) const
+void Method2_Result::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
 
     scdr << m_data;
 }
 
-void Method2_Reply::deserialize(eprosima::fastcdr::Cdr &dcdr)
+void Method2_Result::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
 
     dcdr >> m_data;
@@ -1175,7 +1175,7 @@ void Method2_Reply::deserialize(eprosima::fastcdr::Cdr &dcdr)
  * @brief This function sets a value in member data
  * @param _data New value for member data
  */
-void Method2_Reply::data(float _data)
+void Method2_Result::data(float _data)
 {
 m_data = _data;
 }
@@ -1184,7 +1184,7 @@ m_data = _data;
  * @brief This function returns the value of member data
  * @return Value of member data
  */
-float Method2_Reply::data() const
+float Method2_Result::data() const
 {
     return m_data;
 }
@@ -1193,13 +1193,13 @@ float Method2_Reply::data() const
  * @brief This function returns a reference to member data
  * @return Reference to member data
  */
-float& Method2_Reply::data()
+float& Method2_Result::data()
 {
     return m_data;
 }
 
 
-size_t Method2_Reply::getKeyMaxCdrSerializedSize(size_t current_alignment)
+size_t Method2_Result::getKeyMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t current_align = current_alignment;
 
@@ -1208,18 +1208,18 @@ size_t Method2_Reply::getKeyMaxCdrSerializedSize(size_t current_alignment)
     return current_align;
 }
 
-bool Method2_Reply::isKeyDefined()
+bool Method2_Result::isKeyDefined()
 {
    return false;
 }
 
-void Method2_Reply::serializeKey(eprosima::fastcdr::Cdr &scdr) const
+void Method2_Result::serializeKey(eprosima::fastcdr::Cdr &scdr) const
 {
     (void) scdr;
      
 }
 
-Union_Reply::Union_Reply()
+TestService_Return::TestService_Return()
 {
     m__d = 0;
     // m_method0 com.eprosima.fastrtps.idl.parser.typecode.StructTypeCode@5bcea91b
@@ -1230,11 +1230,11 @@ Union_Reply::Union_Reply()
 
 }
 
-Union_Reply::~Union_Reply()
+TestService_Return::~TestService_Return()
 {
 }
 
-Union_Reply::Union_Reply(const Union_Reply &x)
+TestService_Return::TestService_Return(const TestService_Return &x)
 {
     m__d = x.m__d;
 
@@ -1254,7 +1254,7 @@ Union_Reply::Union_Reply(const Union_Reply &x)
     }
 }
 
-Union_Reply::Union_Reply(Union_Reply &&x)
+TestService_Return::TestService_Return(TestService_Return &&x)
 {
     m__d = x.m__d;
 
@@ -1274,7 +1274,7 @@ Union_Reply::Union_Reply(Union_Reply &&x)
     }
 }
 
-Union_Reply& Union_Reply::operator=(const Union_Reply &x)
+TestService_Return& TestService_Return::operator=(const TestService_Return &x)
 {
     m__d = x.m__d;
 
@@ -1296,7 +1296,7 @@ Union_Reply& Union_Reply::operator=(const Union_Reply &x)
     return *this;
 }
 
-Union_Reply& Union_Reply::operator=(Union_Reply &&x)
+TestService_Return& TestService_Return::operator=(TestService_Return &&x)
 {
     m__d = x.m__d;
 
@@ -1318,7 +1318,7 @@ Union_Reply& Union_Reply::operator=(Union_Reply &&x)
     return *this;
 }
 
-void Union_Reply::_d(uint32_t __d)
+void TestService_Return::_d(int32_t __d)
 {
     bool b = false;
 
@@ -1364,29 +1364,29 @@ void Union_Reply::_d(uint32_t __d)
     m__d = __d;
 }
 
-uint32_t Union_Reply::_d() const
+int32_t TestService_Return::_d() const
 {
     return m__d;
 }
 
-uint32_t& Union_Reply::_d()
+int32_t& TestService_Return::_d()
 {
     return m__d;
 }
 
-void Union_Reply::method0(const Method0_Reply &_method0)
+void TestService_Return::method0(const Method0_Result &_method0)
 {
     m_method0 = _method0;
     m__d = 0;
 }
 
-void Union_Reply::method0(Method0_Reply &&_method0)
+void TestService_Return::method0(Method0_Result &&_method0)
 {
     m_method0 = std::move(_method0);
     m__d = 0;
 }
 
-const Method0_Reply& Union_Reply::method0() const
+const Method0_Result& TestService_Return::method0() const
 {
     bool b = false;
 
@@ -1406,7 +1406,7 @@ const Method0_Reply& Union_Reply::method0() const
     return m_method0;
 }
 
-Method0_Reply& Union_Reply::method0()
+Method0_Result& TestService_Return::method0()
 {
     bool b = false;
 
@@ -1425,19 +1425,19 @@ Method0_Reply& Union_Reply::method0()
 
     return m_method0;
 }
-void Union_Reply::method1(const Method1_Reply &_method1)
+void TestService_Return::method1(const Method1_Result &_method1)
 {
     m_method1 = _method1;
     m__d = 1;
 }
 
-void Union_Reply::method1(Method1_Reply &&_method1)
+void TestService_Return::method1(Method1_Result &&_method1)
 {
     m_method1 = std::move(_method1);
     m__d = 1;
 }
 
-const Method1_Reply& Union_Reply::method1() const
+const Method1_Result& TestService_Return::method1() const
 {
     bool b = false;
 
@@ -1457,7 +1457,7 @@ const Method1_Reply& Union_Reply::method1() const
     return m_method1;
 }
 
-Method1_Reply& Union_Reply::method1()
+Method1_Result& TestService_Return::method1()
 {
     bool b = false;
 
@@ -1476,19 +1476,19 @@ Method1_Reply& Union_Reply::method1()
 
     return m_method1;
 }
-void Union_Reply::method2(const Method2_Reply &_method2)
+void TestService_Return::method2(const Method2_Result &_method2)
 {
     m_method2 = _method2;
     m__d = 2;
 }
 
-void Union_Reply::method2(Method2_Reply &&_method2)
+void TestService_Return::method2(Method2_Result &&_method2)
 {
     m_method2 = std::move(_method2);
     m__d = 2;
 }
 
-const Method2_Reply& Union_Reply::method2() const
+const Method2_Result& TestService_Return::method2() const
 {
     bool b = false;
 
@@ -1508,7 +1508,7 @@ const Method2_Reply& Union_Reply::method2() const
     return m_method2;
 }
 
-Method2_Reply& Union_Reply::method2()
+Method2_Result& TestService_Return::method2()
 {
     bool b = false;
 
@@ -1528,7 +1528,7 @@ Method2_Reply& Union_Reply::method2()
     return m_method2;
 }
 
-size_t Union_Reply::getMaxCdrSerializedSize(size_t current_alignment)
+size_t TestService_Return::getMaxCdrSerializedSize(size_t current_alignment)
 {
     size_t initial_alignment = current_alignment;
     size_t reset_alignment = 0;
@@ -1539,7 +1539,7 @@ size_t Union_Reply::getMaxCdrSerializedSize(size_t current_alignment)
 
         reset_alignment = current_alignment;
 
-        reset_alignment += Method0_Reply::getMaxCdrSerializedSize(reset_alignment);
+        reset_alignment += Method0_Result::getMaxCdrSerializedSize(reset_alignment);
 
         if(union_max_size_serialized < reset_alignment)
             union_max_size_serialized = reset_alignment;
@@ -1547,7 +1547,7 @@ size_t Union_Reply::getMaxCdrSerializedSize(size_t current_alignment)
         
         reset_alignment = current_alignment;
 
-        reset_alignment += Method1_Reply::getMaxCdrSerializedSize(reset_alignment);
+        reset_alignment += Method1_Result::getMaxCdrSerializedSize(reset_alignment);
 
         if(union_max_size_serialized < reset_alignment)
             union_max_size_serialized = reset_alignment;
@@ -1555,7 +1555,7 @@ size_t Union_Reply::getMaxCdrSerializedSize(size_t current_alignment)
         
         reset_alignment = current_alignment;
 
-        reset_alignment += Method2_Reply::getMaxCdrSerializedSize(reset_alignment);
+        reset_alignment += Method2_Result::getMaxCdrSerializedSize(reset_alignment);
 
         if(union_max_size_serialized < reset_alignment)
             union_max_size_serialized = reset_alignment;
@@ -1566,7 +1566,7 @@ size_t Union_Reply::getMaxCdrSerializedSize(size_t current_alignment)
 }
 
 // TODO(Ricardo) Review
-size_t Union_Reply::getCdrSerializedSize(const Union_Reply& data, size_t current_alignment)
+size_t TestService_Return::getCdrSerializedSize(const TestService_Return& data, size_t current_alignment)
 {
     (void)data;
     size_t initial_alignment = current_alignment;
@@ -1576,13 +1576,13 @@ size_t Union_Reply::getCdrSerializedSize(const Union_Reply& data, size_t current
     switch(data.m__d)
     {
         case 0:
-        current_alignment += Method0_Reply::getCdrSerializedSize(data.method0(), current_alignment);
+        current_alignment += Method0_Result::getCdrSerializedSize(data.method0(), current_alignment);
         break;
         case 1:
-        current_alignment += Method1_Reply::getCdrSerializedSize(data.method1(), current_alignment);
+        current_alignment += Method1_Result::getCdrSerializedSize(data.method1(), current_alignment);
         break;
         case 2:
-        current_alignment += Method2_Reply::getCdrSerializedSize(data.method2(), current_alignment);
+        current_alignment += Method2_Result::getCdrSerializedSize(data.method2(), current_alignment);
         break;
         default:
         break;
@@ -1591,7 +1591,7 @@ size_t Union_Reply::getCdrSerializedSize(const Union_Reply& data, size_t current
     return current_alignment - initial_alignment;
 }
 
-void Union_Reply::serialize(eprosima::fastcdr::Cdr &scdr) const
+void TestService_Return::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
     scdr << m__d;
 
@@ -1611,7 +1611,7 @@ void Union_Reply::serialize(eprosima::fastcdr::Cdr &scdr) const
     }
 }
 
-void Union_Reply::deserialize(eprosima::fastcdr::Cdr &dcdr)
+void TestService_Return::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
     dcdr >> m__d;
 
@@ -1634,7 +1634,7 @@ void Union_Reply::deserialize(eprosima::fastcdr::Cdr &dcdr)
 
 TestService_Request::TestService_Request()
 {
-    // m_request com.eprosima.idl.parser.typecode.UnionTypeCode@13c27452
+    // m_data com.eprosima.idl.parser.typecode.UnionTypeCode@13c27452
 
 
 }
@@ -1645,18 +1645,18 @@ TestService_Request::~TestService_Request()
 
 TestService_Request::TestService_Request(const TestService_Request &x)
 {
-    m_request = x.m_request;
+    m_data = x.m_data;
 }
 
 TestService_Request::TestService_Request(TestService_Request &&x)
 {
-    m_request = std::move(x.m_request);
+    m_data = std::move(x.m_data);
 }
 
 TestService_Request& TestService_Request::operator=(const TestService_Request &x)
 {
 
-    m_request = x.m_request;
+    m_data = x.m_data;
 
     return *this;
 }
@@ -1664,7 +1664,7 @@ TestService_Request& TestService_Request::operator=(const TestService_Request &x
 TestService_Request& TestService_Request::operator=(TestService_Request &&x)
 {
 
-    m_request = std::move(x.m_request);
+    m_data = std::move(x.m_data);
 
     return *this;
 }
@@ -1674,7 +1674,7 @@ size_t TestService_Request::getMaxCdrSerializedSize(size_t current_alignment)
     size_t initial_alignment = current_alignment;
 
 
-    current_alignment += Union_Request::getMaxCdrSerializedSize(current_alignment);
+    current_alignment += TestService_Call::getMaxCdrSerializedSize(current_alignment);
 
     return current_alignment - initial_alignment;
 }
@@ -1685,7 +1685,7 @@ size_t TestService_Request::getCdrSerializedSize(const TestService_Request& data
     size_t initial_alignment = current_alignment;
 
 
-    current_alignment += Union_Request::getCdrSerializedSize(data.request(), current_alignment);
+    current_alignment += TestService_Call::getCdrSerializedSize(data.data(), current_alignment);
 
     return current_alignment - initial_alignment;
 }
@@ -1693,49 +1693,49 @@ size_t TestService_Request::getCdrSerializedSize(const TestService_Request& data
 void TestService_Request::serialize(eprosima::fastcdr::Cdr &scdr) const
 {
 
-    scdr << m_request;
+    scdr << m_data;
 }
 
 void TestService_Request::deserialize(eprosima::fastcdr::Cdr &dcdr)
 {
 
-    dcdr >> m_request;
+    dcdr >> m_data;
 }
 
 /*!
- * @brief This function copies the value in member request
- * @param _request New value to be copied in member request
+ * @brief This function copies the value in member data
+ * @param _data New value to be copied in member data
  */
-void TestService_Request::request(const Union_Request &_request)
+void TestService_Request::data(const TestService_Call &_data)
 {
-m_request = _request;
+m_data = _data;
 }
 
 /*!
- * @brief This function moves the value in member request
- * @param _request New value to be moved in member request
+ * @brief This function moves the value in member data
+ * @param _data New value to be moved in member data
  */
-void TestService_Request::request(Union_Request &&_request)
+void TestService_Request::data(TestService_Call &&_data)
 {
-m_request = std::move(_request);
+m_data = std::move(_data);
 }
 
 /*!
- * @brief This function returns a constant reference to member request
- * @return Constant reference to member request
+ * @brief This function returns a constant reference to member data
+ * @return Constant reference to member data
  */
-const Union_Request& TestService_Request::request() const
+const TestService_Call& TestService_Request::data() const
 {
-    return m_request;
+    return m_data;
 }
 
 /*!
- * @brief This function returns a reference to member request
- * @return Reference to member request
+ * @brief This function returns a reference to member data
+ * @return Reference to member data
  */
-Union_Request& TestService_Request::request()
+TestService_Call& TestService_Request::data()
 {
-    return m_request;
+    return m_data;
 }
 
 size_t TestService_Request::getKeyMaxCdrSerializedSize(size_t current_alignment)
@@ -1800,7 +1800,7 @@ size_t TestService_Reply::getMaxCdrSerializedSize(size_t current_alignment)
     size_t initial_alignment = current_alignment;
 
 
-    current_alignment += Union_Reply::getMaxCdrSerializedSize(current_alignment);
+    current_alignment += TestService_Return::getMaxCdrSerializedSize(current_alignment);
 
     return current_alignment - initial_alignment;
 }
@@ -1811,7 +1811,7 @@ size_t TestService_Reply::getCdrSerializedSize(const TestService_Reply& data, si
     size_t initial_alignment = current_alignment;
 
 
-    current_alignment += Union_Reply::getCdrSerializedSize(data.reply(), current_alignment);
+    current_alignment += TestService_Return::getCdrSerializedSize(data.reply(), current_alignment);
 
     return current_alignment - initial_alignment;
 }
@@ -1832,7 +1832,7 @@ void TestService_Reply::deserialize(eprosima::fastcdr::Cdr &dcdr)
  * @brief This function copies the value in member reply
  * @param _reply New value to be copied in member reply
  */
-void TestService_Reply::reply(const Union_Reply &_reply)
+void TestService_Reply::reply(const TestService_Return &_reply)
 {
 m_reply = _reply;
 }
@@ -1841,7 +1841,7 @@ m_reply = _reply;
  * @brief This function moves the value in member reply
  * @param _reply New value to be moved in member reply
  */
-void TestService_Reply::reply(Union_Reply &&_reply)
+void TestService_Reply::reply(TestService_Return &&_reply)
 {
 m_reply = std::move(_reply);
 }
@@ -1850,7 +1850,7 @@ m_reply = std::move(_reply);
  * @brief This function returns a constant reference to member reply
  * @return Constant reference to member reply
  */
-const Union_Reply& TestService_Reply::reply() const
+const TestService_Return& TestService_Reply::reply() const
 {
     return m_reply;
 }
@@ -1859,7 +1859,7 @@ const Union_Reply& TestService_Reply::reply() const
  * @brief This function returns a reference to member reply
  * @return Reference to member reply
  */
-Union_Reply& TestService_Reply::reply()
+TestService_Return& TestService_Reply::reply()
 {
     return m_reply;
 }

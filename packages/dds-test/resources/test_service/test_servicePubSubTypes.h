@@ -33,16 +33,16 @@
 #endif
 
 /*!
- * @brief This class represents the TopicDataType of the type Method0_Request defined by the user in the IDL file.
+ * @brief This class represents the TopicDataType of the type Method0_In defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Method0_RequestPubSubType : public eprosima::fastrtps::TopicDataType {
+class Method0_InPubSubType : public eprosima::fastrtps::TopicDataType {
 public:
-    typedef Method0_Request type;
+    typedef Method0_In type;
 
-    eProsima_user_DllExport Method0_RequestPubSubType();
+    eProsima_user_DllExport Method0_InPubSubType();
 
-    eProsima_user_DllExport virtual ~Method0_RequestPubSubType();
+    eProsima_user_DllExport virtual ~Method0_InPubSubType();
     eProsima_user_DllExport virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
     eProsima_user_DllExport virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
     eProsima_user_DllExport virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
@@ -54,16 +54,16 @@ public:
     unsigned char* m_keyBuffer;
 };
 /*!
- * @brief This class represents the TopicDataType of the type Method1_Request defined by the user in the IDL file.
+ * @brief This class represents the TopicDataType of the type Method1_In defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Method1_RequestPubSubType : public eprosima::fastrtps::TopicDataType {
+class Method1_InPubSubType : public eprosima::fastrtps::TopicDataType {
 public:
-    typedef Method1_Request type;
+    typedef Method1_In type;
 
-    eProsima_user_DllExport Method1_RequestPubSubType();
+    eProsima_user_DllExport Method1_InPubSubType();
 
-    eProsima_user_DllExport virtual ~Method1_RequestPubSubType();
+    eProsima_user_DllExport virtual ~Method1_InPubSubType();
     eProsima_user_DllExport virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
     eProsima_user_DllExport virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
     eProsima_user_DllExport virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
@@ -75,16 +75,16 @@ public:
     unsigned char* m_keyBuffer;
 };
 /*!
- * @brief This class represents the TopicDataType of the type Method2_Request defined by the user in the IDL file.
+ * @brief This class represents the TopicDataType of the type Method2_In defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Method2_RequestPubSubType : public eprosima::fastrtps::TopicDataType {
+class Method2_InPubSubType : public eprosima::fastrtps::TopicDataType {
 public:
-    typedef Method2_Request type;
+    typedef Method2_In type;
 
-    eProsima_user_DllExport Method2_RequestPubSubType();
+    eProsima_user_DllExport Method2_InPubSubType();
 
-    eProsima_user_DllExport virtual ~Method2_RequestPubSubType();
+    eProsima_user_DllExport virtual ~Method2_InPubSubType();
     eProsima_user_DllExport virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
     eProsima_user_DllExport virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
     eProsima_user_DllExport virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
@@ -97,16 +97,16 @@ public:
 };
 
 /*!
- * @brief This class represents the TopicDataType of the type Method0_Reply defined by the user in the IDL file.
+ * @brief This class represents the TopicDataType of the type Method0_Result defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Method0_ReplyPubSubType : public eprosima::fastrtps::TopicDataType {
+class Method0_ResultPubSubType : public eprosima::fastrtps::TopicDataType {
 public:
-    typedef Method0_Reply type;
+    typedef Method0_Result type;
 
-    eProsima_user_DllExport Method0_ReplyPubSubType();
+    eProsima_user_DllExport Method0_ResultPubSubType();
 
-    eProsima_user_DllExport virtual ~Method0_ReplyPubSubType();
+    eProsima_user_DllExport virtual ~Method0_ResultPubSubType();
     eProsima_user_DllExport virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
     eProsima_user_DllExport virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
     eProsima_user_DllExport virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
@@ -118,16 +118,16 @@ public:
     unsigned char* m_keyBuffer;
 };
 /*!
- * @brief This class represents the TopicDataType of the type Method1_Reply defined by the user in the IDL file.
+ * @brief This class represents the TopicDataType of the type Method1_Result defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Method1_ReplyPubSubType : public eprosima::fastrtps::TopicDataType {
+class Method1_ResultPubSubType : public eprosima::fastrtps::TopicDataType {
 public:
-    typedef Method1_Reply type;
+    typedef Method1_Result type;
 
-    eProsima_user_DllExport Method1_ReplyPubSubType();
+    eProsima_user_DllExport Method1_ResultPubSubType();
 
-    eProsima_user_DllExport virtual ~Method1_ReplyPubSubType();
+    eProsima_user_DllExport virtual ~Method1_ResultPubSubType();
     eProsima_user_DllExport virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
     eProsima_user_DllExport virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
     eProsima_user_DllExport virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;
@@ -139,16 +139,16 @@ public:
     unsigned char* m_keyBuffer;
 };
 /*!
- * @brief This class represents the TopicDataType of the type Method2_Reply defined by the user in the IDL file.
+ * @brief This class represents the TopicDataType of the type Method2_Result defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Method2_ReplyPubSubType : public eprosima::fastrtps::TopicDataType {
+class Method2_ResultPubSubType : public eprosima::fastrtps::TopicDataType {
 public:
-    typedef Method2_Reply type;
+    typedef Method2_Result type;
 
-    eProsima_user_DllExport Method2_ReplyPubSubType();
+    eProsima_user_DllExport Method2_ResultPubSubType();
 
-    eProsima_user_DllExport virtual ~Method2_ReplyPubSubType();
+    eProsima_user_DllExport virtual ~Method2_ResultPubSubType();
     eProsima_user_DllExport virtual bool serialize(void *data, eprosima::fastrtps::rtps::SerializedPayload_t *payload) override;
     eProsima_user_DllExport virtual bool deserialize(eprosima::fastrtps::rtps::SerializedPayload_t *payload, void *data) override;
     eProsima_user_DllExport virtual std::function<uint32_t()> getSerializedSizeProvider(void* data) override;

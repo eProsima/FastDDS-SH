@@ -54,6 +54,14 @@ struct Conversion {
     static std::string convert_type_name(
             const std::string& message_type);
 
+    static const xtypes::DynamicType& resolve_discriminator_type(
+            const ::xtypes::DynamicType& service_type,
+            const std::string& discriminator);
+
+    static ::xtypes::WritableDynamicDataRef access_member_data(
+            ::xtypes::WritableDynamicDataRef membered_data,
+            const std::string& path);
+
 private:
     ~Conversion() = default;
     static std::map<std::string, ::xtypes::DynamicType::Ptr> types_;
@@ -131,6 +139,10 @@ private:
             const DynamicData* input,
             ::xtypes::WritableDynamicDataRef output);
 
+    static ::xtypes::WritableDynamicDataRef access_member_data(
+            ::xtypes::WritableDynamicDataRef membered_data,
+            const std::vector<std::string>& tokens,
+            size_t index);
 };
 
 

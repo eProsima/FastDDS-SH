@@ -44,7 +44,8 @@ public:
     Client(
             Participant* participant,
             const std::string& service_name,
-            const xtypes::DynamicType& service_type,
+            const xtypes::DynamicType& request_type,
+            const xtypes::DynamicType& reply_type,
             ServiceClientSystem::RequestCallback callback,
             const YAML::Node& config);
 
@@ -66,6 +67,9 @@ public:
             std::shared_ptr<void> call_handle,
             const xtypes::DynamicData& response) override;
 
+    bool add_config(
+            const YAML::Node& configuration);
+
 private:
 
     void onPublicationMatched(
@@ -81,12 +85,13 @@ private:
 
     eprosima::fastrtps::Publisher* dds_publisher_;
     eprosima::fastrtps::Subscriber* dds_subscriber_;
-    DynamicData_ptr dynamic_data_;
-    const xtypes::DynamicType& message_type_;
+    DynamicData_ptr request_dynamic_data_;
+    DynamicData_ptr reply_dynamic_data_;
+    const xtypes::DynamicType& request_type_;
+    const xtypes::DynamicType& reply_type_;
     ServiceClientSystem::RequestCallback callback_;
 
     const std::string service_name_;
-    std::map<std::string, std::string> discriminator_to_type_;
     std::map<std::string, std::string> type_to_discriminator_;
 };
 

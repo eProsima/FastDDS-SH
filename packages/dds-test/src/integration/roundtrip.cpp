@@ -84,8 +84,8 @@ private:
 
             if (sub->takeNextData(&req_msg, &info))
             {
-                const Union_Request& request = req_msg.request();
-                Union_Reply& reply = rep_msg.reply();
+                const TestService_Call& request = req_msg.data();
+                TestService_Return& reply = rep_msg.reply();
                 rtps::WriteParams params;
                 params.related_sample_identity(info.sample_identity);
 
@@ -93,8 +93,8 @@ private:
                 {
                     case 0: // If the data is "TEST", then success will be true.
                     {
-                        const Method0_Request& input = request.method0();
-                        Method0_Reply output;
+                        const Method0_In& input = request.method0();
+                        Method0_Result output;
                         output.success(false);
                         if (input.data() == "TEST")
                         {
@@ -106,8 +106,8 @@ private:
                     }
                     case 1: // a + b = result
                     {
-                        const Method1_Request& input = request.method1();
-                        Method1_Reply output;
+                        const Method1_In& input = request.method1();
+                        Method1_Result output;
                         output.result(input.a() + input.b());
                         reply.method1(output);
                         pub_->write(&rep_msg, params);
@@ -115,8 +115,8 @@ private:
                     }
                     case 2: // Echoes data
                     {
-                        const Method2_Request& input = request.method2();
-                        Method2_Reply output;
+                        const Method2_In& input = request.method2();
+                        Method2_Result output;
                         output.data(input.data());
                         reply.method2(output);
                         pub_->write(&rep_msg, params);
@@ -174,18 +174,15 @@ std::string gen_config_yaml(
 }
 
 std::string gen_config_method_yaml(
-        const std::string& topic_type,
-        const std::string& topic_sent,
-        const std::string& topic_recv,
-        const std::string& topic_mapped,
+        const std::string& dds_topic,
+        const std::vector<std::string>& request_types,
+        const std::vector<std::string>& reply_types,
+        const std::vector<std::string>& request_members,
+        const std::vector<std::string>& reply_members,
+        bool client,
         const std::string& dds_config_file_path,
         const std::string& dds_profile_name)
 {
-    std::string remap = "";
-    if (topic_mapped != "") {
-        remap = ", remap: {dds: { topic: \"" + topic_mapped + "\" } }";
-    }
-
     std::string s;
     s += "types:\n";
     s += "    idls:\n";
@@ -194,8 +191,6 @@ std::string gen_config_method_yaml(
 
     s += "systems:\n";
     s += "    dds:\n";
-
-    //////////// TODO POR AQUI
 
     if (dds_config_file_path != "")
     {
@@ -207,12 +202,32 @@ std::string gen_config_method_yaml(
     s += "    mock: { type: mock, types-from: dds }\n";
 
     s += "routes:\n";
-    s += "    mock_to_dds: { from: mock, to: dds }\n";
-    s += "    dds_to_mock: { from: dds, to: mock }\n";
+    if (client)
+    {
+        s += "    route: { server: mock, clients: dds }\n";
+    }
+    else
+    {
+        s += "    route: { server: dds, clients: mock }\n";
+    }
 
-    s += "topics:\n";
-    s += "    " + topic_sent + ": { type: \"" + topic_type + "\", route: mock_to_dds" + remap + "}\n";
-    s += "    " + topic_recv + ": { type: \"" + topic_type + "\", route: dds_to_mock" + remap + "}\n";
+    s += "services:\n";
+    for (uint32_t i = 0 ; i < request_types.size(); ++i)
+    {
+        s += "    " + request_types[i] + "_topic_" + std::to_string(i);
+        s += ": {";
+        s += " request_type: \"" + request_types[i] + "\",";
+        s += " reply_type: \"" + reply_types[i] + "\",";
+        s += " route: route,";
+        s += " remap: { " +
+             std::string((client ? "mock" : "dds")) + ": {"
+                + " request_type: \"" + request_members[i] + "\", "
+                + " reply_type: \"" + reply_members[i] + "\", "
+                + " topic: \"" + dds_topic + "\""
+                + " }"
+             + " }";
+        s += " }\n";
+    }
     return s;
 }
 
@@ -231,6 +246,41 @@ soss::InstanceHandle create_instance(
             topic_sent,
             topic_recv,
             topic_name_mapped,
+            config_file,
+            profile_name);
+
+    std::cout << "====================================================================================" << std::endl;
+    std::cout << "                                 Current YAML file" << std::endl;
+    std::cout << "------------------------------------------------------------------------------------" << std::endl;
+    std::cout << config_yaml << std::endl;
+    std::cout << "====================================================================================" << std::endl;
+
+    const YAML::Node config_node = YAML::Load(config_yaml);
+    soss::InstanceHandle instance = soss::run_instance(config_node);
+    REQUIRE(instance);
+
+    std::this_thread::sleep_for(1s); // wait publisher and subscriber matching
+
+    return instance;
+}
+
+soss::InstanceHandle create_method_instance(
+        const std::string& dds_topic,
+        const std::vector<std::string>& request_types,
+        const std::vector<std::string>& reply_types,
+        const std::vector<std::string>& request_members,
+        const std::vector<std::string>& reply_members,
+        bool client,
+        const std::string& config_file = "",
+        const std::string& profile_name = "")
+{
+    std::string config_yaml = gen_config_method_yaml(
+            dds_topic,
+            request_types,
+            reply_types,
+            request_members,
+            reply_members,
+            client,
             config_file,
             profile_name);
 
@@ -270,6 +320,22 @@ xtypes::DynamicData roundtrip(
     return receive_msg_future.get();
 }
 
+xtypes::DynamicData roundtrip_server(
+    const std::string& topic,
+    const xtypes::DynamicData& request)
+{
+    // MOCK->DDS->MOCK
+    std::shared_future<xtypes::DynamicData> response_future = soss::mock::request(topic, request);
+    REQUIRE(std::future_status::ready == response_future.wait_for(5s));
+    xtypes::DynamicData result = std::move(response_future.get());
+    {
+        using namespace std;
+        (&response_future)->~shared_future<xtypes::DynamicData>();
+    }
+    return result;
+}
+
+/*
 TEST_CASE("Transmit to and receive from dds", "[dds]")
 {
     SECTION("basic-type")
@@ -347,6 +413,45 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
 
             REQUIRE(0 == client_instance.quit().wait_for(1s));
             REQUIRE(0 == server_instance.quit().wait_for(1s));
+        }
+    }
+}
+*/
+
+TEST_CASE("Request to and reply from dds", "[dds-server]")
+{
+    SECTION("config-server")
+    {
+        soss::InstanceHandle instance = create_method_instance(
+                "TestService",
+                {"Method0_In","Method1_In","Method2_In"},
+                {"Method0_Result","Method1_Result","Method2_Result"},
+                {"TestService_Request.data.method0","TestService_Request.data.method1","TestService_Request.data.method2"},
+                {"TestService_Reply.reply.method0","TestService_Reply.reply.method1","TestService_Reply.reply.method2"},
+                false,
+                "",
+                "");
+
+        const soss::TypeRegistry& mock_types = *instance.type_registry("mock");
+
+        SECTION("method0")
+        {
+            // Road: [mock -> dds -> dds -> mock]
+            std::string message_data_fail = "TESTING";
+            xtypes::DynamicData msg_to_sent(*mock_types.at("Method0_In"));
+            msg_to_sent["data"].value(message_data_fail);
+            std::cout << "[test]: sent message: " << message_data_fail << std::endl;
+            xtypes::DynamicData msg_to_recv = roundtrip_server("Method0_Reply", msg_to_sent);
+            REQUIRE(msg_to_recv["success"].value<bool>() == false);
+
+            std::string message_data_ok = "TEST";
+            msg_to_sent["data"].value(message_data_ok);
+            std::cout << "[test]: sent message: " << message_data_fail << std::endl;
+            msg_to_recv = roundtrip_server("Method0_Reply", msg_to_sent);
+            REQUIRE(msg_to_recv["success"].value<bool>() == true);
+
+
+            REQUIRE(0 == instance.quit().wait_for(1s));
         }
     }
 }

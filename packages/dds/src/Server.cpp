@@ -37,58 +37,128 @@ namespace dds {
 
 Server::Server(
         Participant* participant,
-        const std::string& topic_name,
-        const ::xtypes::DynamicType& message_type,
+        const std::string& service_name,
+        const ::xtypes::DynamicType& request_type,
+        const ::xtypes::DynamicType& reply_type,
         const YAML::Node& config)
-
-    : topic_name_{topic_name}
-    , message_type_{message_type}
-    , reception_threads_{}
+    : service_name_{service_name}
+    , request_type_{request_type}
+    , reply_type_{reply_type}
 {
-    DynamicTypeBuilder* builder = Conversion::create_builder(message_type);
+    add_config(config);
 
-    if (builder != nullptr)
+    // Create DynamicData
+    DynamicTypeBuilder* builder_request = Conversion::create_builder(request_type);
+    DynamicTypeBuilder* builder_reply = Conversion::create_builder(reply_type);
+
+    if (builder_request != nullptr)
     {
-        participant->register_dynamic_type(topic_name, message_type.name(), builder);
+        participant->register_dynamic_type(service_name + "_Request", request_type.name(), builder_request);
     }
     else
     {
-        throw DDSMiddlewareException("Cannot create builder for type " + message_type.name());
+        throw DDSMiddlewareException("Cannot create builder for type " + request_type.name());
     }
 
-    dynamic_data_ = participant->create_dynamic_data(topic_name);
-
-    // TODO Map discriminator to type from config
-    (void)config;
-
-    fastrtps::SubscriberAttributes attributes;
-    attributes.topic.topicKind = NO_KEY;
-    attributes.topic.topicName = topic_name;
-    attributes.topic.topicDataType = message_type.name();
-
-    dds_subscriber_ = fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, this);
-
-    if (nullptr == dds_subscriber_)
+    if (builder_reply != nullptr)
     {
-        throw DDSMiddlewareException("Error creating a subscriber");
+        participant->register_dynamic_type(service_name + "_Reply", reply_type.name(), builder_reply);
+    }
+    else
+    {
+        throw DDSMiddlewareException("Cannot create builder for type " + reply_type.name());
+    }
+
+    request_dynamic_data_ = participant->create_dynamic_data(service_name + "_Request");
+    reply_dynamic_data_ = participant->create_dynamic_data(service_name + "_Reply");
+
+    // Create Subscriber
+    {
+        fastrtps::SubscriberAttributes attributes;
+        attributes.topic.topicKind = NO_KEY;
+        attributes.topic.topicName = service_name + "_Request";
+        attributes.topic.topicDataType = request_type.name();
+
+        dds_subscriber_ = fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, this);
+
+        if (nullptr == dds_subscriber_)
+        {
+            throw DDSMiddlewareException("Error creating a subscriber");
+        }
+    }
+
+    // Create Publisher
+    {
+        fastrtps::PublisherAttributes attributes;
+        attributes.topic.topicKind = NO_KEY; //Check this
+        attributes.topic.topicName = service_name_ + "_Reply";
+        attributes.topic.topicDataType = reply_type.name();
+
+        if (config["service_instance_name"])
+        {
+            eprosima::fastrtps::rtps::Property instance_property;
+            instance_property.name("dds.rpc.service_instance_name");
+            instance_property.value(config["service_instance_name"].as<std::string>());
+            attributes.properties.properties().push_back(instance_property);
+        }
+
+        dds_publisher_ = fastrtps::Domain::createPublisher(participant->get_dds_participant(), attributes, this);
+
+        if (nullptr == dds_publisher_)
+        {
+            throw DDSMiddlewareException("Error creating a publisher");
+        }
     }
 }
 
 Server::~Server()
 {
     std::cout << "[soss-dds][server]: waiting current processing messages..." << std::endl;
-    for (std::thread& thread: reception_threads_)
-    {
-        if (thread.joinable())
-        {
-            thread.join();
-        }
-    }
 
     std::cout << "[soss-dds][server]: wait finished." << std::endl;
 
     fastrtps::Domain::removeSubscriber(dds_subscriber_);
     fastrtps::Domain::removePublisher(dds_publisher_);
+}
+
+bool Server::add_config(
+        const YAML::Node& config)
+{
+    // Map discriminator to type from config
+    if (config["remap"])
+    {
+        if (config["remap"]["dds"]) // Or name...
+        {
+            if (config["remap"]["dds"]["type"])
+            {
+                std::string disc = config["remap"]["dds"]["type"].as<std::string>();
+                const ::xtypes::DynamicType& member_type = Conversion::resolve_discriminator_type(request_type_, disc);
+                type_to_discriminator_[member_type.name()] = disc;
+                std::cout << "[soss-dds] server: member \"" << disc << "\" has type \""
+                          << member_type.name() << "\"." << std::endl;
+            }
+            else
+            {
+                if (config["remap"]["dds"]["request_type"])
+                {
+                    std::string disc = config["remap"]["dds"]["request_type"].as<std::string>();
+                    const ::xtypes::DynamicType& member_type = Conversion::resolve_discriminator_type(request_type_, disc);
+                    type_to_discriminator_[member_type.name()] = disc;
+                    std::cout << "[soss-dds] server: member \"" << disc << "\" has request type \""
+                              << member_type.name() << "\"." << std::endl;
+                }
+                if (config["remap"]["dds"]["reply_type"])
+                {
+                    std::string disc = config["remap"]["dds"]["reply_type"].as<std::string>();
+                    const ::xtypes::DynamicType& member_type = Conversion::resolve_discriminator_type(reply_type_, disc);
+                    type_to_discriminator_[member_type.name()] = disc;
+                    std::cout << "[soss-dds] server: member \"" << disc << "\" has reply type \""
+                              << member_type.name() << "\"." << std::endl;
+                }
+            }
+        }
+    }
+    return true;
 }
 
 void Server::call_service(
@@ -97,24 +167,22 @@ void Server::call_service(
         std::shared_ptr<void> call_handle)
 {
     bool success = false;
-    ::xtypes::DynamicData request(message_type_);
+    ::xtypes::DynamicData request(request_type_);
 
-    request[type_to_discriminator_[soss_request.type().name()]] = soss_request;
+    Conversion::access_member_data(request, type_to_discriminator_[soss_request.type().name()]) = soss_request;
 
     std::cout << "[soss-dds][server]: translate request: soss -> dds "
-        "(" << topic_name_ << ") " << std::endl;
+        "(" << service_name_ << ") " << std::endl;
 
-    success = Conversion::soss_to_dds(request, static_cast<DynamicData*>(dynamic_data_.get()));
+    success = Conversion::soss_to_dds(request, static_cast<DynamicData*>(request_dynamic_data_.get()));
 
     if (success)
     {
         callhandle_client_[call_handle] = &client;
         fastrtps::rtps::WriteParams params;
-        success = dds_publisher_->write(dynamic_data_.get(), params);
-        // TODO Retrieve sample_id from the publisher
+        success = dds_publisher_->write(request_dynamic_data_.get(), params);
         fastrtps::rtps::SampleIdentity sample = params.sample_identity();
         sample_callhandle_[sample] = call_handle;
-        //sample_callhandle_.emplace(std::make_pair(sample, call_handle));
     }
     else
     {
@@ -128,7 +196,7 @@ void Server::onPublicationMatched(
 {
     std::string matching = fastrtps::rtps::MatchingStatus::MATCHED_MATCHING == info.status ? "matched" : "unmatched";
     std::cout << "[soss-dds][server]: " << matching <<
-        " (" << topic_name_ << ") " << std::endl;
+        " (" << service_name_ << ") " << std::endl;
 }
 
 void Server::onSubscriptionMatched(
@@ -137,7 +205,7 @@ void Server::onSubscriptionMatched(
 {
     std::string matching = fastrtps::rtps::MatchingStatus::MATCHED_MATCHING == info.status ? "matched" : "unmatched";
     std::cout << "[soss-dds][server]: " << matching <<
-        " (" << topic_name_ << ") " << std::endl;
+        " (" << service_name_ << ") " << std::endl;
 }
 
 void Server::onNewDataMessage(
@@ -145,22 +213,21 @@ void Server::onNewDataMessage(
 {
     using namespace std::placeholders;
     fastrtps::SampleInfo_t info;
-    if (dds_subscriber_->takeNextData(dynamic_data_.get(), &info))
+    if (dds_subscriber_->takeNextData(request_dynamic_data_.get(), &info))
     {
         if (ALIVE == info.sampleKind)
         {
-            //auto sample_id = info.sample_identity;
             fastrtps::rtps::SampleIdentity sample_id = info.related_sample_identity; // TODO Verify
             std::shared_ptr<void> call_handle = sample_callhandle_[sample_id];
 
-            ::xtypes::DynamicData received(message_type_);
-            bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(dynamic_data_.get()), received);
+            ::xtypes::DynamicData received(request_type_);
+            bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(request_dynamic_data_.get()), received);
 
             if (success)
             {
                 callhandle_client_[call_handle]->receive_response(
                     call_handle,
-                    received[type_to_discriminator_[dynamic_data_->get_name()]]);
+                    Conversion::access_member_data(received, type_to_discriminator_[request_dynamic_data_->get_name()]));
 
                 callhandle_client_.erase(call_handle);
                 sample_callhandle_.erase(sample_id);

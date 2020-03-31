@@ -65,46 +65,46 @@ namespace eprosima
 
 
 /*!
- * @brief This class represents the structure Method0_Request defined by the user in the IDL file.
+ * @brief This class represents the structure Method0_In defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Method0_Request
+class Method0_In
 {
 public:
 
     /*!
      * @brief Default constructor.
      */
-    eProsima_user_DllExport Method0_Request();
+    eProsima_user_DllExport Method0_In();
 
     /*!
      * @brief Default destructor.
      */
-    eProsima_user_DllExport ~Method0_Request();
+    eProsima_user_DllExport ~Method0_In();
 
     /*!
      * @brief Copy constructor.
-     * @param x Reference to the object Method0_Request that will be copied.
+     * @param x Reference to the object Method0_In that will be copied.
      */
-    eProsima_user_DllExport Method0_Request(const Method0_Request &x);
+    eProsima_user_DllExport Method0_In(const Method0_In &x);
 
     /*!
      * @brief Move constructor.
-     * @param x Reference to the object Method0_Request that will be copied.
+     * @param x Reference to the object Method0_In that will be copied.
      */
-    eProsima_user_DllExport Method0_Request(Method0_Request &&x);
+    eProsima_user_DllExport Method0_In(Method0_In &&x);
 
     /*!
      * @brief Copy assignment.
-     * @param x Reference to the object Method0_Request that will be copied.
+     * @param x Reference to the object Method0_In that will be copied.
      */
-    eProsima_user_DllExport Method0_Request& operator=(const Method0_Request &x);
+    eProsima_user_DllExport Method0_In& operator=(const Method0_In &x);
 
     /*!
      * @brief Move assignment.
-     * @param x Reference to the object Method0_Request that will be copied.
+     * @param x Reference to the object Method0_In that will be copied.
      */
-    eProsima_user_DllExport Method0_Request& operator=(Method0_Request &&x);
+    eProsima_user_DllExport Method0_In& operator=(Method0_In &&x);
 
     /*!
      * @brief This function copies the value in member data
@@ -144,7 +144,7 @@ public:
      * @param current_alignment Buffer alignment.
      * @return Serialized size.
      */
-    eProsima_user_DllExport static size_t getCdrSerializedSize(const Method0_Request& data, size_t current_alignment = 0);
+    eProsima_user_DllExport static size_t getCdrSerializedSize(const Method0_In& data, size_t current_alignment = 0);
 
 
     /*!
@@ -184,46 +184,46 @@ private:
     std::string m_data;
 };
 /*!
- * @brief This class represents the structure Method1_Request defined by the user in the IDL file.
+ * @brief This class represents the structure Method1_In defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Method1_Request
+class Method1_In
 {
 public:
 
     /*!
      * @brief Default constructor.
      */
-    eProsima_user_DllExport Method1_Request();
+    eProsima_user_DllExport Method1_In();
 
     /*!
      * @brief Default destructor.
      */
-    eProsima_user_DllExport ~Method1_Request();
+    eProsima_user_DllExport ~Method1_In();
 
     /*!
      * @brief Copy constructor.
-     * @param x Reference to the object Method1_Request that will be copied.
+     * @param x Reference to the object Method1_In that will be copied.
      */
-    eProsima_user_DllExport Method1_Request(const Method1_Request &x);
+    eProsima_user_DllExport Method1_In(const Method1_In &x);
 
     /*!
      * @brief Move constructor.
-     * @param x Reference to the object Method1_Request that will be copied.
+     * @param x Reference to the object Method1_In that will be copied.
      */
-    eProsima_user_DllExport Method1_Request(Method1_Request &&x);
+    eProsima_user_DllExport Method1_In(Method1_In &&x);
 
     /*!
      * @brief Copy assignment.
-     * @param x Reference to the object Method1_Request that will be copied.
+     * @param x Reference to the object Method1_In that will be copied.
      */
-    eProsima_user_DllExport Method1_Request& operator=(const Method1_Request &x);
+    eProsima_user_DllExport Method1_In& operator=(const Method1_In &x);
 
     /*!
      * @brief Move assignment.
-     * @param x Reference to the object Method1_Request that will be copied.
+     * @param x Reference to the object Method1_In that will be copied.
      */
-    eProsima_user_DllExport Method1_Request& operator=(Method1_Request &&x);
+    eProsima_user_DllExport Method1_In& operator=(Method1_In &&x);
 
     /*!
      * @brief This function sets a value in member a
@@ -276,7 +276,7 @@ public:
      * @param current_alignment Buffer alignment.
      * @return Serialized size.
      */
-    eProsima_user_DllExport static size_t getCdrSerializedSize(const Method1_Request& data, size_t current_alignment = 0);
+    eProsima_user_DllExport static size_t getCdrSerializedSize(const Method1_In& data, size_t current_alignment = 0);
 
 
     /*!
@@ -317,46 +317,46 @@ private:
     int32_t m_b;
 };
 /*!
- * @brief This class represents the structure Method2_Request defined by the user in the IDL file.
+ * @brief This class represents the structure Method2_In defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Method2_Request
+class Method2_In
 {
 public:
 
     /*!
      * @brief Default constructor.
      */
-    eProsima_user_DllExport Method2_Request();
+    eProsima_user_DllExport Method2_In();
 
     /*!
      * @brief Default destructor.
      */
-    eProsima_user_DllExport ~Method2_Request();
+    eProsima_user_DllExport ~Method2_In();
 
     /*!
      * @brief Copy constructor.
-     * @param x Reference to the object Method2_Request that will be copied.
+     * @param x Reference to the object Method2_In that will be copied.
      */
-    eProsima_user_DllExport Method2_Request(const Method2_Request &x);
+    eProsima_user_DllExport Method2_In(const Method2_In &x);
 
     /*!
      * @brief Move constructor.
-     * @param x Reference to the object Method2_Request that will be copied.
+     * @param x Reference to the object Method2_In that will be copied.
      */
-    eProsima_user_DllExport Method2_Request(Method2_Request &&x);
+    eProsima_user_DllExport Method2_In(Method2_In &&x);
 
     /*!
      * @brief Copy assignment.
-     * @param x Reference to the object Method2_Request that will be copied.
+     * @param x Reference to the object Method2_In that will be copied.
      */
-    eProsima_user_DllExport Method2_Request& operator=(const Method2_Request &x);
+    eProsima_user_DllExport Method2_In& operator=(const Method2_In &x);
 
     /*!
      * @brief Move assignment.
-     * @param x Reference to the object Method2_Request that will be copied.
+     * @param x Reference to the object Method2_In that will be copied.
      */
-    eProsima_user_DllExport Method2_Request& operator=(Method2_Request &&x);
+    eProsima_user_DllExport Method2_In& operator=(Method2_In &&x);
 
     /*!
      * @brief This function sets a value in member data
@@ -391,7 +391,7 @@ public:
      * @param current_alignment Buffer alignment.
      * @return Serialized size.
      */
-    eProsima_user_DllExport static size_t getCdrSerializedSize(const Method2_Request& data, size_t current_alignment = 0);
+    eProsima_user_DllExport static size_t getCdrSerializedSize(const Method2_In& data, size_t current_alignment = 0);
 
 
     /*!
@@ -431,46 +431,46 @@ private:
     float m_data;
 };
 /*!
- * @brief This class represents the union Union_Request defined by the user in the IDL file.
+ * @brief This class represents the union TestService_Call defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Union_Request
+class TestService_Call
 {
 public:
 
     /*!
      * @brief Default constructor.
      */
-    eProsima_user_DllExport Union_Request();
+    eProsima_user_DllExport TestService_Call();
 
     /*!
      * @brief Default destructor.
      */
-    eProsima_user_DllExport ~Union_Request();
+    eProsima_user_DllExport ~TestService_Call();
 
     /*!
      * @brief Copy constructor.
-     * @param x Reference to the object Union_Request that will be copied.
+     * @param x Reference to the object TestService_Call that will be copied.
      */
-    eProsima_user_DllExport Union_Request(const Union_Request &x);
+    eProsima_user_DllExport TestService_Call(const TestService_Call &x);
 
     /*!
      * @brief Move constructor.
-     * @param x Reference to the object Union_Request that will be copied.
+     * @param x Reference to the object TestService_Call that will be copied.
      */
-    eProsima_user_DllExport Union_Request(Union_Request &&x);
+    eProsima_user_DllExport TestService_Call(TestService_Call &&x);
 
     /*!
      * @brief Copy assignment.
-     * @param x Reference to the object Union_Request that will be copied.
+     * @param x Reference to the object TestService_Call that will be copied.
      */
-    eProsima_user_DllExport Union_Request& operator=(const Union_Request &x);
+    eProsima_user_DllExport TestService_Call& operator=(const TestService_Call &x);
 
     /*!
      * @brief Move assignment.
-     * @param x Reference to the object Union_Request that will be copied.
+     * @param x Reference to the object TestService_Call that will be copied.
      */
-    eProsima_user_DllExport Union_Request& operator=(Union_Request &&x);
+    eProsima_user_DllExport TestService_Call& operator=(TestService_Call &&x);
 
     /*!
      * @brief This function sets the discriminator value.
@@ -495,77 +495,77 @@ public:
      * @brief This function copies the value in member method0
      * @param _method0 New value to be copied in member method0
      */
-    eProsima_user_DllExport void method0(const Method0_Request &_method0);
+    eProsima_user_DllExport void method0(const Method0_In &_method0);
 
     /*!
      * @brief This function moves the value in member method0
      * @param _method0 New value to be moved in member method0
      */
-    eProsima_user_DllExport void method0(Method0_Request &&_method0);
+    eProsima_user_DllExport void method0(Method0_In &&_method0);
 
     /*!
      * @brief This function returns a constant reference to member method0
      * @return Constant reference to member method0
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the requested union member is not the current selection.
      */
-    eProsima_user_DllExport const Method0_Request& method0() const;
+    eProsima_user_DllExport const Method0_In& method0() const;
 
     /*!
      * @brief This function returns a reference to member method0
      * @return Reference to member method0
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the requested union member is not the current selection.
      */
-    eProsima_user_DllExport Method0_Request& method0();
+    eProsima_user_DllExport Method0_In& method0();
     /*!
      * @brief This function copies the value in member method1
      * @param _method1 New value to be copied in member method1
      */
-    eProsima_user_DllExport void method1(const Method1_Request &_method1);
+    eProsima_user_DllExport void method1(const Method1_In &_method1);
 
     /*!
      * @brief This function moves the value in member method1
      * @param _method1 New value to be moved in member method1
      */
-    eProsima_user_DllExport void method1(Method1_Request &&_method1);
+    eProsima_user_DllExport void method1(Method1_In &&_method1);
 
     /*!
      * @brief This function returns a constant reference to member method1
      * @return Constant reference to member method1
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the requested union member is not the current selection.
      */
-    eProsima_user_DllExport const Method1_Request& method1() const;
+    eProsima_user_DllExport const Method1_In& method1() const;
 
     /*!
      * @brief This function returns a reference to member method1
      * @return Reference to member method1
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the requested union member is not the current selection.
      */
-    eProsima_user_DllExport Method1_Request& method1();
+    eProsima_user_DllExport Method1_In& method1();
     /*!
      * @brief This function copies the value in member method2
      * @param _method2 New value to be copied in member method2
      */
-    eProsima_user_DllExport void method2(const Method2_Request &_method2);
+    eProsima_user_DllExport void method2(const Method2_In &_method2);
 
     /*!
      * @brief This function moves the value in member method2
      * @param _method2 New value to be moved in member method2
      */
-    eProsima_user_DllExport void method2(Method2_Request &&_method2);
+    eProsima_user_DllExport void method2(Method2_In &&_method2);
 
     /*!
      * @brief This function returns a constant reference to member method2
      * @return Constant reference to member method2
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the requested union member is not the current selection.
      */
-    eProsima_user_DllExport const Method2_Request& method2() const;
+    eProsima_user_DllExport const Method2_In& method2() const;
 
     /*!
      * @brief This function returns a reference to member method2
      * @return Reference to member method2
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the requested union member is not the current selection.
      */
-    eProsima_user_DllExport Method2_Request& method2();
+    eProsima_user_DllExport Method2_In& method2();
 
     /*!
      * @brief This function returns the maximum serialized size of an object
@@ -581,7 +581,7 @@ public:
      * @param current_alignment Buffer alignment.
      * @return Serialized size.
      */
-    eProsima_user_DllExport static size_t getCdrSerializedSize(const Union_Request& data, size_t current_alignment = 0);
+    eProsima_user_DllExport static size_t getCdrSerializedSize(const TestService_Call& data, size_t current_alignment = 0);
 
 
     /*!
@@ -602,51 +602,51 @@ public:
 private:
     uint32_t m__d;
 
-    Method0_Request m_method0;
-    Method1_Request m_method1;
-    Method2_Request m_method2;
+    Method0_In m_method0;
+    Method1_In m_method1;
+    Method2_In m_method2;
 };
 /*!
- * @brief This class represents the structure Method0_Reply defined by the user in the IDL file.
+ * @brief This class represents the structure Method0_Result defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Method0_Reply
+class Method0_Result
 {
 public:
 
     /*!
      * @brief Default constructor.
      */
-    eProsima_user_DllExport Method0_Reply();
+    eProsima_user_DllExport Method0_Result();
 
     /*!
      * @brief Default destructor.
      */
-    eProsima_user_DllExport ~Method0_Reply();
+    eProsima_user_DllExport ~Method0_Result();
 
     /*!
      * @brief Copy constructor.
-     * @param x Reference to the object Method0_Reply that will be copied.
+     * @param x Reference to the object Method0_Result that will be copied.
      */
-    eProsima_user_DllExport Method0_Reply(const Method0_Reply &x);
+    eProsima_user_DllExport Method0_Result(const Method0_Result &x);
 
     /*!
      * @brief Move constructor.
-     * @param x Reference to the object Method0_Reply that will be copied.
+     * @param x Reference to the object Method0_Result that will be copied.
      */
-    eProsima_user_DllExport Method0_Reply(Method0_Reply &&x);
+    eProsima_user_DllExport Method0_Result(Method0_Result &&x);
 
     /*!
      * @brief Copy assignment.
-     * @param x Reference to the object Method0_Reply that will be copied.
+     * @param x Reference to the object Method0_Result that will be copied.
      */
-    eProsima_user_DllExport Method0_Reply& operator=(const Method0_Reply &x);
+    eProsima_user_DllExport Method0_Result& operator=(const Method0_Result &x);
 
     /*!
      * @brief Move assignment.
-     * @param x Reference to the object Method0_Reply that will be copied.
+     * @param x Reference to the object Method0_Result that will be copied.
      */
-    eProsima_user_DllExport Method0_Reply& operator=(Method0_Reply &&x);
+    eProsima_user_DllExport Method0_Result& operator=(Method0_Result &&x);
 
     /*!
      * @brief This function sets a value in member success
@@ -681,7 +681,7 @@ public:
      * @param current_alignment Buffer alignment.
      * @return Serialized size.
      */
-    eProsima_user_DllExport static size_t getCdrSerializedSize(const Method0_Reply& data, size_t current_alignment = 0);
+    eProsima_user_DllExport static size_t getCdrSerializedSize(const Method0_Result& data, size_t current_alignment = 0);
 
 
     /*!
@@ -721,46 +721,46 @@ private:
     bool m_success;
 };
 /*!
- * @brief This class represents the structure Method1_Reply defined by the user in the IDL file.
+ * @brief This class represents the structure Method1_Result defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Method1_Reply
+class Method1_Result
 {
 public:
 
     /*!
      * @brief Default constructor.
      */
-    eProsima_user_DllExport Method1_Reply();
+    eProsima_user_DllExport Method1_Result();
 
     /*!
      * @brief Default destructor.
      */
-    eProsima_user_DllExport ~Method1_Reply();
+    eProsima_user_DllExport ~Method1_Result();
 
     /*!
      * @brief Copy constructor.
-     * @param x Reference to the object Method1_Reply that will be copied.
+     * @param x Reference to the object Method1_Result that will be copied.
      */
-    eProsima_user_DllExport Method1_Reply(const Method1_Reply &x);
+    eProsima_user_DllExport Method1_Result(const Method1_Result &x);
 
     /*!
      * @brief Move constructor.
-     * @param x Reference to the object Method1_Reply that will be copied.
+     * @param x Reference to the object Method1_Result that will be copied.
      */
-    eProsima_user_DllExport Method1_Reply(Method1_Reply &&x);
+    eProsima_user_DllExport Method1_Result(Method1_Result &&x);
 
     /*!
      * @brief Copy assignment.
-     * @param x Reference to the object Method1_Reply that will be copied.
+     * @param x Reference to the object Method1_Result that will be copied.
      */
-    eProsima_user_DllExport Method1_Reply& operator=(const Method1_Reply &x);
+    eProsima_user_DllExport Method1_Result& operator=(const Method1_Result &x);
 
     /*!
      * @brief Move assignment.
-     * @param x Reference to the object Method1_Reply that will be copied.
+     * @param x Reference to the object Method1_Result that will be copied.
      */
-    eProsima_user_DllExport Method1_Reply& operator=(Method1_Reply &&x);
+    eProsima_user_DllExport Method1_Result& operator=(Method1_Result &&x);
 
     /*!
      * @brief This function sets a value in member result
@@ -795,7 +795,7 @@ public:
      * @param current_alignment Buffer alignment.
      * @return Serialized size.
      */
-    eProsima_user_DllExport static size_t getCdrSerializedSize(const Method1_Reply& data, size_t current_alignment = 0);
+    eProsima_user_DllExport static size_t getCdrSerializedSize(const Method1_Result& data, size_t current_alignment = 0);
 
 
     /*!
@@ -835,46 +835,46 @@ private:
     int32_t m_result;
 };
 /*!
- * @brief This class represents the structure Method2_Reply defined by the user in the IDL file.
+ * @brief This class represents the structure Method2_Result defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Method2_Reply
+class Method2_Result
 {
 public:
 
     /*!
      * @brief Default constructor.
      */
-    eProsima_user_DllExport Method2_Reply();
+    eProsima_user_DllExport Method2_Result();
 
     /*!
      * @brief Default destructor.
      */
-    eProsima_user_DllExport ~Method2_Reply();
+    eProsima_user_DllExport ~Method2_Result();
 
     /*!
      * @brief Copy constructor.
-     * @param x Reference to the object Method2_Reply that will be copied.
+     * @param x Reference to the object Method2_Result that will be copied.
      */
-    eProsima_user_DllExport Method2_Reply(const Method2_Reply &x);
+    eProsima_user_DllExport Method2_Result(const Method2_Result &x);
 
     /*!
      * @brief Move constructor.
-     * @param x Reference to the object Method2_Reply that will be copied.
+     * @param x Reference to the object Method2_Result that will be copied.
      */
-    eProsima_user_DllExport Method2_Reply(Method2_Reply &&x);
+    eProsima_user_DllExport Method2_Result(Method2_Result &&x);
 
     /*!
      * @brief Copy assignment.
-     * @param x Reference to the object Method2_Reply that will be copied.
+     * @param x Reference to the object Method2_Result that will be copied.
      */
-    eProsima_user_DllExport Method2_Reply& operator=(const Method2_Reply &x);
+    eProsima_user_DllExport Method2_Result& operator=(const Method2_Result &x);
 
     /*!
      * @brief Move assignment.
-     * @param x Reference to the object Method2_Reply that will be copied.
+     * @param x Reference to the object Method2_Result that will be copied.
      */
-    eProsima_user_DllExport Method2_Reply& operator=(Method2_Reply &&x);
+    eProsima_user_DllExport Method2_Result& operator=(Method2_Result &&x);
 
     /*!
      * @brief This function sets a value in member data
@@ -909,7 +909,7 @@ public:
      * @param current_alignment Buffer alignment.
      * @return Serialized size.
      */
-    eProsima_user_DllExport static size_t getCdrSerializedSize(const Method2_Reply& data, size_t current_alignment = 0);
+    eProsima_user_DllExport static size_t getCdrSerializedSize(const Method2_Result& data, size_t current_alignment = 0);
 
 
     /*!
@@ -949,141 +949,141 @@ private:
     float m_data;
 };
 /*!
- * @brief This class represents the union Union_Reply defined by the user in the IDL file.
+ * @brief This class represents the union TestService_Return defined by the user in the IDL file.
  * @ingroup TEST_SERVICE
  */
-class Union_Reply
+class TestService_Return
 {
 public:
 
     /*!
      * @brief Default constructor.
      */
-    eProsima_user_DllExport Union_Reply();
+    eProsima_user_DllExport TestService_Return();
 
     /*!
      * @brief Default destructor.
      */
-    eProsima_user_DllExport ~Union_Reply();
+    eProsima_user_DllExport ~TestService_Return();
 
     /*!
      * @brief Copy constructor.
-     * @param x Reference to the object Union_Reply that will be copied.
+     * @param x Reference to the object TestService_Return that will be copied.
      */
-    eProsima_user_DllExport Union_Reply(const Union_Reply &x);
+    eProsima_user_DllExport TestService_Return(const TestService_Return &x);
 
     /*!
      * @brief Move constructor.
-     * @param x Reference to the object Union_Reply that will be copied.
+     * @param x Reference to the object TestService_Return that will be copied.
      */
-    eProsima_user_DllExport Union_Reply(Union_Reply &&x);
+    eProsima_user_DllExport TestService_Return(TestService_Return &&x);
 
     /*!
      * @brief Copy assignment.
-     * @param x Reference to the object Union_Reply that will be copied.
+     * @param x Reference to the object TestService_Return that will be copied.
      */
-    eProsima_user_DllExport Union_Reply& operator=(const Union_Reply &x);
+    eProsima_user_DllExport TestService_Return& operator=(const TestService_Return &x);
 
     /*!
      * @brief Move assignment.
-     * @param x Reference to the object Union_Reply that will be copied.
+     * @param x Reference to the object TestService_Return that will be copied.
      */
-    eProsima_user_DllExport Union_Reply& operator=(Union_Reply &&x);
+    eProsima_user_DllExport TestService_Return& operator=(TestService_Return &&x);
 
     /*!
      * @brief This function sets the discriminator value.
      * @param __d New value for the discriminator.
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the new value doesn't correspond to the selected union member.
      */
-    eProsima_user_DllExport void _d(uint32_t __d);
+    eProsima_user_DllExport void _d(int32_t __d);
 
     /*!
      * @brief This function returns the value of the discriminator.
      * @return Value of the discriminator
      */
-    eProsima_user_DllExport uint32_t _d() const;
+    eProsima_user_DllExport int32_t _d() const;
 
     /*!
      * @brief This function returns a reference to the discriminator.
      * @return Reference to the discriminator.
      */
-    eProsima_user_DllExport uint32_t& _d();
+    eProsima_user_DllExport int32_t& _d();
 
     /*!
      * @brief This function copies the value in member method0
      * @param _method0 New value to be copied in member method0
      */
-    eProsima_user_DllExport void method0(const Method0_Reply &_method0);
+    eProsima_user_DllExport void method0(const Method0_Result &_method0);
 
     /*!
      * @brief This function moves the value in member method0
      * @param _method0 New value to be moved in member method0
      */
-    eProsima_user_DllExport void method0(Method0_Reply &&_method0);
+    eProsima_user_DllExport void method0(Method0_Result &&_method0);
 
     /*!
      * @brief This function returns a constant reference to member method0
      * @return Constant reference to member method0
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the requested union member is not the current selection.
      */
-    eProsima_user_DllExport const Method0_Reply& method0() const;
+    eProsima_user_DllExport const Method0_Result& method0() const;
 
     /*!
      * @brief This function returns a reference to member method0
      * @return Reference to member method0
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the requested union member is not the current selection.
      */
-    eProsima_user_DllExport Method0_Reply& method0();
+    eProsima_user_DllExport Method0_Result& method0();
     /*!
      * @brief This function copies the value in member method1
      * @param _method1 New value to be copied in member method1
      */
-    eProsima_user_DllExport void method1(const Method1_Reply &_method1);
+    eProsima_user_DllExport void method1(const Method1_Result &_method1);
 
     /*!
      * @brief This function moves the value in member method1
      * @param _method1 New value to be moved in member method1
      */
-    eProsima_user_DllExport void method1(Method1_Reply &&_method1);
+    eProsima_user_DllExport void method1(Method1_Result &&_method1);
 
     /*!
      * @brief This function returns a constant reference to member method1
      * @return Constant reference to member method1
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the requested union member is not the current selection.
      */
-    eProsima_user_DllExport const Method1_Reply& method1() const;
+    eProsima_user_DllExport const Method1_Result& method1() const;
 
     /*!
      * @brief This function returns a reference to member method1
      * @return Reference to member method1
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the requested union member is not the current selection.
      */
-    eProsima_user_DllExport Method1_Reply& method1();
+    eProsima_user_DllExport Method1_Result& method1();
     /*!
      * @brief This function copies the value in member method2
      * @param _method2 New value to be copied in member method2
      */
-    eProsima_user_DllExport void method2(const Method2_Reply &_method2);
+    eProsima_user_DllExport void method2(const Method2_Result &_method2);
 
     /*!
      * @brief This function moves the value in member method2
      * @param _method2 New value to be moved in member method2
      */
-    eProsima_user_DllExport void method2(Method2_Reply &&_method2);
+    eProsima_user_DllExport void method2(Method2_Result &&_method2);
 
     /*!
      * @brief This function returns a constant reference to member method2
      * @return Constant reference to member method2
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the requested union member is not the current selection.
      */
-    eProsima_user_DllExport const Method2_Reply& method2() const;
+    eProsima_user_DllExport const Method2_Result& method2() const;
 
     /*!
      * @brief This function returns a reference to member method2
      * @return Reference to member method2
      * @exception eprosima::fastcdr::BadParamException This exception is thrown if the requested union member is not the current selection.
      */
-    eProsima_user_DllExport Method2_Reply& method2();
+    eProsima_user_DllExport Method2_Result& method2();
 
     /*!
      * @brief This function returns the maximum serialized size of an object
@@ -1099,7 +1099,7 @@ public:
      * @param current_alignment Buffer alignment.
      * @return Serialized size.
      */
-    eProsima_user_DllExport static size_t getCdrSerializedSize(const Union_Reply& data, size_t current_alignment = 0);
+    eProsima_user_DllExport static size_t getCdrSerializedSize(const TestService_Return& data, size_t current_alignment = 0);
 
 
     /*!
@@ -1118,11 +1118,11 @@ public:
 
 
 private:
-    uint32_t m__d;
+    int32_t m__d;
 
-    Method0_Reply m_method0;
-    Method1_Reply m_method1;
-    Method2_Reply m_method2;
+    Method0_Result m_method0;
+    Method1_Result m_method1;
+    Method2_Result m_method2;
 };
 /*!
  * @brief This class represents the structure TestService_Request defined by the user in the IDL file.
@@ -1167,28 +1167,28 @@ public:
     eProsima_user_DllExport TestService_Request& operator=(TestService_Request &&x);
 
     /*!
-     * @brief This function copies the value in member request
-     * @param _request New value to be copied in member request
+     * @brief This function copies the value in member data
+     * @param _data New value to be copied in member data
      */
-    eProsima_user_DllExport void request(const Union_Request &_request);
+    eProsima_user_DllExport void data(const TestService_Call &_data);
 
     /*!
-     * @brief This function moves the value in member request
-     * @param _request New value to be moved in member request
+     * @brief This function moves the value in member data
+     * @param _data New value to be moved in member data
      */
-    eProsima_user_DllExport void request(Union_Request &&_request);
+    eProsima_user_DllExport void data(TestService_Call &&_data);
 
     /*!
-     * @brief This function returns a constant reference to member request
-     * @return Constant reference to member request
+     * @brief This function returns a constant reference to member data
+     * @return Constant reference to member data
      */
-    eProsima_user_DllExport const Union_Request& request() const;
+    eProsima_user_DllExport const TestService_Call& data() const;
 
     /*!
-     * @brief This function returns a reference to member request
-     * @return Reference to member request
+     * @brief This function returns a reference to member data
+     * @return Reference to member data
      */
-    eProsima_user_DllExport Union_Request& request();
+    eProsima_user_DllExport TestService_Call& data();
 
     /*!
      * @brief This function returns the maximum serialized size of an object
@@ -1241,7 +1241,7 @@ public:
     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
 
 private:
-    Union_Request m_request;
+    TestService_Call m_data;
 };
 /*!
  * @brief This class represents the structure TestService_Reply defined by the user in the IDL file.
@@ -1289,25 +1289,25 @@ public:
      * @brief This function copies the value in member reply
      * @param _reply New value to be copied in member reply
      */
-    eProsima_user_DllExport void reply(const Union_Reply &_reply);
+    eProsima_user_DllExport void reply(const TestService_Return &_reply);
 
     /*!
      * @brief This function moves the value in member reply
      * @param _reply New value to be moved in member reply
      */
-    eProsima_user_DllExport void reply(Union_Reply &&_reply);
+    eProsima_user_DllExport void reply(TestService_Return &&_reply);
 
     /*!
      * @brief This function returns a constant reference to member reply
      * @return Constant reference to member reply
      */
-    eProsima_user_DllExport const Union_Reply& reply() const;
+    eProsima_user_DllExport const TestService_Return& reply() const;
 
     /*!
      * @brief This function returns a reference to member reply
      * @return Reference to member reply
      */
-    eProsima_user_DllExport Union_Reply& reply();
+    eProsima_user_DllExport TestService_Return& reply();
 
     /*!
      * @brief This function returns the maximum serialized size of an object
@@ -1360,7 +1360,7 @@ public:
     eProsima_user_DllExport void serializeKey(eprosima::fastcdr::Cdr &cdr) const;
 
 private:
-    Union_Reply m_reply;
+    TestService_Return m_reply;
 };
 
 #endif // _TEST_SERVICE_H_

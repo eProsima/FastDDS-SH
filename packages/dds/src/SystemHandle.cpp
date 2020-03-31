@@ -37,7 +37,7 @@ class SystemHandle : public virtual FullSystem
 public:
 
     bool configure(
-            const RequiredTypes& /* types */,
+            const RequiredTypes& types,
             const YAML::Node& configuration,
             TypeRegistry& /*type_registry*/) override
     {
@@ -66,6 +66,12 @@ public:
         }
 
         std::cout << "[soss-dds]: configured!" << std::endl;
+
+        for (const std::string& type : types.services)
+        {
+            std::cout << "******** " << type << " *********" << std::endl;
+        }
+
         return true;
     }
 
@@ -132,53 +138,82 @@ public:
 
     bool create_client_proxy(
             const std::string& service_name,
-            const xtypes::DynamicType& service_type,
+            const xtypes::DynamicType& request_type,
+            const xtypes::DynamicType& reply_type,
             RequestCallback callback,
             const YAML::Node& configuration) override
     {
-        try
+        if (clients_.count(service_name) == 0)
         {
-            auto client = std::make_shared<Client>(
-                participant_.get(),
-                service_name,
-                service_type,
-                callback,
-                configuration);
-            clients_.emplace_back(std::move(client));
+            try
+            {
+                auto client = std::make_shared<Client>(
+                    participant_.get(),
+                    service_name,
+                    request_type,
+                    reply_type,
+                    callback,
+                    configuration);
 
-            std::cout << "[soss-dds]: client created. "
-                "service: " << service_name << ", "
-                "type: " << service_type.name() << std::endl;
+                clients_[service_name] = std::move(client);
 
-            return true;
+                std::cout << "[soss-dds]: client created. "
+                    << "service: " << service_name
+                    << ", request_type: " << request_type.name()
+                    << ", reply_type: " << reply_type.name() << std::endl;
 
+                return true;
+
+            }
+            catch (DDSMiddlewareException& e)
+            {
+                std::cerr << "[soss-dds]: " << e.what() << std::endl;
+                return false;
+            }
         }
-        catch (DDSMiddlewareException& e)
-        {
-            std::cerr << "[soss-dds]: " << e.what() << std::endl;
-            return false;
-        }
+
+        return clients_[service_name]->add_config(configuration);
     }
 
     std::shared_ptr<ServiceProvider> create_service_proxy(
             const std::string& service_name,
-            const xtypes::DynamicType& service_type,
+            const xtypes::DynamicType& request_type,
+            const xtypes::DynamicType& reply_type,
             const YAML::Node& configuration) override
     {
-        try
+        if (servers_.count(service_name) == 0)
         {
-            auto server = std::make_shared<Server>(participant_.get(), service_name, service_type, configuration);
-            servers_.emplace_back(std::move(server));
+            try
+            {
+                auto server = std::make_shared<Server>(
+                    participant_.get(),
+                    service_name,
+                    request_type,
+                    reply_type,
+                    configuration);
 
-            std::cout << "[soss-dds]: server created. "
-                "service: " << service_name << ", "
-                "type: " << service_type.name() << std::endl;
+                servers_[service_name] = std::move(server);
 
-            return servers_.back();
+                std::cout << "[soss-dds]: server created. "
+                    << "service: " << service_name
+                    << ", request_type: " << request_type.name()
+                    << ", reply_type: " << reply_type.name() << std::endl;
+
+                return servers_[service_name];
+            }
+            catch (DDSMiddlewareException& e)
+            {
+                std::cerr << "[soss-dds]: " << e.what() << std::endl;
+                return nullptr;
+            }
         }
-        catch (DDSMiddlewareException& e)
+
+        if (servers_[service_name]->add_config(configuration))
         {
-            std::cerr << "[soss-dds]: " << e.what() << std::endl;
+            return servers_[service_name];
+        }
+        else
+        {
             return nullptr;
         }
     }
@@ -188,8 +223,8 @@ private:
     std::unique_ptr<Participant> participant_;
     std::vector<std::shared_ptr<Publisher> > publishers_;
     std::vector<std::shared_ptr<Subscriber> > subscribers_;
-    std::vector<std::shared_ptr<Client> > clients_;
-    std::vector<std::shared_ptr<Server> > servers_;
+    std::map<std::string, std::shared_ptr<Client> > clients_;
+    std::map<std::string, std::shared_ptr<Server> > servers_;
 };
 
 

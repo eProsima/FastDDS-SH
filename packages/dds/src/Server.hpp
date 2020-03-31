@@ -43,11 +43,12 @@ public:
 
     Server(
             Participant* participant,
-            const std::string& topic_name,
-            const xtypes::DynamicType& message_type,
+            const std::string& service_name,
+            const xtypes::DynamicType& request_type,
+            const xtypes::DynamicType& reply_type,
             const YAML::Node& config);
 
-    virtual ~Server();
+    virtual ~Server() override;
 
     Server(
             const Server& rhs) = delete;
@@ -68,6 +69,9 @@ public:
             ServiceClient& client,
             std::shared_ptr<void> call_handle) override;
 
+    bool add_config(
+            const YAML::Node& configuration);
+
 private:
 
     void onPublicationMatched(
@@ -83,16 +87,16 @@ private:
 
     eprosima::fastrtps::Publisher* dds_publisher_;
     eprosima::fastrtps::Subscriber* dds_subscriber_;
-    DynamicData_ptr dynamic_data_;
+    DynamicData_ptr request_dynamic_data_;
+    DynamicData_ptr reply_dynamic_data_;
 
-    const std::string topic_name_;
-    const xtypes::DynamicType& message_type_;
+    const std::string service_name_;
+    const xtypes::DynamicType& request_type_;
+    const xtypes::DynamicType& reply_type_;
 
-    std::vector<std::thread> reception_threads_;
     std::map<std::shared_ptr<void>, ServiceClient*> callhandle_client_;
     std::map<eprosima::fastrtps::rtps::SampleIdentity, std::shared_ptr<void>, SampleIdentityComparator>
         sample_callhandle_;
-    std::map<std::string, std::string> discriminator_to_type_;
     std::map<std::string, std::string> type_to_discriminator_;
 };
 
