@@ -37,7 +37,7 @@ class SystemHandle : public virtual FullSystem
 public:
 
     bool configure(
-            const RequiredTypes& types,
+            const RequiredTypes& /*types*/,
             const YAML::Node& configuration,
             TypeRegistry& /*type_registry*/) override
     {
@@ -66,11 +66,6 @@ public:
         }
 
         std::cout << "[soss-dds]: configured!" << std::endl;
-
-        for (const std::string& type : types.services)
-        {
-            std::cout << "******** " << type << " *********" << std::endl;
-        }
 
         return true;
     }

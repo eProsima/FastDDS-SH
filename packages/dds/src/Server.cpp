@@ -76,8 +76,8 @@ Server::Server(
     {
         fastrtps::SubscriberAttributes attributes;
         attributes.topic.topicKind = NO_KEY;
-        attributes.topic.topicName = service_name + "_Request";
-        attributes.topic.topicDataType = request_type.name();
+        attributes.topic.topicName = service_name_ + "_Reply";
+        attributes.topic.topicDataType = reply_type.name();
 
         dds_subscriber_ = fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, this);
 
@@ -85,14 +85,20 @@ Server::Server(
         {
             throw DDSMiddlewareException("Error creating a subscriber");
         }
+        else
+        {
+            std::cout << "[soss-dds][server][sub]: "
+                      << attributes.topic.topicDataType << " in topic "
+                      << attributes.topic.topicName << std::endl;
+        }
     }
 
     // Create Publisher
     {
         fastrtps::PublisherAttributes attributes;
         attributes.topic.topicKind = NO_KEY; //Check this
-        attributes.topic.topicName = service_name_ + "_Reply";
-        attributes.topic.topicDataType = reply_type.name();
+        attributes.topic.topicName = service_name + "_Request";
+        attributes.topic.topicDataType = request_type.name();
 
         if (config["service_instance_name"])
         {
@@ -107,6 +113,12 @@ Server::Server(
         if (nullptr == dds_publisher_)
         {
             throw DDSMiddlewareException("Error creating a publisher");
+        }
+        else
+        {
+            std::cout << "[soss-dds][server][pub]: "
+                      << attributes.topic.topicDataType << " in topic "
+                      << attributes.topic.topicName << std::endl;
         }
     }
 }
@@ -181,8 +193,15 @@ void Server::call_service(
         callhandle_client_[call_handle] = &client;
         fastrtps::rtps::WriteParams params;
         success = dds_publisher_->write(request_dynamic_data_.get(), params);
-        fastrtps::rtps::SampleIdentity sample = params.sample_identity();
-        sample_callhandle_[sample] = call_handle;
+        if (!success)
+        {
+            std::cout << "Failed to publish message into DDS world." << std::endl;
+        }
+        else
+        {
+            fastrtps::rtps::SampleIdentity sample = params.sample_identity();
+            sample_callhandle_[sample] = call_handle;
+        }
     }
     else
     {
@@ -213,21 +232,21 @@ void Server::onNewDataMessage(
 {
     using namespace std::placeholders;
     fastrtps::SampleInfo_t info;
-    if (dds_subscriber_->takeNextData(request_dynamic_data_.get(), &info))
+    if (dds_subscriber_->takeNextData(reply_dynamic_data_.get(), &info))
     {
         if (ALIVE == info.sampleKind)
         {
             fastrtps::rtps::SampleIdentity sample_id = info.related_sample_identity; // TODO Verify
             std::shared_ptr<void> call_handle = sample_callhandle_[sample_id];
 
-            ::xtypes::DynamicData received(request_type_);
-            bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(request_dynamic_data_.get()), received);
+            ::xtypes::DynamicData received(reply_type_);
+            bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(reply_dynamic_data_.get()), received);
 
             if (success)
             {
                 callhandle_client_[call_handle]->receive_response(
                     call_handle,
-                    Conversion::access_member_data(received, type_to_discriminator_[request_dynamic_data_->get_name()]));
+                    Conversion::access_member_data(received, type_to_discriminator_[reply_dynamic_data_->get_name()]));
 
                 callhandle_client_.erase(call_handle);
                 sample_callhandle_.erase(sample_id);

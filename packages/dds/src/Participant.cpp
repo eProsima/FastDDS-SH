@@ -34,6 +34,7 @@ namespace dds {
 Participant::Participant()
 {
     fastrtps::ParticipantAttributes attributes;
+    attributes.rtps.setName("DefaultSOSSDDSParticipant");
     dds_participant_ = fastrtps::Domain::createParticipant(attributes);
 }
 
@@ -162,6 +163,7 @@ void Participant::onParticipantDiscovery(
         fastrtps::Participant* /* participant */,
         fastrtps::rtps::ParticipantDiscoveryInfo&& /* info */)
 {
+    std::cout << ">>>>>>>>>>>>>> PARTICIPANT MATCHED" << std::endl;
 }
 
 } //namespace dds

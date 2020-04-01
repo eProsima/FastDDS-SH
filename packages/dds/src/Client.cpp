@@ -76,8 +76,8 @@ Client::Client(
     {
         fastrtps::SubscriberAttributes attributes;
         attributes.topic.topicKind = NO_KEY;
-        attributes.topic.topicName = service_name + "_Reply";
-        attributes.topic.topicDataType = reply_type.name();
+        attributes.topic.topicName = service_name_ + "_Request";
+        attributes.topic.topicDataType = request_type.name();
 
         dds_subscriber_ = fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, this);
 
@@ -91,8 +91,8 @@ Client::Client(
     {
         fastrtps::PublisherAttributes attributes;
         attributes.topic.topicKind = NO_KEY; //Check this
-        attributes.topic.topicName = service_name_ + "_Request";
-        attributes.topic.topicDataType = request_type.name();
+        attributes.topic.topicName = service_name + "_Reply";
+        attributes.topic.topicDataType = reply_type.name();
 
         if (config["service_instance_name"])
         {
