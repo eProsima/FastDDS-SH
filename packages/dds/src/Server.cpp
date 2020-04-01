@@ -131,6 +131,15 @@ Server::~Server()
 
     fastrtps::Domain::removeSubscriber(dds_subscriber_);
     fastrtps::Domain::removePublisher(dds_publisher_);
+
+    for (std::thread& thread: reception_threads_)
+    {
+        if (thread.joinable())
+        {
+            thread.join();
+        }
+    }
+
 }
 
 bool Server::add_config(
@@ -151,6 +160,7 @@ bool Server::add_config(
             }
             else
             {
+                std::string req;
                 if (config["remap"]["dds"]["request_type"])
                 {
                     std::string disc = config["remap"]["dds"]["request_type"].as<std::string>();
@@ -158,6 +168,7 @@ bool Server::add_config(
                     type_to_discriminator_[member_type.name()] = disc;
                     std::cout << "[soss-dds] server: member \"" << disc << "\" has request type \""
                               << member_type.name() << "\"." << std::endl;
+                    req = member_type.name();
                 }
                 if (config["remap"]["dds"]["reply_type"])
                 {
@@ -166,6 +177,7 @@ bool Server::add_config(
                     type_to_discriminator_[member_type.name()] = disc;
                     std::cout << "[soss-dds] server: member \"" << disc << "\" has reply type \""
                               << member_type.name() << "\"." << std::endl;
+                    request_reply_[req] = member_type.name();
                 }
             }
         }
@@ -192,6 +204,7 @@ void Server::call_service(
     {
         callhandle_client_[call_handle] = &client;
         fastrtps::rtps::WriteParams params;
+        std::unique_lock<std::mutex> lock(mtx_);
         success = dds_publisher_->write(request_dynamic_data_.get(), params);
         if (!success)
         {
@@ -201,6 +214,10 @@ void Server::call_service(
         {
             fastrtps::rtps::SampleIdentity sample = params.sample_identity();
             sample_callhandle_[sample] = call_handle;
+            if (request_reply_.count(soss_request.type().name()) > 0)
+            {
+                reply_id_type_[sample] = request_reply_[soss_request.type().name()];
+            }
         }
     }
     else
@@ -236,26 +253,41 @@ void Server::onNewDataMessage(
     {
         if (ALIVE == info.sampleKind)
         {
-            fastrtps::rtps::SampleIdentity sample_id = info.related_sample_identity; // TODO Verify
-            std::shared_ptr<void> call_handle = sample_callhandle_[sample_id];
-
-            ::xtypes::DynamicData received(reply_type_);
-            bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(reply_dynamic_data_.get()), received);
-
-            if (success)
-            {
-                callhandle_client_[call_handle]->receive_response(
-                    call_handle,
-                    Conversion::access_member_data(received, type_to_discriminator_[reply_dynamic_data_->get_name()]));
-
-                callhandle_client_.erase(call_handle);
-                sample_callhandle_.erase(sample_id);
-            }
-            else
-            {
-                std::cerr << "Error converting message from dynamic types to soss message." << std::endl;
-            }
+            reception_threads_.emplace_back(std::thread(&Server::receive, this, info.related_sample_identity));
         }
+    }
+}
+
+void Server::receive(
+        fastrtps::rtps::SampleIdentity sample_id)
+{
+    std::unique_lock<std::mutex> lock(mtx_);
+    std::shared_ptr<void> call_handle = sample_callhandle_[sample_id];
+
+    ::xtypes::DynamicData received(reply_type_);
+    bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(reply_dynamic_data_.get()), received);
+
+    if (success)
+    {
+        std::string path = reply_type_.name();
+        if (reply_id_type_.count(sample_id) > 0)
+        {
+            path = type_to_discriminator_[reply_id_type_[sample_id]];
+        }
+
+        ::xtypes::WritableDynamicDataRef ref = Conversion::access_member_data(received, path);
+        ::xtypes::DynamicData message(ref, ref.type());
+        callhandle_client_[call_handle]->receive_response(
+            call_handle,
+            message);
+
+        callhandle_client_.erase(call_handle);
+        sample_callhandle_.erase(sample_id);
+        reply_id_type_.erase(sample_id);
+    }
+    else
+    {
+        std::cerr << "Error converting message from dynamic types to soss message." << std::endl;
     }
 }
 

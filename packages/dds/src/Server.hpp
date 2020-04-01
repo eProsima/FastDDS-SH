@@ -85,6 +85,9 @@ private:
     void onNewDataMessage(
             eprosima::fastrtps::Subscriber* sub) override;
 
+    void receive(
+            eprosima::fastrtps::rtps::SampleIdentity sample_id);
+
     eprosima::fastrtps::Publisher* dds_publisher_;
     eprosima::fastrtps::Subscriber* dds_subscriber_;
     DynamicData_ptr request_dynamic_data_;
@@ -98,6 +101,11 @@ private:
     std::map<eprosima::fastrtps::rtps::SampleIdentity, std::shared_ptr<void>, SampleIdentityComparator>
         sample_callhandle_;
     std::map<std::string, std::string> type_to_discriminator_;
+    std::map<std::string, std::string> request_reply_;
+    std::map<eprosima::fastrtps::rtps::SampleIdentity, std::string, SampleIdentityComparator> reply_id_type_;
+
+    std::mutex mtx_;
+    std::vector<std::thread> reception_threads_;
 };
 
 

@@ -49,6 +49,7 @@ public:
             part_attr.rtps.setName("FastDDSTestClient");
         }
         part_ = Domain::createParticipant(part_attr);
+
         Domain::registerType(part_, &psType_req_);
         Domain::registerType(part_, &psType_rep_);
 
@@ -65,7 +66,6 @@ public:
             pub_attr.topic.topicDataType = psType_req_.getName();
             pub_attr.topic.topicName = "TestService_Request";
         }
-        std::cout << "PUBLISHER: " << pub_attr.topic.topicDataType << " in topic " << pub_attr.topic.topicName << std::endl;
         pub_ = Domain::createPublisher(part_, pub_attr, this);
 
         request_listener.publisher(this, pub_);
@@ -86,7 +86,6 @@ public:
             sub_attr.topic.topicName = "TestService_Reply";
             sub_ = Domain::createSubscriber(part_, sub_attr, &reply_listener);
         }
-        std::cout << "SUBCRIBER: " << sub_attr.topic.topicDataType << " in topic " << sub_attr.topic.topicName << std::endl;
     }
 
     ~FastDDSTest()
@@ -94,6 +93,7 @@ public:
         using namespace eprosima::fastrtps;
         Domain::removePublisher(pub_);
         Domain::removeSubscriber(sub_);
+        Domain::removeParticipant(part_);
     }
 
     std::future<xtypes::DynamicData> request(
@@ -109,7 +109,6 @@ public:
             eprosima::fastrtps::Participant* /*participant*/,
             eprosima::fastrtps::rtps::ParticipantDiscoveryInfo&& /*info*/) override
     {
-        std::cout << "*********** MATCHED" << std::endl;
     }
 
     void onPublicationMatched(
@@ -117,7 +116,6 @@ public:
             eprosima::fastrtps::rtps::MatchingInfo&) override
     {
         std::unique_lock<std::mutex> lock(matched_mutex_);
-        std::cout << "PUBLISHER MATCHED" << std::endl;
         pup_sub_matched_++;;
         if (pup_sub_matched_ == 2)
         {
@@ -157,7 +155,6 @@ private:
                 eprosima::fastrtps::rtps::MatchingInfo&) override
         {
             std::unique_lock<std::mutex> lock(test_->matched_mutex_);
-            std::cout << "SUBSCRIBER MATCHED" << std::endl;
             test_->pup_sub_matched_++;;
             if (test_->pup_sub_matched_ == 2)
             {
@@ -171,7 +168,6 @@ private:
             SampleInfo_t info;
             TestService_Request req_msg;
             TestService_Reply rep_msg;
-            std::cout << "--------------RECIBO COSAS-----------" << std::endl;
 
             if (sub->takeNextData(&req_msg, &info))
             {
@@ -309,7 +305,8 @@ std::string gen_config_yaml(
 }
 
 std::string gen_config_method_yaml(
-        const std::string& dds_topic,
+        const std::vector<std::string>& dds_topics,
+        const std::vector<std::string>& topics,
         const std::vector<std::string>& request_types,
         const std::vector<std::string>& reply_types,
         const std::vector<std::string>& request_members,
@@ -349,16 +346,17 @@ std::string gen_config_method_yaml(
     s += "services:\n";
     for (uint32_t i = 0 ; i < request_types.size(); ++i)
     {
-        s += "    " + request_types[i] + "_topic";
+        s += "    " + topics[i];
         s += ": {";
         s += " request_type: \"" + request_types[i] + "\",";
         s += " reply_type: \"" + reply_types[i] + "\",";
         s += " route: route,";
         s += " remap: { " +
-             std::string((client ? "mock" : "dds")) + ": {"
+             //std::string((client ? "mock" : "dds")) + ": {"
+             std::string("dds: {")
                 + " request_type: \"" + request_members[i] + "\", "
                 + " reply_type: \"" + reply_members[i] + "\", "
-                + " topic: \"" + dds_topic + "\""
+                + (topics[i] == dds_topics[i] ? "" : " topic: \"" + dds_topics[i] + "\"")
                 + " }"
              + " }";
         s += " }\n";
@@ -400,7 +398,8 @@ soss::InstanceHandle create_instance(
 }
 
 soss::InstanceHandle create_method_instance(
-        const std::string& dds_topic,
+        const std::vector<std::string>& dds_topics,
+        const std::vector<std::string>& topics,
         const std::vector<std::string>& request_types,
         const std::vector<std::string>& reply_types,
         const std::vector<std::string>& request_members,
@@ -410,7 +409,8 @@ soss::InstanceHandle create_method_instance(
         const std::string& profile_name = "")
 {
     std::string config_yaml = gen_config_method_yaml(
-            dds_topic,
+            dds_topics,
+            topics,
             request_types,
             reply_types,
             request_members,
@@ -488,7 +488,6 @@ xtypes::DynamicData roundtrip_client(
     return response_future.get();
 }
 
-/*
 TEST_CASE("Transmit to and receive from dds", "[dds]")
 {
     SECTION("basic-type")
@@ -569,14 +568,14 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
         }
     }
 }
-*/
 
 TEST_CASE("Request to and reply from dds", "[dds-server]")
 {
     SECTION("config-server")
     {
         soss::InstanceHandle instance = create_method_instance(
-                "TestService",
+                {"TestService","TestService","TestService"},
+                {"TestService_0","TestService_1","TestService_2"},
                 {"Method0_In","Method1_In","Method2_In"},
                 {"Method0_Result","Method1_Result","Method2_Result"},
                 {"TestService_Request.data.method0","TestService_Request.data.method1","TestService_Request.data.method2"},
@@ -596,22 +595,21 @@ TEST_CASE("Request to and reply from dds", "[dds-server]")
             std::string message_data_fail = "TESTING";
             xtypes::DynamicData msg_to_sent(*mock_types.at("Method0_In"));
             msg_to_sent["data"].value(message_data_fail);
-            //disc_mutex.lock();
+            disc_mutex.lock();
             std::cout << "[test]: sent message: " << message_data_fail << std::endl;
-            xtypes::DynamicData msg_to_recv = roundtrip_server("Method0_In_topic", msg_to_sent);
-            //xtypes::DynamicData msg_to_recv = roundtrip_client("Method0_In_topic", msg_to_sent, client);
+            xtypes::DynamicData msg_to_recv = roundtrip_server("TestService_0", msg_to_sent);
+            //xtypes::DynamicData msg_to_recv = roundtrip_client("TestService_0", msg_to_sent, client);
             REQUIRE(msg_to_recv["success"].value<bool>() == false);
 
             std::string message_data_ok = "TEST";
             msg_to_sent["data"].value(message_data_ok);
-            std::cout << "[test]: sent message: " << message_data_fail << std::endl;
-            msg_to_recv = roundtrip_server("Method0_In_topic", msg_to_sent);
-            //msg_to_recv = roundtrip_client("Method0_In_topic", msg_to_sent, client);
+            std::cout << "[test]: sent message: " << message_data_ok << std::endl;
+            /*xtypes::DynamicData*/
+            msg_to_recv = roundtrip_server("TestService_0", msg_to_sent);
+            //msg_to_recv = roundtrip_client("TestService_0", msg_to_sent, client);
             REQUIRE(msg_to_recv["success"].value<bool>() == true);
-
 
             REQUIRE(0 == instance.quit().wait_for(1s));
         }
     }
 }
-
