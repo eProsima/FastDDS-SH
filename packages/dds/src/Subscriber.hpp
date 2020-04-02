@@ -60,7 +60,7 @@ public:
             Subscriber&& rhs) = delete;
 
     void receive(
-            const DynamicData_ptr dds_message);
+            const DynamicData* dds_message);
 
 private:
 
@@ -72,7 +72,7 @@ private:
             eprosima::fastrtps::Subscriber* sub) override;
 
     eprosima::fastrtps::Subscriber* dds_subscriber_;
-    DynamicData_ptr dynamic_data_;
+    DynamicData* dynamic_data_;
 
     const std::string topic_name_;
     const xtypes::DynamicType& message_type_;

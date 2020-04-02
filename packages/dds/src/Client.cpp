@@ -231,11 +231,11 @@ void Client::receive_response(
     std::cout << "[soss-dds][client]: translate reply: soss -> dds "
         "(" << service_name_ << ") " << std::endl;
 
-    bool success = Conversion::soss_to_dds(reply, static_cast<DynamicData*>(reply_dynamic_data_.get()));
+    bool success = Conversion::soss_to_dds(reply, reply_dynamic_data_);
 
     if (success)
     {
-        success = dds_publisher_->write(reply_dynamic_data_.get(), params);
+        success = dds_publisher_->write(reply_dynamic_data_, params);
     }
     else
     {
@@ -268,7 +268,7 @@ void Client::onNewDataMessage(
     using namespace std::placeholders;
     fastrtps::SampleInfo_t info;
     // TODO Protect request_dynamic_data or create a local variable (copying it to the thread)
-    if (dds_subscriber_->takeNextData(request_dynamic_data_.get(), &info))
+    if (dds_subscriber_->takeNextData(request_dynamic_data_, &info))
     {
         if (ALIVE == info.sampleKind)
         {
@@ -281,7 +281,7 @@ void Client::receive(
         eprosima::fastrtps::rtps::SampleIdentity sample_id)
 {
     ::xtypes::DynamicData received(request_type_);
-    bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(request_dynamic_data_.get()), received);
+    bool success = Conversion::dds_to_soss(request_dynamic_data_, received);
 
     if (success)
     {

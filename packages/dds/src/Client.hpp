@@ -93,8 +93,8 @@ private:
 
     eprosima::fastrtps::Publisher* dds_publisher_;
     eprosima::fastrtps::Subscriber* dds_subscriber_;
-    DynamicData_ptr request_dynamic_data_;
-    DynamicData_ptr reply_dynamic_data_;
+    DynamicData* request_dynamic_data_;
+    DynamicData* reply_dynamic_data_;
     const xtypes::DynamicType& request_type_;
     const xtypes::DynamicType& reply_type_;
     ServiceClientSystem::RequestCallback callback_;

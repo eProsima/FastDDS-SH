@@ -201,14 +201,14 @@ void Server::call_service(
     std::cout << "[soss-dds][server]: translate request: soss -> dds "
         "(" << service_name_ << ") " << std::endl;
 
-    success = Conversion::soss_to_dds(request, static_cast<DynamicData*>(request_dynamic_data_.get()));
+    success = Conversion::soss_to_dds(request, request_dynamic_data_);
 
     if (success)
     {
         callhandle_client_[call_handle] = &client;
         fastrtps::rtps::WriteParams params;
         std::unique_lock<std::mutex> lock(mtx_);
-        success = dds_publisher_->write(request_dynamic_data_.get(), params);
+        success = dds_publisher_->write(request_dynamic_data_, params);
         if (!success)
         {
             std::cout << "Failed to publish message into DDS world." << std::endl;
@@ -253,7 +253,7 @@ void Server::onNewDataMessage(
     using namespace std::placeholders;
     fastrtps::SampleInfo_t info;
     // TODO Protect reply_dynamic_data or create a local variable (copying it to the thread)
-    if (dds_subscriber_->takeNextData(reply_dynamic_data_.get(), &info))
+    if (dds_subscriber_->takeNextData(reply_dynamic_data_, &info))
     {
         if (ALIVE == info.sampleKind)
         {
@@ -269,7 +269,7 @@ void Server::receive(
     std::shared_ptr<void> call_handle = sample_callhandle_[sample_id];
 
     ::xtypes::DynamicData received(reply_type_);
-    bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(reply_dynamic_data_.get()), received);
+    bool success = Conversion::dds_to_soss(reply_dynamic_data_, received);
 
     if (success)
     {

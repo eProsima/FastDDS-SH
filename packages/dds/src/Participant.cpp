@@ -136,7 +136,7 @@ void Participant::register_dynamic_type(
     }
 }
 
-fastrtps::types::DynamicData_ptr Participant::create_dynamic_data(
+fastrtps::types::DynamicData* Participant::create_dynamic_data(
         const std::string& topic_name) const
 {
     auto type_it = topic_to_type_.find(topic_name);
@@ -156,7 +156,7 @@ fastrtps::types::DynamicData_ptr Participant::create_dynamic_data(
     }
 
     const DynamicType_ptr& dynamic_type_ = it->second.GetDynamicType();
-    return fastrtps::types::DynamicData_ptr(DynamicDataFactory::get_instance()->create_data(dynamic_type_));
+    return DynamicDataFactory::get_instance()->create_data(dynamic_type_);
 }
 
 void Participant::onParticipantDiscovery(
