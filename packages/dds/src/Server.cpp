@@ -129,6 +129,9 @@ Server::~Server()
 
     std::cout << "[soss-dds][server]: wait finished." << std::endl;
 
+    request_dynamic_data_ = nullptr;
+    reply_dynamic_data_ = nullptr;
+
     fastrtps::Domain::removeSubscriber(dds_subscriber_);
     fastrtps::Domain::removePublisher(dds_publisher_);
 
@@ -249,6 +252,7 @@ void Server::onNewDataMessage(
 {
     using namespace std::placeholders;
     fastrtps::SampleInfo_t info;
+    // TODO Protect reply_dynamic_data or create a local variable (copying it to the thread)
     if (dds_subscriber_->takeNextData(reply_dynamic_data_.get(), &info))
     {
         if (ALIVE == info.sampleKind)

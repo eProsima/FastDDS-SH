@@ -85,6 +85,12 @@ Client::Client(
         {
             throw DDSMiddlewareException("Error creating a subscriber");
         }
+        else
+        {
+            std::cout << "[soss-dds][client][sub]: "
+                      << attributes.topic.topicDataType << " in topic "
+                      << attributes.topic.topicName << std::endl;
+        }
     }
 
     // Create publisher
@@ -108,13 +114,47 @@ Client::Client(
         {
             throw DDSMiddlewareException("Error creating a publisher");
         }
+        else
+        {
+            std::cout << "[soss-dds][client][pub]: "
+                      << attributes.topic.topicDataType << " in topic "
+                      << attributes.topic.topicName << std::endl;
+        }
     }
 }
 
 Client::~Client()
 {
+    request_dynamic_data_ = nullptr;
+    reply_dynamic_data_ = nullptr;
+
     fastrtps::Domain::removePublisher(dds_publisher_);
     fastrtps::Domain::removeSubscriber(dds_subscriber_);
+
+    for (std::thread& thread: reception_threads_)
+    {
+        if (thread.joinable())
+        {
+            thread.join();
+        }
+    }
+}
+
+void Client::add_member(
+        const ::xtypes::DynamicType& type,
+        const std::string& path)
+{
+    std::shared_ptr<NavigationNode> root;
+    if (member_tree_.count(type.name()) > 0)
+    {
+        root = member_tree_[type.name()];
+    }
+    else
+    {
+        root = std::make_shared<NavigationNode>();
+        member_tree_[type.name()] = root;
+    }
+    NavigationNode::fill_root_node(root, type, path);
 }
 
 bool Client::add_config(
@@ -130,26 +170,38 @@ bool Client::add_config(
                 std::string disc = config["remap"]["dds"]["type"].as<std::string>();
                 const ::xtypes::DynamicType& member_type = Conversion::resolve_discriminator_type(request_type_, disc);
                 type_to_discriminator_[member_type.name()] = disc;
-                std::cout << "[soss-dds] server: member \"" << disc << "\" has type \""
+                member_types_.push_back(member_type.name());
+                std::cout << "[soss-dds] client: member \"" << disc << "\" has type \""
                           << member_type.name() << "\"." << std::endl;
+
+                add_member(request_type_, disc);
             }
             else
             {
+                std::string req;
                 if (config["remap"]["dds"]["request_type"])
                 {
                     std::string disc = config["remap"]["dds"]["request_type"].as<std::string>();
-                    const ::xtypes::DynamicType& member_type = Conversion::resolve_discriminator_type(request_type_, disc);
+                    const ::xtypes::DynamicType& member_type =
+                        Conversion::resolve_discriminator_type(request_type_, disc);
                     type_to_discriminator_[member_type.name()] = disc;
-                    std::cout << "[soss-dds] server: member \"" << disc << "\" has request type \""
+                    member_types_.push_back(member_type.name());
+                    std::cout << "[soss-dds] client: member \"" << disc << "\" has request type \""
                               << member_type.name() << "\"." << std::endl;
+                    req = member_type.name();
+                    add_member(request_type_, disc);
                 }
                 if (config["remap"]["dds"]["reply_type"])
                 {
                     std::string disc = config["remap"]["dds"]["reply_type"].as<std::string>();
-                    const ::xtypes::DynamicType& member_type = Conversion::resolve_discriminator_type(reply_type_, disc);
+                    const ::xtypes::DynamicType& member_type =
+                        Conversion::resolve_discriminator_type(reply_type_, disc);
                     type_to_discriminator_[member_type.name()] = disc;
-                    std::cout << "[soss-dds] server: member \"" << disc << "\" has reply type \""
+                    member_types_.push_back(member_type.name());
+                    std::cout << "[soss-dds] client: member \"" << disc << "\" has reply type \""
                               << member_type.name() << "\"." << std::endl;
+                    request_reply_[req] = member_type.name();
+                    add_member(reply_type_, disc);
                 }
             }
         }
@@ -162,16 +214,24 @@ void Client::receive_response(
         const ::xtypes::DynamicData& response)
 {
     fastrtps::rtps::WriteParams params;
-    params.related_sample_identity(*static_cast<fastrtps::rtps::SampleIdentity*>(call_handle.get()));
+    fastrtps::rtps::SampleIdentity sample_id = *static_cast<fastrtps::rtps::SampleIdentity*>(call_handle.get());
+    params.related_sample_identity(sample_id);
 
-    ::xtypes::DynamicData request(reply_type_);
+    std::string path = reply_type_.name();
+    if (reply_id_type_.count(sample_id) > 0)
+    {
+        path = type_to_discriminator_[reply_id_type_[sample_id]];
+        reply_id_type_.erase(sample_id);
+    }
 
-    Conversion::access_member_data(request, type_to_discriminator_[response.type().name()]) = response;
+    ::xtypes::DynamicData reply(reply_type_);
 
-    std::cout << "[soss-dds][client]: translate request: soss -> dds "
+    Conversion::access_member_data(reply, path) = response;
+
+    std::cout << "[soss-dds][client]: translate reply: soss -> dds "
         "(" << service_name_ << ") " << std::endl;
 
-    bool success = Conversion::soss_to_dds(request, static_cast<DynamicData*>(reply_dynamic_data_.get()));
+    bool success = Conversion::soss_to_dds(reply, static_cast<DynamicData*>(reply_dynamic_data_.get()));
 
     if (success)
     {
@@ -207,25 +267,42 @@ void Client::onNewDataMessage(
 {
     using namespace std::placeholders;
     fastrtps::SampleInfo_t info;
-    if (dds_subscriber_->takeNextData(reply_dynamic_data_.get(), &info))
+    // TODO Protect request_dynamic_data or create a local variable (copying it to the thread)
+    if (dds_subscriber_->takeNextData(request_dynamic_data_.get(), &info))
     {
         if (ALIVE == info.sampleKind)
         {
-            fastrtps::rtps::SampleIdentity sample_id = info.sample_identity; // TODO Verify (related_sample_identity?)
-            ::xtypes::DynamicData received(reply_type_);
-            bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(reply_dynamic_data_.get()), received);
-
-            if (success)
-            {
-                callback_(
-                    Conversion::access_member_data(received, type_to_discriminator_[reply_dynamic_data_->get_name()]),
-                    *this, std::make_shared<fastrtps::rtps::SampleIdentity>(sample_id));
-            }
-            else
-            {
-                std::cerr << "Error converting message from dynamic types to soss message." << std::endl;
-            }
+            reception_threads_.emplace_back(std::thread(&Client::receive, this, info.sample_identity));
         }
+    }
+}
+
+void Client::receive(
+        eprosima::fastrtps::rtps::SampleIdentity sample_id)
+{
+    ::xtypes::DynamicData received(request_type_);
+    bool success = Conversion::dds_to_soss(static_cast<DynamicData*>(request_dynamic_data_.get()), received);
+
+    if (success)
+    {
+        std::shared_ptr<NavigationNode> member =
+            NavigationNode::get_discriminator(member_tree_, received, member_types_);
+
+        if (request_reply_.count(member->type_name) > 0)
+        {
+            reply_id_type_[sample_id] = request_reply_[member->type_name];
+        }
+
+        ::xtypes::WritableDynamicDataRef ref =
+            Conversion::access_member_data(received, member->get_path());
+        ::xtypes::DynamicData message(ref, ref.type());
+        callback_(
+            message,
+            *this, std::make_shared<fastrtps::rtps::SampleIdentity>(sample_id));
+    }
+    else
+    {
+        std::cerr << "Error converting message from dynamic types to soss message." << std::endl;
     }
 }
 

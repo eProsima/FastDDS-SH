@@ -32,6 +32,264 @@ std::map<std::string, ::xtypes::DynamicType::Ptr> Conversion::types_;
 std::map<std::string, DynamicPubSubType*> Conversion::registered_types_;
 std::map<std::string, DynamicTypeBuilder_ptr> Conversion::builders_;
 
+std::string NavigationNode::get_path()
+{
+    if (parent_node == nullptr)
+    {
+        return type_name;
+    }
+    return parent_node->get_path() + "." + member_name;
+}
+
+std::string NavigationNode::get_type(
+    std::map<std::string, std::shared_ptr<NavigationNode>> map_nodes,
+    const std::string& full_path)
+{
+    if (full_path.find(".") == std::string::npos)
+    {
+        if (map_nodes.count(full_path) > 0)
+        {
+            return map_nodes[full_path]->type_name;
+        }
+        return full_path;
+    }
+
+    std::string root = full_path.substr(0, full_path.find("."));
+
+    if (map_nodes.count(root) > 0)
+    {
+        return get_type(map_nodes[root], full_path.substr(full_path.find(".") + 1));
+    }
+
+    return "";
+}
+
+std::string NavigationNode::get_type(
+        std::shared_ptr<NavigationNode> root,
+        const std::string& full_path)
+{
+    if (full_path.empty() || full_path.find(".") == std::string::npos)
+    {
+        return root->type_name;
+    }
+
+    std::string member = full_path.substr(0, full_path.find("."));
+
+    if (root->member_node.count(member) > 0)
+    {
+        std::string path = full_path.substr(full_path.find(".") + 1);
+        if (path.find(".") == std::string::npos)
+        {
+            return root->member_node[member]->type_name;
+        }
+        else
+        {
+            return get_type(root->member_node[member], path);
+        }
+    }
+    return "";
+}
+
+std::shared_ptr<NavigationNode> NavigationNode::fill_root_node(
+        std::shared_ptr<NavigationNode> root,
+        const ::xtypes::DynamicType& type,
+        const std::string& full_path)
+{
+    std::string type_name;
+    std::string path;
+    if (full_path.find(".") == std::string::npos)
+    {
+        type_name = full_path;
+        path = "";
+    }
+    else
+    {
+        type_name = full_path.substr(0, full_path.find("."));
+        path = full_path.substr(full_path.find(".") + 1);
+    }
+
+    if (type_name != type.name())
+    {
+        std::cerr << "Attempting to create a root navigation node from a type with different name." << std::endl;
+        return root;
+    }
+
+    if (!path.empty())
+    {
+        std::string member;
+
+        if (path.find(".") == std::string::npos)
+        {
+            member = path;
+            path = "";
+        }
+        else
+        {
+            member = path.substr(0, path.find("."));
+            path = path.substr(path.find(".") + 1);
+        }
+
+        if (!type.is_aggregation_type())
+        {
+            std::cerr << "Attempting to create a root navigation node from a non-aggregated type." << std::endl;
+            return root;
+        }
+
+        const ::xtypes::AggregationType& aggr_type = static_cast<const ::xtypes::AggregationType&>(type);
+
+        if (!aggr_type.has_member(member))
+        {
+            std::cerr << "Type \"" << type_name << "\" doesn't have a member named \""
+                      << member << "\"." << std::endl;
+            return root;
+        }
+
+        std::shared_ptr<NavigationNode> member_node;
+        const ::xtypes::Member& type_member = aggr_type.member(member);
+        if (root->member_node.count(member) > 0)
+        {
+            member_node = root->member_node[member];
+        }
+        else
+        {
+            member_node = std::make_shared<NavigationNode>();
+            member_node->member_name = member;
+            member_node->type_name = type_member.type().name();
+            member_node->parent_node = root;
+            root->member_node[member] = member_node;
+        }
+
+        if (!path.empty())
+        {
+            fill_member_node(member_node, type_member.type(), path);
+        }
+    }
+
+    root->type_name = type.name();
+    return root;
+}
+
+void NavigationNode::fill_member_node(
+        std::shared_ptr<NavigationNode> node,
+        const ::xtypes::DynamicType& type,
+        const std::string& full_path)
+{
+    std::string member;
+    std::string path;
+
+    if (!type.is_aggregation_type())
+    {
+        std::cerr << "Member " << node->member_name << " isn't an aggregated type." << std::endl;
+        return;
+    }
+
+    const ::xtypes::AggregationType& aggr_type = static_cast<const ::xtypes::AggregationType&>(type);
+
+    if (full_path.find(".") == std::string::npos)
+    {
+        member = full_path;
+        path = "";
+    }
+    else
+    {
+        member = full_path.substr(0, full_path.find("."));
+        path = full_path.substr(full_path.find(".") + 1);
+    }
+
+    if (!aggr_type.has_member(member))
+    {
+        std::cerr << "Member \"" << node->member_name << "\" of type \"" << node->type_name
+                  << "\" doesn't have a member named \"" << member << "\"." << std::endl;
+        return;
+    }
+
+    std::shared_ptr<NavigationNode> member_node;
+    const ::xtypes::Member& type_member = aggr_type.member(member);
+
+    if (node->member_node.count(member) > 0)
+    {
+        member_node = node->member_node[member];
+    }
+    else
+    {
+        member_node = std::make_shared<NavigationNode>();
+        member_node->member_name = member;
+        member_node->type_name = type_member.type().name();
+        member_node->parent_node = node;
+        node->member_node[member] = member_node;
+    }
+
+    if (!path.empty())
+    {
+        fill_member_node(member_node, type_member.type(), path);
+    }
+}
+
+std::shared_ptr<NavigationNode> NavigationNode::get_discriminator(
+        const std::map<std::string, std::shared_ptr<NavigationNode>>& member_map,
+        const ::xtypes::DynamicData& data,
+        const std::vector<std::string>& member_types)
+{
+    const std::string& type_name = data.type().name();
+
+    if (member_map.count(type_name) == 0)
+    {
+        std::cerr << "Type \"" << type_name << "\" doesn't exists in the member map." << std::endl;
+        return nullptr;
+    }
+
+    if (std::find(member_types.begin(), member_types.end(), type_name) != member_types.end())
+    {
+        return member_map.at(type_name);
+    }
+
+    return get_discriminator(member_map.at(type_name), data.ref(), member_types);
+}
+
+std::shared_ptr<NavigationNode> NavigationNode::get_discriminator(
+        std::shared_ptr<NavigationNode> node,
+        ::xtypes::ReadableDynamicDataRef data,
+        const std::vector<std::string>& member_types)
+{
+    const std::string& type_name = data.type().name();
+    if (std::find(member_types.begin(), member_types.end(), type_name) != member_types.end())
+    {
+        return node;
+    }
+
+    if (data.type().is_aggregation_type())
+    {
+        const ::xtypes::AggregationType& aggr = static_cast<const ::xtypes::AggregationType&>(data.type());
+        std::shared_ptr<NavigationNode> result;
+        if (aggr.kind() == ::xtypes::TypeKind::UNION_TYPE)
+        {
+            std::string member = data.current_case().name();
+            if (node->member_node.count(member) > 0)
+            {
+                result =
+                    get_discriminator(node->member_node[member], data[member], member_types);
+            }
+        }
+        else
+        {
+            for (auto& n : node->member_node)
+            {
+                if (aggr.has_member(n.first))
+                {
+                    result = get_discriminator(n.second, data[n.first], member_types);
+                    if (result)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    return nullptr;
+}
+
 // This function patches the problem of dynamic types, which do not admit '/' in their type name.
 std::string Conversion::convert_type_name(
         const std::string& message_type)

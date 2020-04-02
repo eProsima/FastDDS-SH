@@ -32,6 +32,7 @@
 namespace soss {
 namespace dds {
 
+struct NavigationNode;
 class Participant;
 
 class Client
@@ -83,6 +84,13 @@ private:
     void onNewDataMessage(
             eprosima::fastrtps::Subscriber* sub) override;
 
+    void receive(
+            eprosima::fastrtps::rtps::SampleIdentity sample_id);
+
+    void add_member(
+            const xtypes::DynamicType& type,
+            const std::string& path);
+
     eprosima::fastrtps::Publisher* dds_publisher_;
     eprosima::fastrtps::Subscriber* dds_subscriber_;
     DynamicData_ptr request_dynamic_data_;
@@ -92,7 +100,14 @@ private:
     ServiceClientSystem::RequestCallback callback_;
 
     const std::string service_name_;
+    std::map<std::string, std::shared_ptr<NavigationNode>> member_tree_;
     std::map<std::string, std::string> type_to_discriminator_;
+    std::map<std::string, std::string> request_reply_;
+    std::vector<std::string> member_types_;
+    std::map<eprosima::fastrtps::rtps::SampleIdentity, std::string, SampleIdentityComparator> reply_id_type_;
+
+    std::mutex mtx_;
+    std::vector<std::thread> reception_threads_;
 };
 
 

@@ -163,7 +163,6 @@ void Participant::onParticipantDiscovery(
         fastrtps::Participant* /* participant */,
         fastrtps::rtps::ParticipantDiscoveryInfo&& /* info */)
 {
-    std::cout << ">>>>>>>>>>>>>> PARTICIPANT MATCHED" << std::endl;
 }
 
 } //namespace dds
