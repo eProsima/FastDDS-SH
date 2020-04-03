@@ -102,8 +102,6 @@ public:
     {
         TestService_Request request;
 
-        std::cout << "REQUESTING DATA: " << data.type().name() << std::endl;
-
         if (data.type().name() == "Method0_In")
         {
             Method0_In in;
@@ -418,8 +416,10 @@ std::string gen_config_method_yaml(
         s += " request_type: \"" + request_types[i] + "\",";
         s += " reply_type: \"" + reply_types[i] + "\",";
         s += " route: route,";
+        // Use dds_service ONLY if remap can cause collision, for example, same dds_service to connect with multiple
+        // soss services, like in the "client" tests.
+        //s += " dds_service: \"" + dds_topics[i] + "\",";
         s += " remap: { " +
-             //std::string((client ? "mock" : "dds")) + ": {"
              std::string("dds: {")
                 + " request_type: \"" + request_members[i] + "\", "
                 + " reply_type: \"" + reply_members[i] + "\", "
@@ -631,6 +631,7 @@ TEST_CASE("Transmit to and receive from dds", "[dds]")
 
 TEST_CASE("Request to and reply from dds", "[dds-server]")
 {
+    // Road: [mock -> dds -> dds -> mock]
     SECTION("config-server")
     {
         soss::InstanceHandle instance = create_method_instance(
@@ -649,25 +650,52 @@ TEST_CASE("Request to and reply from dds", "[dds-server]")
         std::mutex disc_mutex;
         disc_mutex.lock();
         FastDDSTest server(true, disc_mutex);
-        SECTION("method0")
+
+        SECTION("mock->dds->mock")
         {
-            // Road: [mock -> dds -> dds -> mock]
-            std::string message_data_fail = "TESTING";
-            xtypes::DynamicData msg_to_sent(*mock_types.at("Method0_In"));
-            msg_to_sent["data"].value(message_data_fail);
-            disc_mutex.lock();
-            std::cout << "[test]: sent message: " << message_data_fail << std::endl;
-            xtypes::DynamicData msg_to_recv = roundtrip_server("TestService_0", msg_to_sent);
-            REQUIRE(msg_to_recv["success"].value<bool>() == false);
+            // method0
+            {
+                std::string message_data_fail = "TESTING";
+                xtypes::DynamicData msg_to_sent(*mock_types.at("Method0_In"));
+                msg_to_sent["data"].value(message_data_fail);
+                disc_mutex.lock();
+                std::cout << "[test]: sent message: " << message_data_fail << std::endl;
+                xtypes::DynamicData msg_to_recv = roundtrip_server("TestService_0", msg_to_sent);
+                REQUIRE(msg_to_recv["success"].value<bool>() == false);
 
-            std::string message_data_ok = "TEST";
-            msg_to_sent["data"].value(message_data_ok);
-            std::cout << "[test]: sent message: " << message_data_ok << std::endl;
-            msg_to_recv = roundtrip_server("TestService_0", msg_to_sent);
-            REQUIRE(msg_to_recv["success"].value<bool>() == true);
+                std::string message_data_ok = "TEST";
+                msg_to_sent["data"].value(message_data_ok);
+                std::cout << "[test]: sent message: " << message_data_ok << std::endl;
+                msg_to_recv = roundtrip_server("TestService_0", msg_to_sent);
+                REQUIRE(msg_to_recv["success"].value<bool>() == true);
+            }
 
-            REQUIRE(0 == instance.quit().wait_for(1s));
+            // method1
+            {
+                int32_t a = 23;
+                int32_t b = 42;
+                xtypes::DynamicData msg_to_sent(*mock_types.at("Method1_In"));
+                msg_to_sent["a"] = a;
+                msg_to_sent["b"] = b;
+                //disc_mutex.lock();
+                std::cout << "[test]: sent message: " << a << " + " << b << std::endl;
+                xtypes::DynamicData msg_to_recv = roundtrip_server("TestService_1", msg_to_sent);
+                REQUIRE(msg_to_recv["result"].value<int32_t>() == (a + b));
+            }
+
+            // method2
+            {
+                float data = 23.42;
+                xtypes::DynamicData msg_to_sent(*mock_types.at("Method2_In"));
+                msg_to_sent["data"] = data;
+                //disc_mutex.lock();
+                std::cout << "[test]: sent message: " << data << std::endl;
+                xtypes::DynamicData msg_to_recv = roundtrip_server("TestService_2", msg_to_sent);
+                REQUIRE(msg_to_recv["data"].value<float>() == data);
+            }
         }
+
+        REQUIRE(0 == instance.quit().wait_for(1s));
     }
 }
 
@@ -703,6 +731,7 @@ TEST_CASE("Request to and reply from mock", "[dds-client]")
 
 
         // Serve using mock
+        /*
         soss::mock::serve(
                 "TestService_0",
                 [&](const xtypes::DynamicData& request)
@@ -729,25 +758,78 @@ TEST_CASE("Request to and reply from mock", "[dds-client]")
             reply["data"] = request["data"].value<float>();
             return reply;
         });
-
-        SECTION("method0")
+        */
+        auto callback = [&](const xtypes::DynamicData& request)
         {
-            // Road: [mock -> dds -> dds -> mock]
-            std::string message_data_fail = "TESTING";
-            xtypes::DynamicData msg_to_sent(*mock_types.at("Method0_In"));
-            msg_to_sent["data"].value(message_data_fail);
-            disc_mutex.lock();
-            std::cout << "[test]: sent message: " << message_data_fail << std::endl;
-            xtypes::DynamicData msg_to_recv = roundtrip_client(msg_to_sent, client);
-            REQUIRE(msg_to_recv["success"].value<bool>() == false);
+            if (request.type().name() == "Method0_In")
+            {
+                xtypes::DynamicData reply(reply_struct0);
+                reply["success"] = (request["data"].value<std::string>() == "TEST");
+                return reply;
+            }
+            else if (request.type().name() == "Method1_In")
+            {
+                xtypes::DynamicData reply(reply_struct1);
+                reply["result"] = request["a"].value<int32_t>() + request["b"].value<int32_t>();
+                return reply;
+            }
+            else if (request.type().name() == "Method2_In")
+            {
+                xtypes::DynamicData reply(reply_struct2);
+                reply["data"] = request["data"].value<float>();
+                return reply;
+            }
+            return request;
+        };
 
-            std::string message_data_ok = "TEST";
-            msg_to_sent["data"].value(message_data_ok);
-            std::cout << "[test]: sent message: " << message_data_ok << std::endl;
-            msg_to_recv = roundtrip_client(msg_to_sent, client);
-            REQUIRE(msg_to_recv["success"].value<bool>() == true);
+        soss::mock::serve("TestService_0", callback);
+        soss::mock::serve("TestService_1", callback);
+        soss::mock::serve("TestService_2", callback);
 
-            REQUIRE(0 == instance.quit().wait_for(1s));
+        SECTION("dds->mock->dds")
+        {
+            // method0
+            {
+                std::string message_data_fail = "TESTING";
+                xtypes::DynamicData msg_to_sent(*mock_types.at("Method0_In"));
+                msg_to_sent["data"].value(message_data_fail);
+                disc_mutex.lock();
+                std::cout << "[test]: sent message: " << message_data_fail << std::endl;
+                xtypes::DynamicData msg_to_recv = roundtrip_client(msg_to_sent, client);
+                REQUIRE(msg_to_recv["success"].value<bool>() == false);
+
+                std::string message_data_ok = "TEST";
+                msg_to_sent["data"].value(message_data_ok);
+                std::cout << "[test]: sent message: " << message_data_ok << std::endl;
+                msg_to_recv = roundtrip_client(msg_to_sent, client);
+                REQUIRE(msg_to_recv["success"].value<bool>() == true);
+            }
+
+            // method1
+            {
+                int32_t a = 23;
+                int32_t b = 42;
+                xtypes::DynamicData msg_to_sent(*mock_types.at("Method1_In"));
+                msg_to_sent["a"] = a;
+                msg_to_sent["b"] = b;
+                //disc_mutex.lock();
+                std::cout << "[test]: sent message: " << a << " + " << b << std::endl;
+                xtypes::DynamicData msg_to_recv = roundtrip_client(msg_to_sent, client);
+                REQUIRE(msg_to_recv["result"].value<int32_t>() == (a + b));
+            }
+
+            // method2
+            {
+                float data = 23.42;
+                xtypes::DynamicData msg_to_sent(*mock_types.at("Method2_In"));
+                msg_to_sent["data"] = data;
+                //disc_mutex.lock();
+                std::cout << "[test]: sent message: " << data << std::endl;
+                xtypes::DynamicData msg_to_recv = roundtrip_client(msg_to_sent, client);
+                REQUIRE(msg_to_recv["data"].value<float>() == data);
+            }
         }
+
+        REQUIRE(0 == instance.quit().wait_for(1s));
     }
 }
