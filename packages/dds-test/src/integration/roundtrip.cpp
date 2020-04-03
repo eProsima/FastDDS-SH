@@ -420,12 +420,18 @@ std::string gen_config_method_yaml(
         // soss services, like in the "client" tests.
         //s += " dds_service: \"" + dds_topics[i] + "\",";
         s += " remap: { " +
-             std::string("dds: {")
+            std::string("dds: {")
                 + " request_type: \"" + request_members[i] + "\", "
                 + " reply_type: \"" + reply_members[i] + "\", "
                 + (topics[i] == dds_topics[i] ? "" : " topic: \"" + dds_topics[i] + "\"")
-                + " }"
-             + " }";
+                + " },"; // dds
+        if (client)
+        {
+            s += std::string("mock: {")
+                + " topic: \"" + dds_topics[i] + "\""
+                + " },"; // mock
+        }
+        s += " }"; // remap
         s += " }\n";
     }
     return s;
@@ -731,60 +737,32 @@ TEST_CASE("Request to and reply from mock", "[dds-client]")
 
 
         // Serve using mock
-        /*
         soss::mock::serve(
-                "TestService_0",
+                "TestService",
                 [&](const xtypes::DynamicData& request)
         {
             xtypes::DynamicData reply(reply_struct0);
             reply["success"] = (request["data"].value<std::string>() == "TEST");
             return reply;
-        });
+        }, "Method0_In");
 
         soss::mock::serve(
-                "TestService_1",
+                "TestService",
                 [&](const xtypes::DynamicData& request)
         {
             xtypes::DynamicData reply(reply_struct1);
             reply["result"] = request["a"].value<int32_t>() + request["b"].value<int32_t>();
             return reply;
-        });
+        }, "Method1_In");
 
         soss::mock::serve(
-                "TestService_2",
+                "TestService",
                 [&](const xtypes::DynamicData& request)
         {
             xtypes::DynamicData reply(reply_struct2);
             reply["data"] = request["data"].value<float>();
             return reply;
-        });
-        */
-        auto callback = [&](const xtypes::DynamicData& request)
-        {
-            if (request.type().name() == "Method0_In")
-            {
-                xtypes::DynamicData reply(reply_struct0);
-                reply["success"] = (request["data"].value<std::string>() == "TEST");
-                return reply;
-            }
-            else if (request.type().name() == "Method1_In")
-            {
-                xtypes::DynamicData reply(reply_struct1);
-                reply["result"] = request["a"].value<int32_t>() + request["b"].value<int32_t>();
-                return reply;
-            }
-            else if (request.type().name() == "Method2_In")
-            {
-                xtypes::DynamicData reply(reply_struct2);
-                reply["data"] = request["data"].value<float>();
-                return reply;
-            }
-            return request;
-        };
-
-        soss::mock::serve("TestService_0", callback);
-        soss::mock::serve("TestService_1", callback);
-        soss::mock::serve("TestService_2", callback);
+        }, "Method2_In");
 
         SECTION("dds->mock->dds")
         {
