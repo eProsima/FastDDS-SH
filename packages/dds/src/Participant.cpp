@@ -68,12 +68,12 @@ Participant::Participant(
 
 Participant::~Participant()
 {
+    fastrtps::Domain::removeParticipant(dds_participant_);
     for (auto topic : topics_)
     {
         fastrtps::Domain::unregisterType(dds_participant_, topic.first.c_str());
     }
     topics_.clear();
-    fastrtps::Domain::removeParticipant(dds_participant_);
 }
 
 void Participant::register_dynamic_type(
