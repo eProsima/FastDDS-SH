@@ -49,6 +49,9 @@ target_compile_options(${PROJECT_NAME}
         $<$<CXX_COMPILER_ID:GNU>:-Werror -Wall -Wextra -Wpedantic>
 )
 
+#set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=thread")
+#set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -fno-omit-frame-pointer -fsanitize=thread")
+
 target_include_directories(${PROJECT_NAME}
     PRIVATE
         "${PROJECT_SOURCE_DIR}/thirdparty/catch2/include"

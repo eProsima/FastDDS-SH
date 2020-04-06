@@ -105,7 +105,9 @@ private:
     std::map<eprosima::fastrtps::rtps::SampleIdentity, std::string, SampleIdentityComparator> reply_id_type_;
 
     std::mutex mtx_;
+    std::mutex thread_mtx_;
     std::vector<std::thread> reception_threads_;
+    bool stop_ = false;
 };
 
 

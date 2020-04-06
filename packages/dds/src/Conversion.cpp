@@ -34,11 +34,12 @@ std::map<std::string, DynamicTypeBuilder_ptr> Conversion::builders_;
 
 std::string NavigationNode::get_path()
 {
-    if (parent_node == nullptr)
+    using wt = std::weak_ptr<NavigationNode>;
+    if (!parent_node.owner_before(wt{}) && !wt{}.owner_before(parent_node)) // parent_node == nullptr
     {
         return type_name;
     }
-    return parent_node->get_path() + "." + member_name;
+    return parent_node.lock()->get_path() + "." + member_name;
 }
 
 std::string NavigationNode::get_type(

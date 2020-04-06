@@ -32,7 +32,7 @@ struct NavigationNode
     std::string member_name;
     std::string type_name;
     std::map<std::string, std::shared_ptr<NavigationNode>> member_node;
-    std::shared_ptr<NavigationNode> parent_node;
+    std::weak_ptr<NavigationNode> parent_node;
 
     std::string get_path();
 

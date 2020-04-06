@@ -523,7 +523,7 @@ xtypes::DynamicData roundtrip(
     }));
 
     auto receive_msg_future = receive_msg_promise.get_future();
-    REQUIRE(std::future_status::ready == receive_msg_future.wait_for(5s));
+    REQUIRE(std::future_status::ready == receive_msg_future.wait_for(50s));
 
     return receive_msg_future.get();
 }
@@ -535,7 +535,7 @@ xtypes::DynamicData roundtrip_server(
     // MOCK->DDS->MOCK
     std::shared_future<xtypes::DynamicData> response_future = soss::mock::request(topic, request);
     REQUIRE(std::future_status::ready == response_future.wait_for(5s));
-    xtypes::DynamicData result = std::move(response_future.get());
+    xtypes::DynamicData result = /*std::move*/(response_future.get());
     {
         using namespace std;
         (&response_future)->~shared_future<xtypes::DynamicData>();

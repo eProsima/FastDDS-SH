@@ -132,17 +132,18 @@ Server::~Server()
     request_dynamic_data_ = nullptr;
     reply_dynamic_data_ = nullptr;
 
-    fastrtps::Domain::removeSubscriber(dds_subscriber_);
-    fastrtps::Domain::removePublisher(dds_publisher_);
+    //fastrtps::Domain::removeSubscriber(dds_subscriber_);
+    //fastrtps::Domain::removePublisher(dds_publisher_);
 
-    for (std::thread& thread: reception_threads_)
+    std::unique_lock<std::mutex> lock(thread_mtx_);
+    stop_ = true;
+    for (std::thread& thread : reception_threads_)
     {
         if (thread.joinable())
         {
             thread.join();
         }
     }
-
 }
 
 bool Server::add_config(
@@ -257,7 +258,11 @@ void Server::onNewDataMessage(
     {
         if (ALIVE == info.sampleKind)
         {
-            reception_threads_.emplace_back(std::thread(&Server::receive, this, info.related_sample_identity));
+            std::unique_lock<std::mutex> lock(thread_mtx_);
+            if (!stop_)
+            {
+                reception_threads_.emplace_back(&Server::receive, this, info.related_sample_identity);
+            }
         }
     }
 }
@@ -265,8 +270,12 @@ void Server::onNewDataMessage(
 void Server::receive(
         fastrtps::rtps::SampleIdentity sample_id)
 {
-    std::unique_lock<std::mutex> lock(mtx_);
-    std::shared_ptr<void> call_handle = sample_callhandle_[sample_id];
+    std::shared_ptr<void> call_handle;
+
+    {
+        std::unique_lock<std::mutex> lock(mtx_);
+        call_handle = sample_callhandle_[sample_id];
+    }
 
     ::xtypes::DynamicData received(reply_type_);
     bool success = Conversion::dds_to_soss(reply_dynamic_data_, received);

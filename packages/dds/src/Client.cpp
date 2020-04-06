@@ -128,8 +128,8 @@ Client::~Client()
     request_dynamic_data_ = nullptr;
     reply_dynamic_data_ = nullptr;
 
-    fastrtps::Domain::removePublisher(dds_publisher_);
-    fastrtps::Domain::removeSubscriber(dds_subscriber_);
+    //fastrtps::Domain::removePublisher(dds_publisher_);
+    //fastrtps::Domain::removeSubscriber(dds_subscriber_);
 
     for (std::thread& thread: reception_threads_)
     {
@@ -218,6 +218,7 @@ void Client::receive_response(
     params.related_sample_identity(sample_id);
 
     std::string path = reply_type_.name();
+
     if (reply_id_type_.count(sample_id) > 0)
     {
         path = type_to_discriminator_[reply_id_type_[sample_id]];
