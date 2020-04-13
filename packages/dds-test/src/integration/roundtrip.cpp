@@ -523,7 +523,7 @@ xtypes::DynamicData roundtrip(
     }));
 
     auto receive_msg_future = receive_msg_promise.get_future();
-    REQUIRE(std::future_status::ready == receive_msg_future.wait_for(50s));
+    REQUIRE(std::future_status::ready == receive_msg_future.wait_for(5s));
 
     return receive_msg_future.get();
 }
