@@ -28,6 +28,7 @@
 #include <fastrtps/subscriber/SubscriberListener.h>
 
 #include <map>
+#include <thread>
 
 namespace soss {
 namespace dds {

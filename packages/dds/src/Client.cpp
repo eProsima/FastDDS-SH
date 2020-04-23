@@ -169,7 +169,15 @@ bool Client::add_config(
             {
                 std::string disc = config["remap"]["dds"]["type"].as<std::string>();
                 const ::xtypes::DynamicType& member_type = Conversion::resolve_discriminator_type(request_type_, disc);
-                type_to_discriminator_[member_type.name()] = disc;
+                //type_to_discriminator_[member_type.name()] = disc;
+                if (member_type.name().find("::") == 0)
+                {
+                    type_to_discriminator_[member_type.name().substr(2)] = disc;
+                }
+                else
+                {
+                    type_to_discriminator_[member_type.name()] = disc;
+                }
                 member_types_.push_back(member_type.name());
                 std::cout << "[soss-dds] client: member \"" << disc << "\" has type \""
                           << member_type.name() << "\"." << std::endl;
@@ -184,7 +192,15 @@ bool Client::add_config(
                     std::string disc = config["remap"]["dds"]["request_type"].as<std::string>();
                     const ::xtypes::DynamicType& member_type =
                         Conversion::resolve_discriminator_type(request_type_, disc);
-                    type_to_discriminator_[member_type.name()] = disc;
+                    //type_to_discriminator_[member_type.name()] = disc;
+                    if (member_type.name().find("::") == 0)
+                    {
+                        type_to_discriminator_[member_type.name().substr(2)] = disc;
+                    }
+                    else
+                    {
+                        type_to_discriminator_[member_type.name()] = disc;
+                    }
                     member_types_.push_back(member_type.name());
                     std::cout << "[soss-dds] client: member \"" << disc << "\" has request type \""
                               << member_type.name() << "\"." << std::endl;
@@ -196,11 +212,27 @@ bool Client::add_config(
                     std::string disc = config["remap"]["dds"]["reply_type"].as<std::string>();
                     const ::xtypes::DynamicType& member_type =
                         Conversion::resolve_discriminator_type(reply_type_, disc);
-                    type_to_discriminator_[member_type.name()] = disc;
+                    //type_to_discriminator_[member_type.name()] = disc;
+                    if (member_type.name().find("::") == 0)
+                    {
+                        type_to_discriminator_[member_type.name().substr(2)] = disc;
+                    }
+                    else
+                    {
+                        type_to_discriminator_[member_type.name()] = disc;
+                    }
                     member_types_.push_back(member_type.name());
                     std::cout << "[soss-dds] client: member \"" << disc << "\" has reply type \""
                               << member_type.name() << "\"." << std::endl;
-                    request_reply_[req] = member_type.name();
+                    //request_reply_[req] = member_type.name();
+                    if (member_type.name().find("::") == 0)
+                    {
+                        request_reply_[req] = member_type.name().substr(2);
+                    }
+                    else
+                    {
+                        request_reply_[req] = member_type.name();
+                    }
                     add_member(reply_type_, disc);
                 }
             }
