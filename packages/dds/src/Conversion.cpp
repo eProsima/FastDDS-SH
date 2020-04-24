@@ -330,7 +330,7 @@ void Conversion::set_primitive_data(
     switch (resolve_type(from.type()).kind())
     {
         case ::xtypes::TypeKind::BOOLEAN_TYPE:
-            to->set_bool_value(from.value<bool>(), id);
+            to->set_bool_value(from.value<bool>() ? true : false, id);
             break;
         case ::xtypes::TypeKind::CHAR_8_TYPE:
             to->set_char8_value(from.value<char>(), id);
@@ -1959,7 +1959,7 @@ bool Conversion::set_struct_data(
                     {
                         bool value;
                         ret = input->get_bool_value(value, id);
-                        output[descriptor.get_name()].value<bool>(value);
+                        output[descriptor.get_name()].value<bool>(value ? true : false);
                         break;
                     }
                     case types::TK_BYTE:
