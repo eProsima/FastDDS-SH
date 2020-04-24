@@ -79,6 +79,14 @@ Server::Server(
         attributes.topic.topicName = service_name_ + "_Reply";
         attributes.topic.topicDataType = reply_type.name();
 
+        if (config["service_instance_name"])
+        {
+            fastrtps::rtps::Property instance_property;
+            instance_property.name("dds.rpc.service_instance_name");
+            instance_property.value(config["service_instance_name"].as<std::string>());
+            attributes.properties.properties().push_back(instance_property);
+        }
+
         dds_subscriber_ = fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, this);
 
         if (nullptr == dds_subscriber_)
