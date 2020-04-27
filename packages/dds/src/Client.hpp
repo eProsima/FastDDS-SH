@@ -70,7 +70,8 @@ public:
             const xtypes::DynamicData& response) override;
 
     bool add_config(
-            const YAML::Node& configuration);
+            const YAML::Node& configuration,
+            ServiceClientSystem::RequestCallback callback);
 
 private:
 
@@ -98,7 +99,7 @@ private:
     DynamicData* reply_dynamic_data_;
     const xtypes::DynamicType& request_type_;
     const xtypes::DynamicType& reply_type_;
-    ServiceClientSystem::RequestCallback callback_;
+    std::map<std::string, ServiceClientSystem::RequestCallback> callbacks_;
 
     const std::string service_name_;
     std::map<std::string, std::shared_ptr<NavigationNode>> member_tree_;

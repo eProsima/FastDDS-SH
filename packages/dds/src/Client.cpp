@@ -42,10 +42,10 @@ Client::Client(
         const YAML::Node& config)
     : request_type_{request_type}
     , reply_type_{reply_type}
-    , callback_{callback}
+    //, callback_{callback}
     , service_name_{service_name}
 {
-    add_config(config);
+    add_config(config, callback);
 
     // Create DynamicData
     DynamicTypeBuilder* builder_request = Conversion::create_builder(request_type);
@@ -158,8 +158,10 @@ void Client::add_member(
 }
 
 bool Client::add_config(
-        const YAML::Node& config)
+        const YAML::Node& config,
+        ServiceClientSystem::RequestCallback callback)
 {
+    bool callback_set = false;
     // Map discriminator to type from config
     if (config["remap"])
     {
@@ -167,20 +169,24 @@ bool Client::add_config(
         {
             if (config["remap"]["dds"]["type"])
             {
+                std::string req;
                 std::string disc = config["remap"]["dds"]["type"].as<std::string>();
                 const ::xtypes::DynamicType& member_type = Conversion::resolve_discriminator_type(request_type_, disc);
                 //type_to_discriminator_[member_type.name()] = disc;
                 if (member_type.name().find("::") == 0)
                 {
-                    type_to_discriminator_[member_type.name().substr(2)] = disc;
+                    req = member_type.name().substr(2);
                 }
                 else
                 {
-                    type_to_discriminator_[member_type.name()] = disc;
+                    req = member_type.name();
                 }
-                member_types_.push_back(member_type.name());
+                type_to_discriminator_[req] = disc;
+                callbacks_[req] = callback;
+                callback_set  = true;
+                member_types_.push_back(req);
                 std::cout << "[soss-dds] client: member \"" << disc << "\" has type \""
-                          << member_type.name() << "\"." << std::endl;
+                          << req << "\"." << std::endl;
 
                 add_member(request_type_, disc);
             }
@@ -195,16 +201,18 @@ bool Client::add_config(
                     //type_to_discriminator_[member_type.name()] = disc;
                     if (member_type.name().find("::") == 0)
                     {
-                        type_to_discriminator_[member_type.name().substr(2)] = disc;
+                        req = member_type.name().substr(2);
                     }
                     else
                     {
-                        type_to_discriminator_[member_type.name()] = disc;
+                        req = member_type.name();
                     }
-                    member_types_.push_back(member_type.name());
+                    type_to_discriminator_[req] = disc;
+                    callbacks_[req] = callback;
+                    callback_set  = true;
+                    member_types_.push_back(req);
                     std::cout << "[soss-dds] client: member \"" << disc << "\" has request type \""
-                              << member_type.name() << "\"." << std::endl;
-                    req = member_type.name();
+                              << req << "\"." << std::endl;
                     add_member(request_type_, disc);
                 }
                 if (config["remap"]["dds"]["reply_type"])
@@ -216,27 +224,31 @@ bool Client::add_config(
                     if (member_type.name().find("::") == 0)
                     {
                         type_to_discriminator_[member_type.name().substr(2)] = disc;
-                    }
-                    else
-                    {
-                        type_to_discriminator_[member_type.name()] = disc;
-                    }
-                    member_types_.push_back(member_type.name());
-                    std::cout << "[soss-dds] client: member \"" << disc << "\" has reply type \""
-                              << member_type.name() << "\"." << std::endl;
-                    //request_reply_[req] = member_type.name();
-                    if (member_type.name().find("::") == 0)
-                    {
+                        member_types_.push_back(member_type.name().substr(2));
                         request_reply_[req] = member_type.name().substr(2);
                     }
                     else
                     {
+                        type_to_discriminator_[member_type.name()] = disc;
+                        member_types_.push_back(member_type.name());
                         request_reply_[req] = member_type.name();
                     }
+                    std::cout << "[soss-dds] client: member \"" << disc << "\" has reply type \""
+                              << member_type.name() << "\"." << std::endl;
                     add_member(reply_type_, disc);
                 }
             }
         }
+    }
+    if (!callback_set && config["type"])
+    {
+        std::string req = config["type"].as<std::string>();
+        if (req.find("::") == 0)
+        {
+            req = req.substr(2);
+        }
+
+        callbacks_[req] = callback;
     }
     return true;
 }
@@ -329,9 +341,12 @@ void Client::receive(
         ::xtypes::WritableDynamicDataRef ref =
             Conversion::access_member_data(received, member->get_path());
         ::xtypes::DynamicData message(ref, ref.type());
-        callback_(
-            message,
-            *this, std::make_shared<fastrtps::rtps::SampleIdentity>(sample_id));
+        if (callbacks_.count(message.type().name()))
+        {
+            callbacks_[message.type().name()](
+                message,
+                *this, std::make_shared<fastrtps::rtps::SampleIdentity>(sample_id));
+        }
     }
     else
     {

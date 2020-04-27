@@ -167,7 +167,7 @@ public:
             }
         }
 
-        return clients_[service_name]->add_config(configuration);
+        return clients_[service_name]->add_config(configuration, callback);
     }
 
     std::shared_ptr<ServiceProvider> create_service_proxy(
