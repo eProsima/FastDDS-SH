@@ -164,15 +164,26 @@ bool Server::add_config(
         {
             if (config["remap"]["dds"]["type"])
             {
+                std::string req;
                 std::string disc = config["remap"]["dds"]["type"].as<std::string>();
                 const ::xtypes::DynamicType& member_type = Conversion::resolve_discriminator_type(request_type_, disc);
                 if (member_type.name().find("::") == 0)
                 {
-                    type_to_discriminator_[member_type.name().substr(2)] = disc;
+                    req = member_type.name().substr(2);
                 }
                 else
                 {
-                    type_to_discriminator_[member_type.name()] = disc;
+                    req = member_type.name();
+                }
+                type_to_discriminator_[req] = disc;
+                if (config["type"])
+                {
+                    if (config["type"].as<std::string>() != req)
+                    {
+                        // Add alias from other types
+                        // TODO - Solve path?
+                        type_to_discriminator_[config["type"].as<std::string>()] = disc;
+                    }
                 }
                 std::cout << "[soss-dds] server: member \"" << disc << "\" has type \""
                           << member_type.name() << "\"." << std::endl;
@@ -180,41 +191,60 @@ bool Server::add_config(
             else
             {
                 std::string req;
+                std::string req_alias;
                 if (config["remap"]["dds"]["request_type"])
                 {
                     std::string disc = config["remap"]["dds"]["request_type"].as<std::string>();
                     const ::xtypes::DynamicType& member_type = Conversion::resolve_discriminator_type(request_type_, disc);
-                    //type_to_discriminator_[member_type.name()] = disc;
                     if (member_type.name().find("::") == 0)
                     {
-                        type_to_discriminator_[member_type.name().substr(2)] = disc;
+                        req = member_type.name().substr(2);
                     }
                     else
                     {
-                        type_to_discriminator_[member_type.name()] = disc;
+                        req = member_type.name();
+                    }
+                    type_to_discriminator_[req] = disc;
+                    if (config["request_type"])
+                    {
+                        if (config["request_type"].as<std::string>() != req)
+                        {
+                            // Add alias from other types
+                            // TODO - Solve path?
+                            req_alias = config["request_type"].as<std::string>();
+                            type_to_discriminator_[req_alias] = disc;
+                        }
                     }
                     std::cout << "[soss-dds] server: member \"" << disc << "\" has request type \""
                               << member_type.name() << "\"." << std::endl;
-                    req = member_type.name();
                 }
                 if (config["remap"]["dds"]["reply_type"])
                 {
+                    std::string rep;
                     std::string disc = config["remap"]["dds"]["reply_type"].as<std::string>();
                     const ::xtypes::DynamicType& member_type = Conversion::resolve_discriminator_type(reply_type_, disc);
-                    //type_to_discriminator_[member_type.name()] = disc;
                     if (member_type.name().find("::") == 0)
                     {
-                        type_to_discriminator_[member_type.name().substr(2)] = disc;
-                        request_reply_[req] = member_type.name().substr(2);
+                        rep = member_type.name().substr(2);
                     }
                     else
                     {
-                        type_to_discriminator_[member_type.name()] = disc;
-                        request_reply_[req] = member_type.name();
+                        rep = member_type.name();
+                    }
+                    request_reply_[req] = rep;
+                    type_to_discriminator_[rep] = disc;
+                    if (config["reply_type"])
+                    {
+                        if (config["reply_type"].as<std::string>() != req)
+                        {
+                            // Add alias from other types
+                            // TODO - Solve path?
+                            type_to_discriminator_[config["reply_type"].as<std::string>()] = disc;
+                            request_reply_[req_alias] = rep;
+                        }
                     }
                     std::cout << "[soss-dds] server: member \"" << disc << "\" has reply type \""
                               << member_type.name() << "\"." << std::endl;
-                    //request_reply_[req] = member_type.name();
                 }
             }
         }
