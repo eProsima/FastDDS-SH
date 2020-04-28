@@ -78,6 +78,8 @@ Client::Client(
         attributes.topic.topicKind = NO_KEY;
         attributes.topic.topicName = service_name_ + "_Request";
         attributes.topic.topicDataType = request_type.name();
+        // RPC are reliable
+        attributes.qos.m_reliability.kind = fastrtps::ReliabilityQosPolicyKind::RELIABLE_RELIABILITY_QOS;
 
         dds_subscriber_ = fastrtps::Domain::createSubscriber(participant->get_dds_participant(), attributes, this);
 

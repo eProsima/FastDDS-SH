@@ -78,6 +78,8 @@ Server::Server(
         attributes.topic.topicKind = NO_KEY;
         attributes.topic.topicName = service_name_ + "_Reply";
         attributes.topic.topicDataType = reply_type.name();
+        // RPC are reliable
+        attributes.qos.m_reliability.kind = fastrtps::ReliabilityQosPolicyKind::RELIABLE_RELIABILITY_QOS;
 
         if (config["service_instance_name"])
         {
