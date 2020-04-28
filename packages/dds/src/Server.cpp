@@ -346,7 +346,15 @@ void Server::receive(
 
     {
         std::unique_lock<std::mutex> lock(mtx_);
-        call_handle = sample_callhandle_[sample_id];
+        if (sample_callhandle_.count(sample_id) > 0)
+        {
+            call_handle = sample_callhandle_[sample_id];
+        }
+        else
+        {
+            std::cout << "[soss-dds][server] received reply from unasked request. Ignoring." << std::endl;
+            return;
+        }
     }
 
     ::xtypes::DynamicData received(reply_type_);
@@ -362,13 +370,21 @@ void Server::receive(
 
         ::xtypes::WritableDynamicDataRef ref = Conversion::access_member_data(received, path);
         ::xtypes::DynamicData message(ref, ref.type());
-        callhandle_client_[call_handle]->receive_response(
-            call_handle,
-            message);
 
-        callhandle_client_.erase(call_handle);
-        sample_callhandle_.erase(sample_id);
-        reply_id_type_.erase(sample_id);
+        if (callhandle_client_.count(call_handle) > 0)
+        {
+            callhandle_client_[call_handle]->receive_response(
+                call_handle,
+                message);
+
+            callhandle_client_.erase(call_handle);
+            sample_callhandle_.erase(sample_id);
+            reply_id_type_.erase(sample_id);
+        }
+        else
+        {
+            std::cout << "[soss-dds][server] received reply from unasked request. Ignoring." << std::endl;
+        }
     }
     else
     {
