@@ -278,9 +278,9 @@ void Server::call_service(
 
     if (success)
     {
-        callhandle_client_[call_handle] = &client;
         fastrtps::rtps::WriteParams params;
         std::unique_lock<std::mutex> lock(mtx_);
+        callhandle_client_[call_handle] = &client;
         success = dds_publisher_->write(request_dynamic_data_, params);
         if (!success)
         {
@@ -375,12 +375,13 @@ void Server::receive(
 
         if (callhandle_client_.count(call_handle) > 0)
         {
-            callhandle_client_[call_handle]->receive_response(
-                call_handle,
-                message);
-
+            auto client = callhandle_client_.at(call_handle);
             callhandle_client_.erase(call_handle);
             sample_callhandle_.erase(sample_id);
+
+            client->receive_response(
+                call_handle,
+                message);
         }
         else
         {
