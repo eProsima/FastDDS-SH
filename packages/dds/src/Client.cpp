@@ -265,10 +265,13 @@ void Client::receive_response(
 
     std::string path = reply_type_.name();
 
-    if (reply_id_type_.count(sample_id) > 0)
     {
-        path = type_to_discriminator_[reply_id_type_[sample_id]];
-        reply_id_type_.erase(sample_id);
+        std::unique_lock<std::mutex> lock(mtx_);
+        if (reply_id_type_.count(sample_id) > 0)
+        {
+            path = type_to_discriminator_[reply_id_type_[sample_id]];
+            reply_id_type_.erase(sample_id);
+        }
     }
 
     ::xtypes::DynamicData reply(reply_type_);
@@ -335,9 +338,12 @@ void Client::receive(
         std::shared_ptr<NavigationNode> member =
             NavigationNode::get_discriminator(member_tree_, received, member_types_);
 
-        if (request_reply_.count(member->type_name) > 0)
         {
-            reply_id_type_[sample_id] = request_reply_[member->type_name];
+            std::unique_lock<std::mutex> lock(mtx_);
+            if (request_reply_.count(member->type_name) > 0)
+            {
+                reply_id_type_[sample_id] = request_reply_[member->type_name];
+            }
         }
 
         ::xtypes::WritableDynamicDataRef ref =

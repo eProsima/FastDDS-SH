@@ -362,10 +362,12 @@ void Server::receive(
 
     if (success)
     {
+        std::unique_lock<std::mutex> lock(mtx_);
         std::string path = reply_type_.name();
         if (reply_id_type_.count(sample_id) > 0)
         {
             path = type_to_discriminator_[reply_id_type_[sample_id]];
+            reply_id_type_.erase(sample_id);
         }
 
         ::xtypes::WritableDynamicDataRef ref = Conversion::access_member_data(received, path);
@@ -379,7 +381,6 @@ void Server::receive(
 
             callhandle_client_.erase(call_handle);
             sample_callhandle_.erase(sample_id);
-            reply_id_type_.erase(sample_id);
         }
         else
         {
