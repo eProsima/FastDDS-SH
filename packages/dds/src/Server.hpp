@@ -88,6 +88,7 @@ private:
     void receive(
             eprosima::fastrtps::rtps::SampleIdentity sample_id);
 
+    Participant* participant_;
     eprosima::fastrtps::Publisher* dds_publisher_;
     eprosima::fastrtps::Subscriber* dds_subscriber_;
     DynamicData* request_dynamic_data_;
@@ -105,9 +106,17 @@ private:
     std::map<eprosima::fastrtps::rtps::SampleIdentity, std::string, SampleIdentityComparator> reply_id_type_;
 
     std::mutex mtx_;
-    std::mutex thread_mtx_;
-    std::vector<std::thread> reception_threads_;
-    bool stop_ = false;
+    std::mutex request_data_mtx_;
+    std::mutex reply_data_mtx_;
+
+    std::map<std::thread::id, std::thread*> reception_threads_;
+    bool stop_cleaner_;
+    std::thread cleaner_thread_;
+    std::vector<std::thread::id> finished_threads_;
+    std::mutex cleaner_mtx_;
+    std::condition_variable cleaner_cv_;
+
+    void cleaner_function();
 };
 
 

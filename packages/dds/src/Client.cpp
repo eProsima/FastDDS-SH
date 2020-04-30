@@ -40,10 +40,12 @@ Client::Client(
         const ::xtypes::DynamicType& reply_type,
         ServiceClientSystem::RequestCallback callback,
         const YAML::Node& config)
-    : request_type_{request_type}
+    : participant_(participant)
+    , request_type_{request_type}
     , reply_type_{reply_type}
-    //, callback_{callback}
     , service_name_{service_name}
+    , stop_cleaner_{false}
+    , cleaner_thread_{&Client::cleaner_function, this}
 {
     add_config(config, callback);
 
@@ -127,19 +129,23 @@ Client::Client(
 
 Client::~Client()
 {
-    request_dynamic_data_ = nullptr;
-    reply_dynamic_data_ = nullptr;
-
-    //fastrtps::Domain::removePublisher(dds_publisher_);
-    //fastrtps::Domain::removeSubscriber(dds_subscriber_);
-
-    for (std::thread& thread: reception_threads_)
     {
-        if (thread.joinable())
-        {
-            thread.join();
-        }
+        std::unique_lock<std::mutex> lock(cleaner_mtx_);
+        stop_cleaner_ = true;
+        cleaner_cv_.notify_one();
     }
+
+    if (cleaner_thread_.joinable())
+    {
+        cleaner_thread_.join();
+    }
+
+    std::unique_lock<std::mutex> request_lock(request_data_mtx_);
+    participant_->delete_dynamic_data(request_dynamic_data_);
+    request_dynamic_data_ = nullptr;
+    std::unique_lock<std::mutex> reply_lock(reply_data_mtx_);
+    participant_->delete_dynamic_data(reply_dynamic_data_);
+    reply_dynamic_data_ = nullptr;
 }
 
 void Client::add_member(
@@ -281,6 +287,7 @@ void Client::receive_response(
     std::cout << "[soss-dds][client]: translate reply: soss -> dds "
         "(" << service_name_ << ") " << std::endl;
 
+    std::unique_lock<std::mutex> reply_lock(reply_data_mtx_);
     bool success = Conversion::soss_to_dds(reply, reply_dynamic_data_);
 
     if (success)
@@ -318,48 +325,125 @@ void Client::onNewDataMessage(
     using namespace std::placeholders;
     fastrtps::SampleInfo_t info;
     // TODO Protect request_dynamic_data or create a local variable (copying it to the thread)
-    if (dds_subscriber_->takeNextData(request_dynamic_data_, &info))
+    std::unique_lock<std::mutex> lock(cleaner_mtx_);
+    request_data_mtx_.lock();
+    if (!stop_cleaner_ && dds_subscriber_->takeNextData(request_dynamic_data_, &info))
     {
         if (ALIVE == info.sampleKind)
         {
-            reception_threads_.emplace_back(std::thread(&Client::receive, this, info.sample_identity));
+            std::thread* thread = new std::thread(&Client::receive, this, info.sample_identity);
+            reception_threads_.emplace(thread->get_id(), thread);
         }
+        else
+        {
+            request_data_mtx_.unlock();
+        }
+    }
+    else
+    {
+        request_data_mtx_.unlock();
     }
 }
 
 void Client::receive(
         eprosima::fastrtps::rtps::SampleIdentity sample_id)
 {
-    ::xtypes::DynamicData received(request_type_);
-    bool success = Conversion::dds_to_soss(request_dynamic_data_, received);
-
-    if (success)
     {
-        std::shared_ptr<NavigationNode> member =
-            NavigationNode::get_discriminator(member_tree_, received, member_types_);
+        ::xtypes::DynamicData received(request_type_);
+        bool success = Conversion::dds_to_soss(request_dynamic_data_, received);
+        request_data_mtx_.unlock();
 
+        if (success)
         {
-            std::unique_lock<std::mutex> lock(mtx_);
-            if (request_reply_.count(member->type_name) > 0)
+            std::shared_ptr<NavigationNode> member =
+                NavigationNode::get_discriminator(member_tree_, received, member_types_);
+
             {
-                reply_id_type_[sample_id] = request_reply_[member->type_name];
+                std::unique_lock<std::mutex> lock(mtx_);
+                if (request_reply_.count(member->type_name) > 0)
+                {
+                    reply_id_type_[sample_id] = request_reply_[member->type_name];
+                }
+            }
+
+            ::xtypes::WritableDynamicDataRef ref =
+                Conversion::access_member_data(received, member->get_path());
+            ::xtypes::DynamicData message(ref, ref.type());
+            if (callbacks_.count(message.type().name()))
+            {
+                callbacks_[message.type().name()](
+                    message,
+                    *this, std::make_shared<fastrtps::rtps::SampleIdentity>(sample_id));
+            }
+        }
+        else
+        {
+            std::cerr << "Error converting message from dynamic types to soss message." << std::endl;
+        }
+    }
+
+    // Notify that we have ended
+    std::unique_lock<std::mutex> lock(cleaner_mtx_);
+    finished_threads_.push_back(std::this_thread::get_id());
+    cleaner_cv_.notify_one();
+}
+
+void Client::cleaner_function()
+{
+    using namespace std::chrono_literals;
+    std::unique_lock<std::mutex> lock(cleaner_mtx_);
+    std::vector<std::thread::id> stopped;
+
+    while (!stop_cleaner_)
+    {
+        cleaner_cv_.wait(
+            lock,
+            [this]()
+            {
+                return stop_cleaner_ || !finished_threads_.empty();
+            });
+
+        for (std::thread::id id : finished_threads_)
+        {
+            // Some threads may end too quickly, wait until the next iteration
+            if (reception_threads_.count(id) > 0)
+            {
+                std::thread* thread = reception_threads_.at(id);
+                reception_threads_.erase(id);
+
+                if (thread->joinable())
+                {
+                    thread->join();
+                }
+                delete thread;
+                stopped.push_back(id);
             }
         }
 
-        ::xtypes::WritableDynamicDataRef ref =
-            Conversion::access_member_data(received, member->get_path());
-        ::xtypes::DynamicData message(ref, ref.type());
-        if (callbacks_.count(message.type().name()))
+        for (std::thread::id id : stopped)
         {
-            callbacks_[message.type().name()](
-                message,
-                *this, std::make_shared<fastrtps::rtps::SampleIdentity>(sample_id));
+            auto it = std::find(finished_threads_.begin(), finished_threads_.end(), id);
+            finished_threads_.erase(it);
         }
+        stopped.clear();
+
+        // Free the CPU just a moment
+        lock.unlock();
+        std::this_thread::sleep_for(10ms);
+        lock.lock();
     }
-    else
+
+    // Wait for the rest of threads
+    for (auto& pair : reception_threads_)
     {
-        std::cerr << "Error converting message from dynamic types to soss message." << std::endl;
+        std::thread* thread = pair.second;
+        if (thread->joinable())
+        {
+            thread->join();
+        }
+        delete thread;
     }
+
 }
 
 } // namespace dds

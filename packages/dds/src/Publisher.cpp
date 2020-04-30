@@ -34,7 +34,8 @@ Publisher::Publisher(
         const std::string& topic_name,
         const ::xtypes::DynamicType& message_type,
         const YAML::Node& config)
-    : topic_name_{topic_name}
+    : participant_{participant}
+    , topic_name_{topic_name}
 {
     DynamicTypeBuilder* builder = Conversion::create_builder(message_type);
 
@@ -72,6 +73,9 @@ Publisher::Publisher(
 
 Publisher::~Publisher()
 {
+    std::unique_lock<std::mutex> lock(data_mtx_);
+    participant_->delete_dynamic_data(dynamic_data_);
+    dynamic_data_ = nullptr;
     fastrtps::Domain::removePublisher(dds_publisher_);
 }
 
@@ -83,6 +87,7 @@ bool Publisher::publish(
     std::cout << "[soss-dds][publisher]: translate message: soss -> dds "
         "(" << topic_name_ << ") " << std::endl;
 
+    std::unique_lock<std::mutex> lock(data_mtx_);
     success = Conversion::soss_to_dds(soss_message, dynamic_data_);
 
     if (success)

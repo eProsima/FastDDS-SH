@@ -71,14 +71,23 @@ private:
     void onNewDataMessage(
             eprosima::fastrtps::Subscriber* sub) override;
 
+    Participant* participant_;
     eprosima::fastrtps::Subscriber* dds_subscriber_;
     DynamicData* dynamic_data_;
+    std::mutex data_mtx_;
 
     const std::string topic_name_;
     const xtypes::DynamicType& message_type_;
 
     TopicSubscriberSystem::SubscriptionCallback soss_callback_;
-    std::vector<std::thread> reception_threads_;
+    std::map<std::thread::id, std::thread*> reception_threads_;
+    bool stop_cleaner_;
+    std::thread cleaner_thread_;
+    std::vector<std::thread::id> finished_threads_;
+    std::mutex cleaner_mtx_;
+    std::condition_variable cleaner_cv_;
+
+    void cleaner_function();
 };
 
 

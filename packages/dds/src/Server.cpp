@@ -41,9 +41,12 @@ Server::Server(
         const ::xtypes::DynamicType& request_type,
         const ::xtypes::DynamicType& reply_type,
         const YAML::Node& config)
-    : service_name_{service_name}
+    : participant_(participant)
+    , service_name_{service_name}
     , request_type_{request_type}
     , reply_type_{reply_type}
+    , stop_cleaner_{false}
+    , cleaner_thread_{&Server::cleaner_function, this}
 {
     add_config(config);
 
@@ -139,21 +142,26 @@ Server::~Server()
 
     std::cout << "[soss-dds][server]: wait finished." << std::endl;
 
-    request_dynamic_data_ = nullptr;
-    reply_dynamic_data_ = nullptr;
-
     //fastrtps::Domain::removeSubscriber(dds_subscriber_);
     //fastrtps::Domain::removePublisher(dds_publisher_);
 
-    std::unique_lock<std::mutex> lock(thread_mtx_);
-    stop_ = true;
-    for (std::thread& thread : reception_threads_)
     {
-        if (thread.joinable())
-        {
-            thread.join();
-        }
+        std::unique_lock<std::mutex> lock(cleaner_mtx_);
+        stop_cleaner_ = true;
+        cleaner_cv_.notify_one();
     }
+
+    if (cleaner_thread_.joinable())
+    {
+        cleaner_thread_.join();
+    }
+
+    std::unique_lock<std::mutex> request_lock(request_data_mtx_);
+    participant_->delete_dynamic_data(request_dynamic_data_);
+    request_dynamic_data_ = nullptr;
+    std::unique_lock<std::mutex> reply_lock(reply_data_mtx_);
+    participant_->delete_dynamic_data(reply_dynamic_data_);
+    reply_dynamic_data_ = nullptr;
 }
 
 bool Server::add_config(
@@ -274,6 +282,7 @@ void Server::call_service(
     std::cout << "[soss-dds][server]: translate request: soss -> dds "
         "(" << service_name_ << ") " << std::endl;
 
+    request_data_mtx_.lock();
     success = Conversion::soss_to_dds(request, request_dynamic_data_);
 
     if (success)
@@ -282,6 +291,7 @@ void Server::call_service(
         std::unique_lock<std::mutex> lock(mtx_);
         callhandle_client_[call_handle] = &client;
         success = dds_publisher_->write(request_dynamic_data_, params);
+        request_data_mtx_.unlock();
         if (!success)
         {
             std::cout << "Failed to publish message into DDS world." << std::endl;
@@ -298,6 +308,7 @@ void Server::call_service(
     }
     else
     {
+        request_data_mtx_.unlock();
         std::cerr << "Error converting message from soss message to dynamic types." << std::endl;
     }
 }
@@ -326,16 +337,24 @@ void Server::onNewDataMessage(
     using namespace std::placeholders;
     fastrtps::SampleInfo_t info;
     // TODO Protect reply_dynamic_data or create a local variable (copying it to the thread)
-    if (dds_subscriber_->takeNextData(reply_dynamic_data_, &info))
+    std::unique_lock<std::mutex> lock(cleaner_mtx_);
+    reply_data_mtx_.lock();
+    if (!stop_cleaner_ && dds_subscriber_->takeNextData(reply_dynamic_data_, &info))
     {
         if (ALIVE == info.sampleKind)
         {
-            std::unique_lock<std::mutex> lock(thread_mtx_);
-            if (!stop_)
-            {
-                reception_threads_.emplace_back(&Server::receive, this, info.related_sample_identity);
-            }
+            //reception_threads_.emplace_back(&Server::receive, this, info.related_sample_identity);
+            std::thread* thread = new std::thread(&Server::receive, this, info.related_sample_identity);
+            reception_threads_.emplace(thread->get_id(), thread);
         }
+        else
+        {
+            reply_data_mtx_.unlock();
+        }
+    }
+    else
+    {
+        reply_data_mtx_.unlock();
     }
 }
 
@@ -353,45 +372,112 @@ void Server::receive(
         else
         {
             std::cout << "[soss-dds][server] received reply from unasked request. Ignoring." << std::endl;
+            reply_data_mtx_.unlock();
             return;
         }
     }
 
-    ::xtypes::DynamicData received(reply_type_);
-    bool success = Conversion::dds_to_soss(reply_dynamic_data_, received);
-
-    if (success)
     {
-        std::unique_lock<std::mutex> lock(mtx_);
-        std::string path = reply_type_.name();
-        if (reply_id_type_.count(sample_id) > 0)
+        ::xtypes::DynamicData received(reply_type_);
+        bool success = Conversion::dds_to_soss(reply_dynamic_data_, received);
+        reply_data_mtx_.unlock();
+
+        if (success)
         {
-            path = type_to_discriminator_[reply_id_type_[sample_id]];
-            reply_id_type_.erase(sample_id);
-        }
+            std::unique_lock<std::mutex> lock(mtx_);
+            std::string path = reply_type_.name();
+            if (reply_id_type_.count(sample_id) > 0)
+            {
+                path = type_to_discriminator_[reply_id_type_[sample_id]];
+                reply_id_type_.erase(sample_id);
+            }
 
-        ::xtypes::WritableDynamicDataRef ref = Conversion::access_member_data(received, path);
-        ::xtypes::DynamicData message(ref, ref.type());
+            ::xtypes::WritableDynamicDataRef ref = Conversion::access_member_data(received, path);
+            ::xtypes::DynamicData message(ref, ref.type());
 
-        if (callhandle_client_.count(call_handle) > 0)
-        {
-            auto client = callhandle_client_.at(call_handle);
-            callhandle_client_.erase(call_handle);
-            sample_callhandle_.erase(sample_id);
+            if (callhandle_client_.count(call_handle) > 0)
+            {
+                auto client = callhandle_client_.at(call_handle);
+                callhandle_client_.erase(call_handle);
+                sample_callhandle_.erase(sample_id);
 
-            client->receive_response(
-                call_handle,
-                message);
+                client->receive_response(
+                    call_handle,
+                    message);
+            }
+            else
+            {
+                std::cout << "[soss-dds][server] received reply from unasked request. Ignoring." << std::endl;
+            }
         }
         else
         {
-            std::cout << "[soss-dds][server] received reply from unasked request. Ignoring." << std::endl;
+            std::cerr << "Error converting message from dynamic types to soss message." << std::endl;
         }
     }
-    else
+
+    // Notify that we have ended
+    std::unique_lock<std::mutex> lock(cleaner_mtx_);
+    finished_threads_.push_back(std::this_thread::get_id());
+    cleaner_cv_.notify_one();
+}
+
+void Server::cleaner_function()
+{
+    using namespace std::chrono_literals;
+    std::unique_lock<std::mutex> lock(cleaner_mtx_);
+    std::vector<std::thread::id> stopped;
+
+    while (!stop_cleaner_)
     {
-        std::cerr << "Error converting message from dynamic types to soss message." << std::endl;
+        cleaner_cv_.wait(
+            lock,
+            [this]()
+            {
+                return stop_cleaner_ || !finished_threads_.empty();
+            });
+
+        for (std::thread::id id : finished_threads_)
+        {
+            // Some threads may end too quickly, wait until the next iteration
+            if (reception_threads_.count(id) > 0)
+            {
+                std::thread* thread = reception_threads_.at(id);
+                reception_threads_.erase(id);
+
+                if (thread->joinable())
+                {
+                    thread->join();
+                }
+                delete thread;
+                stopped.push_back(id);
+            }
+        }
+
+        for (std::thread::id id : stopped)
+        {
+            auto it = std::find(finished_threads_.begin(), finished_threads_.end(), id);
+            finished_threads_.erase(it);
+        }
+        stopped.clear();
+
+        // Free the CPU just a moment
+        lock.unlock();
+        std::this_thread::sleep_for(10ms);
+        lock.lock();
     }
+
+    // Wait for the rest of threads
+    for (auto& pair : reception_threads_)
+    {
+        std::thread* thread = pair.second;
+        if (thread->joinable())
+        {
+            thread->join();
+        }
+        delete thread;
+    }
+
 }
 
 } // namespace dds

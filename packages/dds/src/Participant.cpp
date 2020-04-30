@@ -159,6 +159,12 @@ fastrtps::types::DynamicData* Participant::create_dynamic_data(
     return DynamicDataFactory::get_instance()->create_data(dynamic_type_);
 }
 
+void Participant::delete_dynamic_data(
+        DynamicData* data) const
+{
+    DynamicDataFactory::get_instance()->delete_data(data);
+}
+
 void Participant::onParticipantDiscovery(
         fastrtps::Participant* /* participant */,
         fastrtps::rtps::ParticipantDiscoveryInfo&& /* info */)

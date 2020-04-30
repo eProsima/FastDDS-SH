@@ -54,6 +54,9 @@ public:
     DynamicData* create_dynamic_data(
             const std::string& name) const;
 
+    void delete_dynamic_data(
+            DynamicData* data) const;
+
     const DynamicType* get_dynamic_type(
             const std::string& name) const
     {
