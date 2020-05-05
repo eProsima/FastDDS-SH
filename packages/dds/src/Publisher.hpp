@@ -39,7 +39,8 @@ public:
     Publisher(
             Participant* participant,
             const std::string& topic_name,
-            const xtypes::DynamicType& message_type);
+            const xtypes::DynamicType& message_type,
+            const YAML::Node& config);
 
     virtual ~Publisher() override;
 

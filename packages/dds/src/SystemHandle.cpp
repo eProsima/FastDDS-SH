@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
-*/
+ */
 
 #include <soss/SystemHandle.hpp>
 
@@ -28,15 +28,16 @@
 #include <thread>
 
 namespace soss {
-namespace dds{
+namespace dds {
 
 class SystemHandle : public virtual TopicSystem
 {
 public:
+
     bool configure(
-        const RequiredTypes& /* types */,
-        const YAML::Node& configuration,
-        TypeRegistry& /*type_registry*/)
+            const RequiredTypes& /* types */,
+            const YAML::Node& configuration,
+            TypeRegistry& /*type_registry*/)
     {
         /*
          * SOSS-DDS doesn't define new types. Needed types will be defined in the 'types' section
@@ -56,7 +57,7 @@ public:
                 participant_ = std::make_unique<Participant>();
             }
         }
-        catch(DDSMiddlewareException& e)
+        catch (DDSMiddlewareException& e)
         {
             std::cerr << "[soss-dds]: " << e.what() << std::endl;
             return false;
@@ -79,10 +80,10 @@ public:
     }
 
     bool subscribe(
-        const std::string& topic_name,
-        const xtypes::DynamicType& message_type,
-        SubscriptionCallback callback,
-        const YAML::Node& /* configuration */)
+            const std::string& topic_name,
+            const xtypes::DynamicType& message_type,
+            SubscriptionCallback callback,
+            const YAML::Node& /* configuration */)
     {
         try
         {
@@ -97,7 +98,7 @@ public:
 
             return true;
         }
-        catch(DDSMiddlewareException& e)
+        catch (DDSMiddlewareException& e)
         {
             std::cerr << "[soss-dds]: " << e.what() << std::endl;
             return false;
@@ -105,13 +106,13 @@ public:
     }
 
     std::shared_ptr<TopicPublisher> advertise(
-        const std::string& topic_name,
-        const xtypes::DynamicType& message_type,
-        const YAML::Node& /* configuration */)
+            const std::string& topic_name,
+            const xtypes::DynamicType& message_type,
+            const YAML::Node& configuration)
     {
         try
         {
-            auto publisher = std::make_shared<Publisher>(participant_.get(), topic_name, message_type);
+            auto publisher = std::make_shared<Publisher>(participant_.get(), topic_name, message_type, configuration);
             publishers_.emplace_back(std::move(publisher));
 
             std::cout << "[soss-dds]: publisher created. "
@@ -120,7 +121,7 @@ public:
 
             return publishers_.back();
         }
-        catch(DDSMiddlewareException& e)
+        catch (DDSMiddlewareException& e)
         {
             std::cerr << "[soss-dds]: " << e.what() << std::endl;
             return std::shared_ptr<TopicPublisher>();
@@ -128,9 +129,10 @@ public:
     }
 
 private:
+
     std::unique_ptr<Participant> participant_;
-    std::vector<std::shared_ptr<Publisher>> publishers_;
-    std::vector<std::shared_ptr<Subscriber>> subscribers_;
+    std::vector<std::shared_ptr<Publisher> > publishers_;
+    std::vector<std::shared_ptr<Subscriber> > subscribers_;
 };
 
 
