@@ -28,6 +28,7 @@
 #include <fastrtps/subscriber/SubscriberListener.h>
 
 #include <thread>
+#include <condition_variable>
 
 namespace soss {
 namespace dds {
@@ -100,7 +101,7 @@ private:
 
     std::map<std::shared_ptr<void>, ServiceClient*> callhandle_client_;
     std::map<eprosima::fastrtps::rtps::SampleIdentity, std::shared_ptr<void>, SampleIdentityComparator>
-        sample_callhandle_;
+    sample_callhandle_;
     std::map<std::string, std::string> type_to_discriminator_;
     std::map<std::string, std::string> request_reply_;
     std::map<eprosima::fastrtps::rtps::SampleIdentity, std::string, SampleIdentityComparator> reply_id_type_;

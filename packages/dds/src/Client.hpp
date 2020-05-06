@@ -29,6 +29,7 @@
 
 #include <map>
 #include <thread>
+#include <condition_variable>
 
 namespace soss {
 namespace dds {
@@ -103,7 +104,7 @@ private:
     std::map<std::string, ServiceClientSystem::RequestCallback> callbacks_;
 
     const std::string service_name_;
-    std::map<std::string, std::shared_ptr<NavigationNode>> member_tree_;
+    std::map<std::string, std::shared_ptr<NavigationNode> > member_tree_;
     std::map<std::string, std::string> type_to_discriminator_;
     std::map<std::string, std::string> request_reply_;
     std::vector<std::string> member_types_;

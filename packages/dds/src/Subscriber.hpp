@@ -27,6 +27,7 @@
 #include <fastrtps/subscriber/SubscriberListener.h>
 
 #include <thread>
+#include <condition_variable>
 
 namespace soss {
 namespace dds {
