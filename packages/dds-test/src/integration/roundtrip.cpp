@@ -512,8 +512,6 @@ xtypes::DynamicData roundtrip(
         const std::string& topic_recv,
         const xtypes::DynamicData& message)
 {
-    soss::mock::publish_message(topic_sent, message);
-
     std::promise<xtypes::DynamicData> receive_msg_promise;
     REQUIRE(soss::mock::subscribe(
             topic_recv,
@@ -521,6 +519,8 @@ xtypes::DynamicData roundtrip(
     {
         receive_msg_promise.set_value(msg_to_recv);
     }));
+
+    soss::mock::publish_message(topic_sent, message);
 
     auto receive_msg_future = receive_msg_promise.get_future();
     REQUIRE(std::future_status::ready == receive_msg_future.wait_for(5s));
