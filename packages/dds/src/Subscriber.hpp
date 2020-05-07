@@ -83,10 +83,10 @@ private:
     TopicSubscriberSystem::SubscriptionCallback soss_callback_;
     std::map<std::thread::id, std::thread*> reception_threads_;
     bool stop_cleaner_;
-    std::thread cleaner_thread_;
     std::vector<std::thread::id> finished_threads_;
     std::mutex cleaner_mtx_;
     std::condition_variable cleaner_cv_;
+    std::thread cleaner_thread_;
 
     void cleaner_function();
 };
