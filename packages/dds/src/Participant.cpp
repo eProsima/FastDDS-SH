@@ -34,6 +34,7 @@ namespace dds {
 Participant::Participant()
 {
     fastrtps::ParticipantAttributes attributes;
+    attributes.rtps.setName("DefaultSOSSDDSParticipant");
     dds_participant_ = fastrtps::Domain::createParticipant(attributes);
 }
 
@@ -67,12 +68,12 @@ Participant::Participant(
 
 Participant::~Participant()
 {
+    fastrtps::Domain::removeParticipant(dds_participant_);
     for (auto topic : topics_)
     {
         fastrtps::Domain::unregisterType(dds_participant_, topic.first.c_str());
     }
     topics_.clear();
-    fastrtps::Domain::removeParticipant(dds_participant_);
 }
 
 void Participant::register_dynamic_type(
@@ -135,7 +136,7 @@ void Participant::register_dynamic_type(
     }
 }
 
-fastrtps::types::DynamicData_ptr Participant::create_dynamic_data(
+fastrtps::types::DynamicData* Participant::create_dynamic_data(
         const std::string& topic_name) const
 {
     auto type_it = topic_to_type_.find(topic_name);
@@ -155,7 +156,13 @@ fastrtps::types::DynamicData_ptr Participant::create_dynamic_data(
     }
 
     const DynamicType_ptr& dynamic_type_ = it->second.GetDynamicType();
-    return fastrtps::types::DynamicData_ptr(DynamicDataFactory::get_instance()->create_data(dynamic_type_));
+    return DynamicDataFactory::get_instance()->create_data(dynamic_type_);
+}
+
+void Participant::delete_dynamic_data(
+        DynamicData* data) const
+{
+    DynamicDataFactory::get_instance()->delete_data(data);
 }
 
 void Participant::onParticipantDiscovery(

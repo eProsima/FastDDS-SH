@@ -22,6 +22,7 @@ find_package(soss-dds REQUIRED)
 find_package(soss-core REQUIRED)
 find_package(xtypes REQUIRED)
 find_package(soss-mock REQUIRED)
+find_package(fastrtps REQUIRED)
 
 if(WIN32)
     find_package(yaml-cpp)
@@ -33,6 +34,8 @@ include(${PROJECT_SOURCE_DIR}/thirdparty/catch2/cmake/Catch.cmake)
 add_executable(${PROJECT_NAME}
     src/main.cpp
     src/integration/roundtrip.cpp
+    resources/test_service/test_service.cxx
+    resources/test_service/test_servicePubSubTypes.cxx
 )
 
 set_target_properties(${PROJECT_NAME}
@@ -54,6 +57,7 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
         soss::mock
+        fastrtps
         $<$<PLATFORM_ID:Windows>:yaml-cpp>
 )
 
@@ -72,5 +76,10 @@ else()
         )
 endif()
 
+configure_file(
+    ${PROJECT_SOURCE_DIR}/resources/test_service.idl
+    ${PROJECT_BINARY_DIR}/test_service.idl
+    COPYONLY
+    )
 catch_discover_tests(${PROJECT_NAME})
 

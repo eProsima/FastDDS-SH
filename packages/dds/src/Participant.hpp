@@ -51,8 +51,11 @@ public:
             const std::string& type_name,
             DynamicTypeBuilder* builder);
 
-    DynamicData_ptr create_dynamic_data(
+    DynamicData* create_dynamic_data(
             const std::string& name) const;
+
+    void delete_dynamic_data(
+            DynamicData* data) const;
 
     const DynamicType* get_dynamic_type(
             const std::string& name) const

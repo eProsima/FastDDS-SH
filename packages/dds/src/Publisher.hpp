@@ -65,8 +65,10 @@ private:
             eprosima::fastrtps::Publisher* pub,
             eprosima::fastrtps::rtps::MatchingInfo& info) override;
 
+    Participant* participant_;
     eprosima::fastrtps::Publisher* dds_publisher_;
-    DynamicData_ptr dynamic_data_;
+    DynamicData* dynamic_data_;
+    std::mutex data_mtx_;
 
     const std::string topic_name_;
 };

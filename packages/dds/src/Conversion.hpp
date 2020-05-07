@@ -27,6 +27,53 @@
 namespace soss {
 namespace dds {
 
+struct NavigationNode
+{
+    std::string member_name;
+    std::string type_name;
+    std::map<std::string, std::shared_ptr<NavigationNode>> member_node;
+    std::weak_ptr<NavigationNode> parent_node;
+
+    std::string get_path();
+
+    static std::string get_type(
+            std::map<std::string, std::shared_ptr<NavigationNode>> map_nodes,
+            const std::string& full_path);
+
+    static std::shared_ptr<NavigationNode> fill_root_node(
+            std::shared_ptr<NavigationNode> root,
+            const ::xtypes::DynamicType& type,
+            const std::string& full_path);
+
+    /**
+     * @brief get_discriminator Instrospects data until it found an active member of type contained in member_types.
+     * This is useful for discriminate Union types in request/reply types.
+     * @param member_map
+     * @param data
+     * @param member_types
+     * @return
+     */
+    static std::shared_ptr<NavigationNode> get_discriminator(
+            const std::map<std::string, std::shared_ptr<NavigationNode>>& member_map,
+            const ::xtypes::DynamicData& data,
+            const std::vector<std::string>& member_types);
+
+private:
+    static std::string get_type(
+            std::shared_ptr<NavigationNode> root,
+            const std::string& full_path);
+
+    static void fill_member_node(
+            std::shared_ptr<NavigationNode> node,
+            const ::xtypes::DynamicType& type,
+            const std::string& full_path);
+
+    static std::shared_ptr<NavigationNode> get_discriminator(
+            std::shared_ptr<NavigationNode> node,
+            ::xtypes::ReadableDynamicDataRef data,
+            const std::vector<std::string>& member_types);
+};
+
 struct Conversion {
 
     static bool soss_to_dds(
@@ -53,6 +100,14 @@ struct Conversion {
     // This function patches the problem of dynamic types, which do not admit '/' in their type name.
     static std::string convert_type_name(
             const std::string& message_type);
+
+    static const xtypes::DynamicType& resolve_discriminator_type(
+            const ::xtypes::DynamicType& service_type,
+            const std::string& discriminator);
+
+    static ::xtypes::WritableDynamicDataRef access_member_data(
+            ::xtypes::WritableDynamicDataRef membered_data,
+            const std::string& path);
 
 private:
     ~Conversion() = default;
@@ -131,6 +186,10 @@ private:
             const DynamicData* input,
             ::xtypes::WritableDynamicDataRef output);
 
+    static ::xtypes::WritableDynamicDataRef access_member_data(
+            ::xtypes::WritableDynamicDataRef membered_data,
+            const std::vector<std::string>& tokens,
+            size_t index);
 };
 
 

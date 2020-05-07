@@ -43,6 +43,28 @@ using DynamicType_ptr = eprosima::fastrtps::types::DynamicType_ptr;
 using DynamicPubSubType = eprosima::fastrtps::types::DynamicPubSubType;
 using TypeKind = eprosima::fastrtps::types::TypeKind;
 
+struct SampleIdentityComparator
+{
+    bool operator () (
+            const eprosima::fastrtps::rtps::SampleIdentity lha,
+            const eprosima::fastrtps::rtps::SampleIdentity rha) const
+    {
+        if (lha.writer_guid() < rha.writer_guid())
+        {
+            return true;
+        }
+        if (rha.writer_guid() < lha.writer_guid()) // operator > doesn't exists for GUID_t
+        {
+            return false;
+        }
+        if (lha.sequence_number() < rha.sequence_number())
+        {
+            return true;
+        }
+        return false;
+    }
+};
+
 #if 1 < FASTRTPS_VERSION_MAJOR || (1 == FASTRTPS_VERSION_MAJOR && 8 <= FASTRTPS_VERSION_MINOR)
 
 #define EPROSIMA_XTYPES_DASHING

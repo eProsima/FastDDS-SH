@@ -32,6 +32,8 @@ set(SRC
     src/Conversion.cpp
     src/Publisher.cpp
     src/Subscriber.cpp
+    src/Client.cpp
+    src/Server.cpp
     src/Participant.cpp
     src/SystemHandle.cpp
     )
