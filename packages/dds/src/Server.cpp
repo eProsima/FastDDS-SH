@@ -380,7 +380,7 @@ void Server::receive(
     {
         ::xtypes::DynamicData received(reply_type_);
         bool success = Conversion::dds_to_soss(reply_dynamic_data_, received);
-        reply_data_mtx_.unlock();
+        //reply_data_mtx_.unlock();
 
         if (success)
         {
@@ -414,6 +414,7 @@ void Server::receive(
         {
             std::cerr << "Error converting message from dynamic types to soss message." << std::endl;
         }
+        reply_data_mtx_.unlock();
     }
 
     // Notify that we have ended
