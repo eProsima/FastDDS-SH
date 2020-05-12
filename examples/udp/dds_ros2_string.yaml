@@ -21,3 +21,10 @@ topics:
             ros2: { type: "std_msgs/String", topic: "chatter" }
         }
     }
+    hello_dds: {
+        type: "std_msgs/String",
+        route: ros2_to_dds,
+        remap: {
+            dds: { type: HelloWorld, topic: HelloWorldTopic }
+        }
+    }
