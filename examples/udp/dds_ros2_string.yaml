@@ -14,5 +14,17 @@ routes:
     dds_to_ros2: { from: dds, to: ros2 }
 
 topics:
-    hello_ros2: { type: "std_msgs/String", route: dds_to_ros2, remap: { dds: { type: HelloWorld } } }
-    hello_dds: { type: "std_msgs/String", route: ros2_to_dds, remap: { dds: { type: HelloWorld } } }
+    hello_ros2: {
+        type: "std_msgs/String",
+        route: dds_to_ros2,
+        remap: {
+            dds: { type: HelloWorld, topic: HelloWorldTopic }
+        }
+    }
+    hello_dds: {
+        type: "std_msgs/String",
+        route: ros2_to_dds,
+        remap: {
+            dds: { type: HelloWorld, topic: HelloWorldTopic }
+        }
+    }
