@@ -76,7 +76,8 @@ Publisher::~Publisher()
     std::unique_lock<std::mutex> lock(data_mtx_);
     participant_->delete_dynamic_data(dynamic_data_);
     dynamic_data_ = nullptr;
-    fastrtps::Domain::removePublisher(dds_publisher_);
+    //fastrtps::Domain::removePublisher(dds_publisher_);
+    dds_publisher_ = nullptr;
 }
 
 bool Publisher::publish(
@@ -84,8 +85,8 @@ bool Publisher::publish(
 {
     bool success = false;
 
-    std::cout << "[soss-dds][publisher]: translate message: soss -> dds "
-        "(" << topic_name_ << ") " << std::endl;
+    //std::cout << "[soss-dds][publisher]: translate message: soss -> dds "
+    //    "(" << topic_name_ << ") " << std::endl;
 
     std::unique_lock<std::mutex> lock(data_mtx_);
     success = Conversion::soss_to_dds(soss_message, dynamic_data_);
