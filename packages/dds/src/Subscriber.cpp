@@ -93,14 +93,15 @@ Subscriber::~Subscriber()
     std::unique_lock<std::mutex> lock(data_mtx_);
     participant_->delete_dynamic_data(dynamic_data_);
     dynamic_data_ = nullptr;
-    fastrtps::Domain::removeSubscriber(dds_subscriber_);
+    //fastrtps::Domain::removeSubscriber(dds_subscriber_);
+    dds_subscriber_ = nullptr;
 }
 
 void Subscriber::receive(
         const fastrtps::types::DynamicData* dds_message)
 {
-    std::cout << "[soss-dds][subscriber]: translate message: dds -> soss "
-        "(" << topic_name_ << ") " << std::endl;
+    //std::cout << "[soss-dds][subscriber]: translate message: dds -> soss "
+    //    "(" << topic_name_ << ") " << std::endl;
 
     {
         ::xtypes::DynamicData soss_message(message_type_);
