@@ -284,8 +284,8 @@ void Client::receive_response(
 
     Conversion::access_member_data(reply, path) = response;
 
-    std::cout << "[soss-dds][client]: translate reply: soss -> dds "
-        "(" << service_name_ << ") " << std::endl;
+    //std::cout << "[soss-dds][client]: translate reply: soss -> dds "
+    //    "(" << service_name_ << ") " << std::endl;
 
     std::unique_lock<std::mutex> reply_lock(reply_data_mtx_);
     bool success = Conversion::soss_to_dds(reply, reply_dynamic_data_);
