@@ -133,6 +133,15 @@ public:
 
     bool create_client_proxy(
             const std::string& service_name,
+            const xtypes::DynamicType& type,
+            RequestCallback callback,
+            const YAML::Node& configuration) override
+    {
+        return create_client_proxy(service_name, type, type, callback, configuration);
+    }
+
+    bool create_client_proxy(
+            const std::string& service_name,
             const xtypes::DynamicType& request_type,
             const xtypes::DynamicType& reply_type,
             RequestCallback callback,
@@ -168,6 +177,14 @@ public:
         }
 
         return clients_[service_name]->add_config(configuration, callback);
+    }
+
+    std::shared_ptr<ServiceProvider> create_service_proxy(
+            const std::string& service_name,
+            const xtypes::DynamicType& type,
+            const YAML::Node& configuration) override
+    {
+        return create_service_proxy(service_name, type, type, configuration);
     }
 
     std::shared_ptr<ServiceProvider> create_service_proxy(

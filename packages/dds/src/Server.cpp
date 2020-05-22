@@ -279,8 +279,8 @@ void Server::call_service(
         Conversion::access_member_data(request, type_to_discriminator_[soss_request.type().name()]) = soss_request;
     }
 
-    std::cout << "[soss-dds][server]: translate request: soss -> dds "
-        "(" << service_name_ << ") " << std::endl;
+    //std::cout << "[soss-dds][server]: translate request: soss -> dds "
+    //    "(" << service_name_ << ") " << std::endl;
 
     request_data_mtx_.lock();
     success = Conversion::soss_to_dds(request, request_dynamic_data_);

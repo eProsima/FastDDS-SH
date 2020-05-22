@@ -235,8 +235,13 @@ std::shared_ptr<NavigationNode> NavigationNode::get_discriminator(
 
     if (member_map.count(type_name) == 0)
     {
+        auto result = std::make_shared<NavigationNode>();
+        result->type_name = type_name;
+        return result;
+        /*
         std::cerr << "Type \"" << type_name << "\" doesn't exists in the member map." << std::endl;
         return nullptr;
+        */
     }
 
     if (std::find(member_types.begin(), member_types.end(), type_name) != member_types.end())
@@ -2632,7 +2637,7 @@ const xtypes::DynamicType& Conversion::resolve_discriminator_type(
             const std::vector<std::string>& tokens,
             size_t index)
 {
-    if (index == tokens.size())
+    if (tokens.empty() || index == tokens.size())
     {
         return membered_data;
     }
