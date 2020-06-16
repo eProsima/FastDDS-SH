@@ -1,0 +1,12 @@
+# - Config file for the radar_types package
+# It defines the following variables
+#  radar_types_INCLUDE_DIRS - include directories for FooBar
+#  radar_types_LIBRARIES    - libraries to link against
+#  radar_types_EXECUTABLE   - the bar executable
+
+set(radar_types_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+
+# Our library dependencies (contains definitions for IMPORTED targets)
+include("${radar_types_DIR}/export_radar_types.cmake")
+
+# These are IMPORTED targets created by radar_typesTargets.cmake
