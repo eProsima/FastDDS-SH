@@ -18,7 +18,7 @@ topics:
         route: dds_to_ros2,
         remap: {
             dds: { type: HelloWorld, topic: HelloWorldTopic },
-            ros2: { topic: "rt/chatter" }
+            ros2: { type: "std_msgs/String", topic: "rt/chatter" }
         }
     }
     hello_dds: {
@@ -26,6 +26,6 @@ topics:
         route: ros2_to_dds,
         remap: {
             dds: { type: HelloWorld, topic: HelloWorldTopic },
-            ros2: { topic: "rt/chatter" }
+            ros2: { type: "std_msgs/String", topic: "rt/chatter" }
         }
     }
