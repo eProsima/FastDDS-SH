@@ -1,0 +1,23 @@
+types:
+    idls:
+        - >
+            struct HelloWorld
+            {
+                string data;
+            };
+systems:
+    dds: { type: dds }
+    ros1: { type: ros1 }
+
+routes:
+    ros1_to_dds: { from: ros1, to: dds }
+
+topics:
+    hello_dds: {
+        type: "std_msgs/String",
+        route: ros1_to_dds,
+        remap: {
+            dds: { type: HelloWorld, topic: HelloWorldTopic },
+            ros1: { type: "std_msgs/String", topic: "chatter" }
+        }
+    }
