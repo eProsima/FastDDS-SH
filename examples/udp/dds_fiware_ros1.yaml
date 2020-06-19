@@ -1,0 +1,19 @@
+types:
+    idls:
+        - >
+            struct HelloWorld {
+                string data;
+            };
+
+systems:
+    dds: { type: dds }
+    ros1: { type: ros1 }
+    fiware: { type: fiware, host: "127.0.0.1", port: 1026 }
+
+routes:
+    dds_to_fiware: { from: dds, to: fiware }
+    dds_to_ros1: { from: dds, to: ros1 }
+
+topics:
+    HelloWorldTopic: { type: "HelloWorld", route: dds_to_fiware }
+    chatter: { type: "std_msgs/String", route: dds_to_ros1, remap: { dds: { type: "HelloWorld", topic: "HelloWorldTopic" } } }
