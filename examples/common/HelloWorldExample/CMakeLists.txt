@@ -19,30 +19,16 @@ if(NOT fastrtps_FOUND)
     find_package(fastrtps REQUIRED)
 endif()
 
-# Generate mix
-find_package(soss-core REQUIRED)
-find_package(soss-mock REQUIRED)
-find_package(soss-ros2 REQUIRED)
-
-find_package(soss-rosidl REQUIRED)
-find_package(std_msgs REQUIRED)
-
-# Use C++14 standard. Required for soss_rosidl_mix
+# Use C++14 standard.
 if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 14)
 endif()
-
-soss_rosidl_mix(
-    PACKAGES std_msgs
-    MIDDLEWARES ros2
-)
 
 message(STATUS "Configuring HelloWorld example...")
 file(GLOB HELLOWORLD_EXAMPLE_SOURCES_CXX "*.cxx")
 file(GLOB HELLOWORLD_EXAMPLE_SOURCES_CPP "*.cpp")
 
 add_executable(HelloWorldExample ${HELLOWORLD_EXAMPLE_SOURCES_CXX} ${HELLOWORLD_EXAMPLE_SOURCES_CPP})
-target_link_libraries(HelloWorldExample fastrtps fastcdr foonathan_memory
-    ${std_msgs_LIBRARIES})
+target_link_libraries(HelloWorldExample fastrtps fastcdr foonathan_memory)
 install(TARGETS HelloWorldExample
     RUNTIME DESTINATION examples/C++/HelloWorldExample/${BIN_INSTALL_DIR})
