@@ -9,8 +9,6 @@ systems:
 
 routes:
     ros2_to_dds: { from: ros2, to: dds }
-    dds_to_ros2: { from: dds, to: ros2 }
 
 topics:
-    HelloWorldTopicS: { type: "std_msgs/String", route: dds_to_ros2, remap: { ros2: { type: "std_msgs/String", topic: chatter } } }
     chatter: { type: "std_msgs/String", route: ros2_to_dds, remap: { dds: { type: "std_msgs/String", topic: HelloWorldTopicC } } }
