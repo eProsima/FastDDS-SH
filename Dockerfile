@@ -1,41 +1,35 @@
 FROM ubuntu:bionic
 
 # Dependencies
-RUN apt-get install -f
-RUN apt-get update
+RUN apt-get install -f && apt-get update
 
-RUN apt-get install -y lsb-release
-RUN apt-get install -y gnupg2
+RUN apt-get install -y lsb-release gnupg2
 
 ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
-RUN echo "deb http://packages.ros.org/ros2/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros2-latest.list
-RUN apt-get update
+ENV TZ=Europe/Stockholm
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654 && \ 
+echo "deb http://packages.ros.org/ros2/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros2-latest.list && apt-get update
 
-RUN apt-get install -y libyaml-cpp-dev
-RUN apt-get install -y libboost-program-options-dev
-RUN apt-get install -y python3
-RUN apt-get install -y python3-colcon-common-extensions
 
 # Install ros2
-RUN apt-get install -y ros-crystal-desktop
-RUN apt-get install -y ros-crystal-test-msgs
-RUN chmod +x ./opt/ros/crystal/setup.sh
+RUN apt-get install -y git libyaml-cpp-dev libboost-dev libboost-program-options-dev python3 python3-colcon-common-extensions ros-dashing-desktop ros-dashing-test-msgs
+RUN chmod +x ./opt/ros/dashing/setup.sh
 
 # Prepare soss
-RUN apt-get install -y git #Required for config
 RUN mkdir -p root/soss_wp/src
 WORKDIR /root/soss_wp/src
-RUN git clone https://github.com/osrf/soss_v2.git
-RUN git clone https://github.com/eProsima/SOSS-DDS.git dds
+RUN git clone --recursive --branch feature/xtypes-dds https://github.com/eProsima/soss_v2.git soss
+RUN git clone --recursive --branch doc/examples https://github.com/eProsima/SOSS-DDS.git soss-dds 
+
 WORKDIR /root/soss_wp
 
 # Compile soss
-RUN . /opt/ros/crystal/setup.sh && \
+RUN . /opt/ros/dashing/setup.sh && \
     colcon build --packages-up-to soss-ros2-test soss-dds-test --cmake-args -DCMAKE_BUILD_TYPE=RELEASE --install-base /opt/soss
 
 # Check compilation
-RUN . /opt/ros/crystal/setup.sh && \
+RUN . /opt/ros/dashing/setup.sh && \
     colcon test --packages-up-to soss-ros2-test soss-dds-test --install-base /opt/soss
 
 # Prepare environment
