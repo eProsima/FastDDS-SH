@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.5.0)
 project(soss_turtle_types)
 
 find_package(ament_cmake REQUIRED)
+find_package(soss-genmsg REQUIRED)
 find_package(soss-rosidl REQUIRED)
 
 if(NOT CMAKE_CXX_STANDARD)
