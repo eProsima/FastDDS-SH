@@ -1,5 +1,6 @@
 systems:
     ros2: { type: ros2 }
+    ros2_joy: { type: ros2 }
     dds:
       type: dds
       types-from: ros2
@@ -9,6 +10,8 @@ systems:
 
 routes:
     ros2_to_dds: { from: ros2, to: dds }
+    ros2_joy_to_dds: { from: ros2_joy, to: dds }
 
 topics:
     "turtle1/cmd_vel": { type: "geometry_msgs/Twist", route: ros2_to_dds, remap: { dds: { type: "geometry_msgs/Twist", topic: HelloWorldTopicC } } }
+    "cmd_vel": { type: "geometry_msgs/Twist", route: ros2_joy_to_dds, remap: { dds: { type: "geometry_msgs/Twist", topic: HelloWorldTopicC } } }
