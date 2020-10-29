@@ -5,7 +5,7 @@
             <transport_id>tcp_transport_server</transport_id>
             <type>TCPv4</type>
             <listening_ports>
-                <port>6666</port>
+                <port>9001</port>
             </listening_ports>
             <wan_addr>10.0.0.46</wan_addr>
         </transport_descriptor>
@@ -43,7 +43,7 @@
                 <initialPeersList>
                     <locator>
                         <tcpv4>
-                            <physical_port>6666</physical_port>
+                            <physical_port>9001</physical_port>
                             <address>10.0.0.46</address>
                         </tcpv4>
                     </locator>
