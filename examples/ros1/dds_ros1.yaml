@@ -7,17 +7,17 @@ types:
             };
 systems:
     dds: { type: dds }
-    ros2: { type: ros2 }
+    ros1: { type: ros1 }
 
 routes:
-    dds_to_ros2: { from: dds, to: ros2 }
+    dds_to_ros1: { from: dds, to: ros1 }
 
 topics:
-    hello_ros2: {
+    hello_ros: {
         type: "std_msgs/String",
-        route: dds_to_ros2,
+        route: dds_to_ros1,
         remap: {
             dds: { type: HelloWorld, topic: HelloWorldTopic },
-            ros2: { type: "std_msgs/String", topic: "chatter" }
+            ros1: { type: "std_msgs/String", topic: "chatter" }
         }
     }
