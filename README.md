@@ -1,15 +1,14 @@
-[![soss-commit](https://img.shields.io/badge/soss--commit-660078e-blue.svg)](https://github.com/osrf/soss_v2/tree/660078e9fee9fca1b3094d62dc6a22d4a1e80a38)
-# soss-dds
+# SOSS System Handle for ROS 2
 
 System handle to connect [*SOSS*][soss] to *eProsima*'s open-source implementation of the
-[DDS protocol][dds], [Fast-RTPS][fast].
+[DDS protocol][dds], [Fast-DDS][fast].
 
 ## Installation
 
 To install this package, just clone this repository into a workspace already containing SOSS and build it:
 ```
 $ cd <soss workspace folder>
-$ git clone https://github.com/eProsima/SOSS-DDS.git src/soss-dds
+$ git clone https://github.com/eProsima/FastDDS-SH.git src/fastdds-sh
 
 $ colcon build --packages-up-to soss-dds
 ```
@@ -23,12 +22,12 @@ $ colcon build --packages-up-to soss-dds
 
 2. Clone the soss project into the source subfolder.
     ```
-    $ git clone https://github.com/osrf/soss_v2.git src/soss
+    $ git clone https://github.com/eProsima/soss.git src/soss
     ```
 
 3. Clone this project into the subfolder.
     ```
-    $ git clone https://github.com/eProsima/SOSS-DDS.git src/soss-dds
+    $ git clone https://github.com/eProsima/FastDDS-SH.git src/fastdds-sh
     ```
 
     The workspace layout should look like this:
@@ -41,7 +40,7 @@ $ colcon build --packages-up-to soss-dds
             │       │── soss-ros2 (ROS2 system handle)
             │       │── soss-ros2-test
             │       └── ... (other packages)
-            └── soss-dds (repo)
+            └── fastdds-sh (repo)
                     ├── dds (soss-dds colcon pkg)
                     └── dds-test (soss-dds-test colcon pkg)
     ```
@@ -117,7 +116,7 @@ find the configuration file for the DDS profle,
 and what profile must be used from the many that can be defined in that XML.
 This profile is used to set the DDS quality of services' parameters.
 A guide on how this XML files are configured can be found in
-[Fast-RTPS' documentation](https://fast-rtps.docs.eprosima.com/en/v1.7.2/xmlprofiles.html).
+[Fast-DDS' documentation](https://fast-dds.docs.eprosima.com/en/latest/fastdds/xml_configuration/xml_configuration.html?highlight=xml#xml-profiles).
 An example of an XML configuration file can be found [in this repository](examples/tcp/config.xml).
 Notice that this example file has two participant profiles defined in it,
 one to be used in the client side and other for the server side,
@@ -136,7 +135,7 @@ or connect any system supported by soss with other system that is not in its LAN
 For the TCP tunnel, two instances of SOSS are going to be used, one in each of the computers that
 are going to be communicated.
 Each of those instances will have a system handle for the system they want to communicate in the WAN network,
-and other to communicate with Fast-RTPS' DDS implementation.
+and other to communicate with Fast-DDS' DDS implementation.
 
 You can see the YAML's configuration files related to TCP tunnel configuration in the [examples folder](examples/tcp).
 
@@ -152,8 +151,8 @@ If we take as an example the communication between ROS2 and FIWARE, the communic
 ## Changelog
 
 ### v1.0.0
-- Updated to work with soss_v3 (xtypes support).
-- Support several Fast-RTPS versions, used in Crystal, Dashing and Eloquent.
+- Updated to work with xTypes support.
+- Support several Fast-DDS versions, used in Crystal, Dashing and Eloquent.
 
 ### v0.1.0
 
@@ -161,8 +160,8 @@ If we take as an example the communication between ROS2 and FIWARE, the communic
 - TCP tunnel support
 - Integration tests
 
- [fast]: https://github.com/eProsima/Fast-RTPS
- [soss]: https://github.com/osrf/soss_v2
+ [fast]: https://github.com/eProsima/Fast-DDS
+ [soss]: https://github.com/eProsima/soss
  [dds]: https://en.wikipedia.org/wiki/Data_Distribution_Service
 
 ---
