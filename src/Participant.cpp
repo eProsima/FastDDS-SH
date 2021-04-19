@@ -110,15 +110,25 @@ Participant::Participant(
 
 Participant::~Participant()
 {
-    dds_participant_->set_listener(nullptr);
-
-    for (const auto& [type_name, unused] : types_)
+    if (!dds_participant_->has_active_entities())
     {
-        dds_participant_->unregister_type(type_name);
-    }
-    types_.clear();
+        dds_participant_->set_listener(nullptr);
 
-    ::fastdds::dds::DomainParticipantFactory::get_instance()->delete_participant(dds_participant_);
+        if (fastrtps::types::ReturnCode_t::RETCODE_OK !=
+                ::fastdds::dds::DomainParticipantFactory::get_instance()->delete_participant(dds_participant_))
+        {
+            logger_ << utils::Logger::Level::ERROR
+                    << "Cannot delete Fast DDS participant yet: it has active entities" << std::endl;
+        }
+    }
+
+    // for (const auto& [type_name, unused] : types_)
+    // {
+    //     dds_participant_->unregister_type(type_name);
+    // }
+    // types_.clear();
+
+
     std::cout << "destroyed is::fastdds::Participant~ finished" << std::endl;
 }
 
@@ -230,6 +240,9 @@ fastrtps::types::DynamicData* Participant::create_dynamic_data(
 void Participant::delete_dynamic_data(
         fastrtps::types::DynamicData* data) const
 {
+    std::cout << "Participant::delete_dynamic_data: '" << data->get_name() << "', pointer: '"
+              << data << "'" << std::endl;
+
     DynamicDataFactory::get_instance()->delete_data(data);
 }
 
@@ -301,7 +314,7 @@ bool Participant::dissociate_topic_from_dds_entity(
         ::fastdds::dds::Topic* topic,
         ::fastdds::dds::DomainEntity* entity)
 {
-    std::unique_lock<std::mutex> lock(topic_to_entities_mtx_);
+    // std::unique_lock<std::mutex> lock(topic_to_entities_mtx_);
 
     if (1 == topic_to_entities_.at(topic).size())
     {

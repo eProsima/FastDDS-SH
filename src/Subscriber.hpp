@@ -76,7 +76,7 @@ public:
      * @throws DDSMiddlewareException if some error occurs while creating the Fast DDS subscriber.
      */
     Subscriber(
-            Participant* participant,
+            std::shared_ptr<Participant> participant,
             const std::string& topic_name,
             const xtypes::DynamicType& message_type,
             TopicSubscriberSystem::SubscriptionCallback is_callback);
@@ -144,7 +144,7 @@ private:
     /**
      * Class members.
      */
-    Participant* participant_;
+    std::shared_ptr<Participant> participant_;
     ::fastdds::dds::Subscriber* dds_subscriber_;
     ::fastdds::dds::Topic* dds_topic_;
     ::fastdds::dds::DataReader* dds_datareader_;

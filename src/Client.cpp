@@ -39,7 +39,7 @@ namespace sh {
 namespace fastdds {
 
 Client::Client(
-        Participant* participant,
+        std::shared_ptr<Participant> participant,
         const std::string& service_name,
         const ::xtypes::DynamicType& request_type,
         const ::xtypes::DynamicType& reply_type,

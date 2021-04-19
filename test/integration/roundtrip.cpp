@@ -776,7 +776,7 @@ std::string gen_config_yaml(
         s += "            profile_name: " + dds_profile_name + "\n";
     }
 
-    s += "    mock: { type: mock, types-from: dds }\n";
+    s += "    mock: { type: mock }\n";
 
     s += "routes:\n";
     s += "    mock_to_dds: { from: mock, to: dds }\n";
@@ -816,7 +816,7 @@ std::string gen_config_method_yaml(
         s += "            profile_name: " + dds_profile_name + "\n";
     }
 
-    s += "    mock: { type: mock, types-from: dds }\n";
+    s += "    mock: { type: mock }\n";
 
     s += "routes:\n";
     if (client)

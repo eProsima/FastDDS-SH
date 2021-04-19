@@ -114,7 +114,7 @@ public:
         try
         {
             auto subscriber = std::make_shared<Subscriber>(
-                participant_.get(), topic_name, message_type, callback);
+                participant_, topic_name, message_type, callback);
 
             subscribers_.emplace_back(std::move(subscriber));
 
@@ -139,7 +139,7 @@ public:
         try
         {
             auto publisher = std::make_shared<Publisher>(
-                participant_.get(), topic_name, message_type, configuration);
+                participant_, topic_name, message_type, configuration);
             publishers_.emplace_back(std::move(publisher));
 
             logger_ << utils::Logger::Level::INFO
@@ -176,7 +176,7 @@ public:
             try
             {
                 auto client = std::make_shared<Client>(
-                    participant_.get(),
+                    participant_,
                     service_name,
                     request_type,
                     reply_type,
@@ -222,7 +222,7 @@ public:
             try
             {
                 auto server = std::make_shared<Server>(
-                    participant_.get(),
+                    participant_,
                     service_name,
                     request_type,
                     reply_type,

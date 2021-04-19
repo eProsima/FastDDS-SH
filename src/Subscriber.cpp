@@ -37,7 +37,7 @@ namespace sh {
 namespace fastdds {
 
 Subscriber::Subscriber(
-        Participant* participant,
+        std::shared_ptr<Participant> participant,
         const std::string& topic_name,
         const xtypes::DynamicType& message_type,
         TopicSubscriberSystem::SubscriptionCallback is_callback)

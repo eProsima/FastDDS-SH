@@ -218,7 +218,7 @@ is_install_middleware_plugin(
 
 install(
     FILES
-        ${PROJECT_SOURCE_DIR}/../../examples/tcp/config.xml
+        ${PROJECT_SOURCE_DIR}/examples/tcp/config.xml
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/../sample/tcp
     COMPONENT

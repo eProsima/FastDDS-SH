@@ -93,7 +93,7 @@ public:
      * @throws DDSMiddlewareExeption if some error occurs while creating the Fast DDS entities.
      */
     Server(
-            Participant* participant,
+            std::shared_ptr<Participant> participant,
             const std::string& service_name,
             const xtypes::DynamicType& request_type,
             const xtypes::DynamicType& reply_type,
@@ -190,7 +190,7 @@ private:
     /**
      * Class members.
      */
-    Participant* participant_;
+    std::shared_ptr<Participant> participant_;
     const std::string service_name_;
 
     struct RequestEntities
