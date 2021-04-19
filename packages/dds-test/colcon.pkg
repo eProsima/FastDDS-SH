@@ -1,6 +1,0 @@
-{
-    "name": "soss-dds-test",
-    "type": "cmake",
-    "dependencies": ["xtypes", "soss-core", "soss-dds", "soss-mock"]
-}
-
