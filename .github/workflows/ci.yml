@@ -9,7 +9,7 @@ on:
       - '**'
 
 jobs:
-  websocket-sh_CI:
+  fastdds-sh_CI:
     runs-on: ubuntu-20.04
     container: ubuntu:focal
 
@@ -38,5 +38,5 @@ jobs:
 
       - name: Test
         run: |
-          . install/local_setup.sh && colcon test --packages-up-to is-websocket-test --event-handlers console_direct+
+          . install/local_setup.sh && colcon test --packages-up-to is-fastdds --event-handlers console_direct+
           colcon test-result
