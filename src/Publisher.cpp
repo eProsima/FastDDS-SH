@@ -31,7 +31,7 @@ namespace sh {
 namespace fastdds {
 
 Publisher::Publisher(
-        std::shared_ptr<Participant> participant,
+        Participant* participant,
         const std::string& topic_name,
         const xtypes::DynamicType& message_type,
         const YAML::Node& config)
@@ -139,14 +139,10 @@ Publisher::~Publisher()
     dds_publisher_->delete_datawriter(dds_datawriter_);
     participant_->get_dds_participant()->delete_publisher(dds_publisher_);
 
-    std::cout << "Publisher::~Publisher: dds_participant_ '" << participant_->get_dds_participant() << "'" <<
-        std::endl;
-
     if (delete_topic)
     {
         participant_->get_dds_participant()->delete_topic(dds_topic_);
     }
-    std::cout << "~Publisher() finished" << std::endl;
 }
 
 bool Publisher::publish(

@@ -93,7 +93,7 @@ public:
      * @throws DDSMiddlewareExeption if some error occurs while creating the Fast DDS entities.
      */
     Server(
-            std::shared_ptr<Participant> participant,
+            Participant* participant,
             const std::string& service_name,
             const xtypes::DynamicType& request_type,
             const xtypes::DynamicType& reply_type,
@@ -190,7 +190,7 @@ private:
     /**
      * Class members.
      */
-    std::shared_ptr<Participant> participant_;
+    Participant* participant_;
     const std::string service_name_;
 
     struct RequestEntities
@@ -268,6 +268,9 @@ private:
             std::string, SampleIdentityComparator> reply_id_type_;
 
     std::mutex mtx_;
+
+    std::mutex matched_mtx_;
+    uint8_t pub_sub_matched_;
 
     std::map<std::thread::id, std::thread*> reception_threads_;
     bool stop_cleaner_;

@@ -69,9 +69,10 @@ public:
         , tsType_rep_(new TestService_ReplyPubSubType())
         , server_(server)
         , mutex_(mtx)
+        , matched_mutex_()
     {
         // Create participant
-        ::fastdds::dds::DomainId_t default_domain_id(0);
+        ::fastdds::dds::DomainId_t default_domain_id(3);
         ::fastdds::dds::DomainParticipantQos participant_qos = ::fastdds::dds::PARTICIPANT_QOS_DEFAULT;
 
         participant_qos.name(server ? "FastDDSTestServer" : "FastDDSTestClient");
@@ -92,38 +93,6 @@ public:
         participant_->register_type(tsType_req_);
         participant_->register_type(tsType_rep_);
 
-        // Create subscriber entities
-        subscriber_ = participant_->create_subscriber(::fastdds::dds::SUBSCRIBER_QOS_DEFAULT);
-
-        if (!subscriber_)
-        {
-            throw DDSMiddlewareException(logger, "Subscriber was not created");
-        }
-
-        sub_topic_ = participant_->create_topic(
-            server ? "TestService_Request" : "TestService_Reply",
-            server ? tsType_req_.get_type_name() : tsType_rep_.get_type_name(),
-            ::fastdds::dds::TOPIC_QOS_DEFAULT);
-
-        if (!sub_topic_)
-        {
-            throw DDSMiddlewareException(logger, "Creating subscriber topic failed");
-        }
-
-        ::fastdds::dds::DataReaderQos datareader_qos;
-        datareader_ = subscriber_->create_datareader(
-            sub_topic_, ::fastdds::dds::DATAREADER_QOS_DEFAULT,
-            server ? static_cast<::fastdds::dds::DataReaderListener*>(&request_listener)
-            : static_cast<::fastdds::dds::DataReaderListener*>(&reply_listener));
-
-        if (!datareader_)
-        {
-            std::ostringstream err;
-            err << "Creating datareader for topic '" << sub_topic_->get_name() << "' failed";
-
-            throw DDSMiddlewareException(logger, err.str());
-        }
-
         // Create publisher entities
         publisher_ = participant_->create_publisher(::fastdds::dds::PUBLISHER_QOS_DEFAULT);
 
@@ -133,7 +102,7 @@ public:
         }
 
         pub_topic_ = participant_->create_topic(
-            server ? "TestServiceReply" : "TestServiceRequest",
+            server ? "TestService_Reply" : "TestService_Request",
             server ? tsType_rep_.get_type_name() : tsType_req_.get_type_name(),
             ::fastdds::dds::TOPIC_QOS_DEFAULT);
 
@@ -153,17 +122,57 @@ public:
             throw DDSMiddlewareException(logger, err.str());
         }
 
-        request_listener.publisher(this, datawriter_);
-        reply_listener.publisher(this);
+        if (server)
+        {
+            request_listener.publisher(this, datawriter_);
+        }
+        else
+        {
+            reply_listener.publisher(this);
+        }
+
+        // Create subscriber entities
+        subscriber_ = participant_->create_subscriber(::fastdds::dds::SUBSCRIBER_QOS_DEFAULT);
+
+        if (!subscriber_)
+        {
+            throw DDSMiddlewareException(logger, "Subscriber was not created");
+        }
+
+        sub_topic_ = participant_->create_topic(
+            server ? "TestService_Request" : "TestService_Reply",
+            server ? tsType_req_.get_type_name() : tsType_rep_.get_type_name(),
+            ::fastdds::dds::TOPIC_QOS_DEFAULT);
+
+        if (!sub_topic_)
+        {
+            throw DDSMiddlewareException(logger, "Creating subscriber topic failed");
+        }
+
+        ::fastdds::dds::DataReaderQos datareader_qos = ::fastdds::dds::DATAREADER_QOS_DEFAULT;
+        ::fastdds::dds::ReliabilityQosPolicy rel_policy;
+        rel_policy.kind = ::fastdds::dds::RELIABLE_RELIABILITY_QOS;
+        datareader_qos.reliability(rel_policy);
+
+        datareader_ = subscriber_->create_datareader(
+            sub_topic_, datareader_qos,
+            server ? static_cast<::fastdds::dds::DataReaderListener*>(&request_listener)
+            : static_cast<::fastdds::dds::DataReaderListener*>(&reply_listener));
+
+        if (!datareader_)
+        {
+            std::ostringstream err;
+            err << "Creating datareader for topic '" << sub_topic_->get_name() << "' failed";
+
+            throw DDSMiddlewareException(logger, err.str());
+        }
     }
 
     ~FastDDSTest()
     {
-        std::cout << "FastDDSTest::~FastDDSTest: start" << std::endl;
         // Unregister types
         participant_->unregister_type(tsType_req_.get_type_name());
         participant_->unregister_type(tsType_rep_.get_type_name());
-        std::cout << "FastDDSTest::~FastDDSTest: unregistered all types" << std::endl;
 
         // Delete subscriber entities
         subscriber_->delete_datareader(datareader_);
@@ -263,8 +272,17 @@ private:
 
         void on_subscription_matched(
                 ::fastdds::dds::DataReader* /*datareader*/,
-                const ::fastdds::dds::SubscriptionMatchedStatus& /*info*/) override
+                const ::fastdds::dds::SubscriptionMatchedStatus& info) override
         {
+            if (1 == info.current_count_change)
+            {
+                std::cout << "Subscriber for Request matched" << std::endl;
+            }
+            else if (-1 == info.current_count_change)
+            {
+                std::cout << "Subscriber for Request unmatched" << std::endl;
+            }
+
             std::unique_lock<std::mutex> lock(test_->matched_mutex_);
             test_->pub_sub_matched_++;
             if (test_->pub_sub_matched_ == 2)
@@ -332,8 +350,9 @@ private:
             }
         }
 
-    }
-    request_listener;
+    };
+
+    RequestListener request_listener;
 
     class ReplyListener : public ::fastdds::dds::DataReaderListener
     {
@@ -429,318 +448,11 @@ private:
                 ::eprosima::xtypes::DynamicData(::eprosima::xtypes::primitive_type<bool>()));
         }
 
-    }
-    reply_listener;
+    };
+
+    ReplyListener reply_listener;
 };
 
-// class FastDDSTest : public eprosima::fastrtps::PublisherListener, public eprosima::fastrtps::ParticipantListener
-// {
-// public:
-
-//     FastDDSTest(
-//             bool server,
-//             std::mutex& mtx)
-//         : server_(server)
-//         , mutex_(mtx)
-//     {
-//         using namespace eprosima::fastrtps;
-//         ParticipantAttributes part_attr;
-//         if (server)
-//         {
-//             part_attr.rtps.setName("FastDDSTestServer");
-//         }
-//         else
-//         {
-//             part_attr.rtps.setName("FastDDSTestClient");
-//         }
-//         part_ = Domain::createParticipant(part_attr);
-
-//         Domain::registerType(part_, &psType_req_);
-//         Domain::registerType(part_, &psType_rep_);
-
-//         // Publisher of replies
-//         PublisherAttributes pub_attr;
-//         pub_attr.topic.topicKind = rtps::NO_KEY;
-//         if (server)
-//         {
-//             pub_attr.topic.topicDataType = psType_rep_.getName();
-//             pub_attr.topic.topicName = "TestService_Reply";
-//         }
-//         else
-//         {
-//             pub_attr.topic.topicDataType = psType_req_.getName();
-//             pub_attr.topic.topicName = "TestService_Request";
-//         }
-//         pub_ = Domain::createPublisher(part_, pub_attr, this);
-
-//         request_listener.publisher(this, pub_);
-//         reply_listener.publisher(this, pub_);
-
-//         // Subscriber of requests
-//         SubscriberAttributes sub_attr;
-//         sub_attr.topic.topicKind = rtps::NO_KEY;
-//         if (server)
-//         {
-//             sub_attr.topic.topicDataType = psType_req_.getName();
-//             sub_attr.topic.topicName = "TestService_Request";
-//             sub_ = Domain::createSubscriber(part_, sub_attr, &request_listener);
-//         }
-//         else
-//         {
-//             sub_attr.topic.topicDataType = psType_rep_.getName();
-//             sub_attr.topic.topicName = "TestService_Reply";
-//             sub_ = Domain::createSubscriber(part_, sub_attr, &reply_listener);
-//         }
-//     }
-
-//     ~FastDDSTest()
-//     {
-//         using namespace eprosima::fastrtps;
-//         Domain::removePublisher(pub_);
-//         Domain::removeSubscriber(sub_);
-//         Domain::removeParticipant(part_);
-//         delete promise_;
-//     }
-
-//     std::future<eprosima::xtypes::DynamicData> request(
-//             const eprosima::xtypes::DynamicData& data)
-//     {
-//         TestService_Request request;
-
-//         if (data.type().name() == "Method0_In")
-//         {
-//             Method0_In in;
-//             in.data(data["data"]);
-//             request.data().method0(in);
-//         }
-//         else if (data.type().name() == "Method1_In")
-//         {
-//             Method1_In in;
-//             in.a(data["a"]);
-//             in.b(data["b"]);
-//             request.data().method1(in);
-//         }
-//         else if (data.type().name() == "Method2_In")
-//         {
-//             Method2_In in;
-//             in.data(data["data"]);
-//             request.data().method2(in);
-//         }
-
-//         pub_->write(&request);
-//         delete promise_;
-//         promise_ = new std::promise<eprosima::xtypes::DynamicData>();
-//         return promise_->get_future();
-//     }
-
-//     void onParticipantDiscovery(
-//             eprosima::fastrtps::Participant* /*participant*/,
-//             eprosima::fastrtps::rtps::ParticipantDiscoveryInfo&& /*info*/) override
-//     {
-//     }
-
-//     void onPublicationMatched(
-//             eprosima::fastrtps::Publisher*,
-//             eprosima::fastrtps::rtps::MatchingInfo&) override
-//     {
-//         std::unique_lock<std::mutex> lock(matched_mutex_);
-//         pup_sub_matched_++;
-//         if (pup_sub_matched_ == 2)
-//         {
-//             mutex_.unlock();
-//         }
-//     }
-
-// private:
-
-//     eprosima::fastrtps::Participant* part_;
-//     eprosima::fastrtps::Subscriber* sub_;
-//     eprosima::fastrtps::Publisher* pub_;
-//     TestService_RequestPubSubType psType_req_;
-//     TestService_ReplyPubSubType psType_rep_;
-//     std::promise<eprosima::xtypes::DynamicData>* promise_ = nullptr;
-//     bool server_;
-//     std::mutex& mutex_;
-//     std::mutex matched_mutex_;
-//     uint32_t pup_sub_matched_ = 0;
-
-//     class RequestListener : public eprosima::fastrtps::SubscriberListener
-//     {
-//     private:
-
-//         eprosima::fastrtps::Publisher* pub_;
-//         FastDDSTest* test_;
-
-//     public:
-
-//         void publisher(
-//                 FastDDSTest* test,
-//                 eprosima::fastrtps::Publisher* pub)
-//         {
-//             test_ = test;
-//             pub_ = pub;
-//         }
-
-//         void onSubscriptionMatched(
-//                 eprosima::fastrtps::Subscriber*,
-//                 eprosima::fastrtps::rtps::MatchingInfo&) override
-//         {
-//             std::unique_lock<std::mutex> lock(test_->matched_mutex_);
-//             test_->pup_sub_matched_++;
-//             if (test_->pup_sub_matched_ == 2)
-//             {
-//                 test_->mutex_.unlock();
-//             }
-//         }
-
-//         void onNewDataMessage(
-//                 eprosima::fastrtps::Subscriber* sub) override
-//         {
-//             using namespace eprosima::fastrtps;
-//             SampleInfo_t info;
-//             TestService_Request req_msg;
-//             TestService_Reply rep_msg;
-
-//             if (sub->takeNextData(&req_msg, &info))
-//             {
-//                 const TestService_Call& request = req_msg.data();
-//                 TestService_Return& reply = rep_msg.reply();
-//                 rtps::WriteParams params;
-//                 params.related_sample_identity(info.sample_identity);
-
-//                 switch (request._d())
-//                 {
-//                     case 0: // If the data is "TEST", then success will be true.
-//                     {
-//                         const Method0_In& input = request.method0();
-//                         Method0_Result output;
-//                         output.success(false);
-//                         if (input.data() == "TEST")
-//                         {
-//                             output.success(true);
-//                         }
-//                         reply.method0(output);
-//                         pub_->write(&rep_msg, params);
-//                         break;
-//                     }
-//                     case 1: // a + b = result
-//                     {
-//                         const Method1_In& input = request.method1();
-//                         Method1_Result output;
-//                         output.result(input.a() + input.b());
-//                         reply.method1(output);
-//                         pub_->write(&rep_msg, params);
-//                         break;
-//                     }
-//                     case 2: // Echoes data
-//                     {
-//                         const Method2_In& input = request.method2();
-//                         Method2_Result output;
-//                         output.data(input.data());
-//                         reply.method2(output);
-//                         pub_->write(&rep_msg, params);
-//                         break;
-//                     }
-
-//                 }
-//             }
-//         }
-
-//     }
-//     request_listener;
-
-//     class ReplyListener : public eprosima::fastrtps::SubscriberListener
-//     {
-//     private:
-
-//         eprosima::fastrtps::Publisher* pub_;
-//         FastDDSTest* test_;
-//         eprosima::xtypes::DynamicType::Ptr method0_reply_type;
-//         eprosima::xtypes::DynamicType::Ptr method1_reply_type;
-//         eprosima::xtypes::DynamicType::Ptr method2_reply_type;
-
-//     public:
-
-//         void publisher(
-//                 FastDDSTest* test,
-//                 eprosima::fastrtps::Publisher* pub)
-//         {
-//             test_ = test;
-//             pub_ = pub;
-
-//             {
-//                 eprosima::xtypes::StructType reply_struct("Method0_Result");
-//                 reply_struct.add_member(eprosima::xtypes::Member("success", eprosima::xtypes::primitive_type<bool>()));
-//                 method0_reply_type = std::move(reply_struct);
-//             }
-
-//             {
-//                 eprosima::xtypes::StructType reply_struct("Method1_Result");
-//                 reply_struct.add_member(eprosima::xtypes::Member("result",
-//                         eprosima::xtypes::primitive_type<int32_t>()));
-//                 method1_reply_type = std::move(reply_struct);
-//             }
-
-//             {
-//                 eprosima::xtypes::StructType reply_struct("Method2_Result");
-//                 reply_struct.add_member(eprosima::xtypes::Member("data", eprosima::xtypes::primitive_type<float>()));
-//                 method2_reply_type = std::move(reply_struct);
-//             }
-//         }
-
-//         void onSubscriptionMatched(
-//                 eprosima::fastrtps::Subscriber*,
-//                 eprosima::fastrtps::rtps::MatchingInfo&) override
-//         {
-//             std::unique_lock<std::mutex> lock(test_->matched_mutex_);
-//             test_->pup_sub_matched_++;
-//             if (test_->pup_sub_matched_ == 2)
-//             {
-//                 test_->mutex_.unlock();
-//             }
-//         }
-
-//         void onNewDataMessage(
-//                 eprosima::fastrtps::Subscriber* sub) override
-//         {
-//             using namespace eprosima::fastrtps;
-//             SampleInfo_t info;
-//             TestService_Reply rep_msg;
-
-//             if (sub->takeNextData(&rep_msg, &info))
-//             {
-//                 switch (rep_msg.reply()._d())
-//                 {
-//                     case 0:
-//                     {
-//                         eprosima::xtypes::DynamicData reply(*method0_reply_type);
-//                         reply["success"] = rep_msg.reply().method0().success();
-//                         test_->promise_->set_value(std::move(reply));
-//                         return;
-//                     }
-//                     case 1:
-//                     {
-//                         eprosima::xtypes::DynamicData reply(*method1_reply_type);
-//                         reply["result"] = rep_msg.reply().method1().result();
-//                         test_->promise_->set_value(std::move(reply));
-//                         return;
-//                     }
-//                     case 2:
-//                     {
-//                         eprosima::xtypes::DynamicData reply(*method2_reply_type);
-//                         reply["data"] = rep_msg.reply().method2().data();
-//                         test_->promise_->set_value(std::move(reply));
-//                         return;
-//                     }
-//                 }
-//             }
-
-//             test_->promise_->set_value(::eprosima::xtypes::DynamicData(::eprosima::xtypes::primitive_type<bool>()));
-//         }
-
-//     }
-//     reply_listener;
-// };
 
 std::string gen_config_yaml(
         const std::string& topic_type,
@@ -808,6 +520,7 @@ std::string gen_config_method_yaml(
     s += "systems:\n";
     s += "    dds:\n";
     s += "        type: fastdds\n";
+    s += "        participant: { domain_id: 3 }\n";
 
     if (dds_config_file_path != "")
     {
@@ -837,7 +550,7 @@ std::string gen_config_method_yaml(
         s += " reply_type: \"" + reply_types[i] + "\",";
         s += " route: route,";
         // Use dds_service ONLY if remap can cause collision, for example, same dds_service to connect with multiple
-        // soss services, like in the "client" tests.
+        // Integration Service services, like in the "client" tests.
         //s += " dds_service: \"" + dds_topics[i] + "\",";
         s += " remap: { " +
                 std::string("dds: {")
@@ -1012,7 +725,6 @@ TEST(FastDDS, Transmit_to_and_receive_from_dds__basic_type_udp)
 
     ASSERT_EQ(msg_to_sent, msg_to_recv);
     ASSERT_EQ(0, instance.quit().wait_for(1s));
-    std::cout << "exiting first test..." << std::endl;
 }
 
 TEST(FastDDS, Transmit_to_and_receive_from_dds__basic_type_tcp_tunnel)
@@ -1091,8 +803,7 @@ TEST(FastDDS, Request_to_and_reply_from_dds_server_to_mock_client)
 
     ASSERT_TRUE(instance);
 
-    const is::TypeRegistry& mock_types = *instance.type_registry("mock");
-    const is::TypeRegistry& dds_types = *instance.type_registry("dds");
+    const is::TypeRegistry* mock_types = instance.type_registry("mock");
 
     std::mutex disc_mutex;
     disc_mutex.lock();
@@ -1103,14 +814,14 @@ TEST(FastDDS, Request_to_and_reply_from_dds_server_to_mock_client)
     // method0
     {
         std::string message_data_fail = "TESTING";
-        eprosima::xtypes::DynamicData msg_to_sent(*mock_types.at("Method0_In"));
+        eprosima::xtypes::DynamicData msg_to_sent(*mock_types->at("Method0_In"));
         msg_to_sent["data"].value(message_data_fail);
         disc_mutex.lock();
 
         logger << utils::Logger::Level::INFO
-               << "sent message: " << message_data_fail << std::endl;
+               << "Sent message: " << message_data_fail << std::endl;
 
-        eprosima::xtypes::DynamicData msg_to_recv(*dds_types.at("Method0_Result"));
+        eprosima::xtypes::DynamicData msg_to_recv(*mock_types->at("Method0_Result"));
         roundtrip_server("TestService_0", msg_to_sent, msg_to_recv);
         ASSERT_FALSE(msg_to_recv["success"].value<bool>());
 
@@ -1128,14 +839,13 @@ TEST(FastDDS, Request_to_and_reply_from_dds_server_to_mock_client)
     {
         int32_t a = 23;
         int32_t b = 42;
-        eprosima::xtypes::DynamicData msg_to_sent(*mock_types.at("Method1_In"));
+        eprosima::xtypes::DynamicData msg_to_sent(*mock_types->at("Method1_In"));
         msg_to_sent["a"] = a;
         msg_to_sent["b"] = b;
-        //disc_mutex.lock();
         logger << utils::Logger::Level::INFO
                << "Sent message: " << a << " + " << b << std::endl;
 
-        eprosima::xtypes::DynamicData msg_to_recv(*dds_types.at("Method1_Result"));
+        eprosima::xtypes::DynamicData msg_to_recv(*mock_types->at("Method1_Result"));
         roundtrip_server("TestService_1", msg_to_sent, msg_to_recv);
         ASSERT_EQ(msg_to_recv["result"].value<int32_t>(), (a + b));
     }
@@ -1143,14 +853,13 @@ TEST(FastDDS, Request_to_and_reply_from_dds_server_to_mock_client)
     // method2
     {
         float data = 23.42;
-        eprosima::xtypes::DynamicData msg_to_sent(*mock_types.at("Method2_In"));
+        eprosima::xtypes::DynamicData msg_to_sent(*mock_types->at("Method2_In"));
         msg_to_sent["data"] = data;
-        //disc_mutex.lock();
 
         logger << utils::Logger::Level::INFO
                << "Sent message: " << data << std::endl;
 
-        eprosima::xtypes::DynamicData msg_to_recv(*dds_types.at("Method2_Result"));
+        eprosima::xtypes::DynamicData msg_to_recv(*mock_types->at("Method2_Result"));
         roundtrip_server("TestService_2", msg_to_sent, msg_to_recv);
         ASSERT_EQ(msg_to_recv["data"].value<float>(), data);
     }
@@ -1183,8 +892,8 @@ TEST(FastDDS, Request_to_and_reply_from_mock_server_to_dds_client)
 
     ASSERT_TRUE(instance);
 
-    const is::TypeRegistry& mock_types = *instance.type_registry("mock");
-    const is::TypeRegistry& dds_types = *instance.type_registry("dds");
+    const is::TypeRegistry* mock_types = instance.type_registry("mock");
+    ASSERT_NE(mock_types, nullptr);
 
     std::mutex disc_mutex;
     disc_mutex.lock();
@@ -1223,14 +932,15 @@ TEST(FastDDS, Request_to_and_reply_from_mock_server_to_dds_client)
     // method0
     {
         std::string message_data_fail = "TESTING";
-        eprosima::xtypes::DynamicData msg_to_sent(*mock_types.at("Method0_In"));
+
+        eprosima::xtypes::DynamicData msg_to_sent(*mock_types->at("Method0_In"));
         msg_to_sent["data"].value(message_data_fail);
         disc_mutex.lock();
 
         logger << utils::Logger::Level::INFO
                << "Sent message: " << message_data_fail << std::endl;
 
-        eprosima::xtypes::DynamicData msg_to_recv(*dds_types.at("Method0_Result"));
+        eprosima::xtypes::DynamicData msg_to_recv(*mock_types->at("Method0_Result"));
         roundtrip_client(msg_to_sent, client, msg_to_recv);
         ASSERT_FALSE(msg_to_recv["success"].value<bool>());
 
@@ -1249,15 +959,14 @@ TEST(FastDDS, Request_to_and_reply_from_mock_server_to_dds_client)
     {
         int32_t a = 23;
         int32_t b = 42;
-        eprosima::xtypes::DynamicData msg_to_sent(*mock_types.at("Method1_In"));
+        eprosima::xtypes::DynamicData msg_to_sent(*mock_types->at("Method1_In"));
         msg_to_sent["a"] = a;
         msg_to_sent["b"] = b;
-        //disc_mutex.lock();
 
         logger << utils::Logger::Level::INFO
                << "Sent message: " << a << " + " << b << std::endl;
 
-        eprosima::xtypes::DynamicData msg_to_recv(*dds_types.at("Method1_Result"));
+        eprosima::xtypes::DynamicData msg_to_recv(*mock_types->at("Method1_Result"));
         roundtrip_client(msg_to_sent, client, msg_to_recv);
 
         ASSERT_EQ(msg_to_recv["result"].value<int32_t>(), (a + b));
@@ -1266,14 +975,13 @@ TEST(FastDDS, Request_to_and_reply_from_mock_server_to_dds_client)
     // method2
     {
         float data = 23.42;
-        eprosima::xtypes::DynamicData msg_to_sent(*mock_types.at("Method2_In"));
+        eprosima::xtypes::DynamicData msg_to_sent(*mock_types->at("Method2_In"));
         msg_to_sent["data"] = data;
-        //disc_mutex.lock();
 
         logger << utils::Logger::Level::INFO
                << "Sent message: " << data << std::endl;
 
-        eprosima::xtypes::DynamicData msg_to_recv(*dds_types.at("Method2_Result"));
+        eprosima::xtypes::DynamicData msg_to_recv(*mock_types->at("Method2_Result"));
         roundtrip_client(msg_to_sent, client, msg_to_recv);
 
         ASSERT_EQ(msg_to_recv["data"].value<float>(), data);

@@ -52,12 +52,14 @@ namespace fastdds {
  *          Fast DDS DomainParticipantListener</a> class to scan for state changes on the DDS
  *          participant created by this *Integration Service* SystemHandle.
  */
-class Participant : private ::fastdds::dds::DomainParticipantListener
+class Participant
 {
 public:
 
     /**
-     * @brief Construct a new Participant, with default values (UDP transport).
+     * @brief Construct a new Participant, with default values.
+     *
+     * @throws DDSMiddlewareException If the *DomainParticipant* could not be created.
      */
     Participant();
 
@@ -87,6 +89,16 @@ public:
      * @brief Destroy the Participant object.
      */
     virtual ~Participant();
+
+    /**
+     * @brief Construct a Fast DDS DomainParticipant, given its DDS domain ID.
+     *
+     * @param[in] domain_id The DDS domain ID for this participant.
+     *
+     * @throws DDSMiddlewareException If the *DomainParticipant* could not be created.
+     */
+    void build_participant(
+            const ::fastdds::dds::DomainId_t& domain_id = 0);
 
     /**
      * @brief Get the associate *FastDDS DomainParticipant* attribute.
@@ -172,13 +184,6 @@ public:
             ::fastdds::dds::DomainEntity* entity);
 
 private:
-
-    /**
-     * @brief Inherited from *DomainParticipantListener*.
-     */
-    void on_participant_discovery(
-            ::fastdds::dds::DomainParticipant* /*participant*/,
-            fastrtps::rtps::ParticipantDiscoveryInfo&& info) override;
 
 #if (FASTRTPS_VERSION_MINOR == 0)
     /**

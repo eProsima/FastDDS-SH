@@ -37,10 +37,10 @@ namespace sh {
 namespace fastdds {
 
 Subscriber::Subscriber(
-        std::shared_ptr<Participant> participant,
+        Participant* participant,
         const std::string& topic_name,
         const xtypes::DynamicType& message_type,
-        TopicSubscriberSystem::SubscriptionCallback is_callback)
+        TopicSubscriberSystem::SubscriptionCallback* is_callback)
     : participant_(participant)
     , dds_subscriber_(nullptr)
     , dynamic_data_(nullptr)
@@ -117,6 +117,9 @@ Subscriber::Subscriber(
 
     // Create DDS datareader
     ::fastdds::dds::DataReaderQos datareader_qos = ::fastdds::dds::DATAREADER_QOS_DEFAULT;
+    ::fastdds::dds::ReliabilityQosPolicy rel_policy;
+    rel_policy.kind = ::fastdds::dds::RELIABLE_RELIABILITY_QOS;
+    datareader_qos.reliability(rel_policy);
 
     dds_datareader_ = dds_subscriber_->create_datareader(dds_topic_, datareader_qos, this);
     if (dds_datareader_)
@@ -167,7 +170,6 @@ Subscriber::~Subscriber()
     {
         participant_->get_dds_participant()->delete_topic(dds_topic_);
     }
-    std::cout << "~Subscriber finished" << std::endl;
 }
 
 void Subscriber::receive(
@@ -185,7 +187,7 @@ void Subscriber::receive(
         logger_ << utils::Logger::Level::INFO
                 << "Received message: [[ " << is_message << " ]]" << std::endl;
 
-        is_callback_(is_message);
+        (*is_callback_)(is_message);
     }
     else
     {

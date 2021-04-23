@@ -96,11 +96,11 @@ public:
      * @param[in] config Additional configuration that might be required to configure this Client.
      */
     Client(
-            std::shared_ptr<Participant> participant,
+            Participant* participant,
             const std::string& service_name,
             const xtypes::DynamicType& request_type,
             const xtypes::DynamicType& reply_type,
-            ServiceClientSystem::RequestCallback callback,
+            ServiceClientSystem::RequestCallback* callback,
             const YAML::Node& config);
 
     // TODO(@jamoralp): use XML profile to create request subscriber / reply publisher?
@@ -152,7 +152,7 @@ public:
      */
     bool add_config(
             const YAML::Node& configuration,
-            ServiceClientSystem::RequestCallback callback);
+            ServiceClientSystem::RequestCallback* callback);
 
 private:
 
@@ -205,7 +205,7 @@ private:
     /**
      * Class members.
      */
-    std::shared_ptr<Participant> participant_;
+    Participant* participant_;
     const std::string service_name_;
 
     struct RequestEntities
@@ -275,7 +275,7 @@ private:
 
     };
 
-    std::map<std::string, ServiceClientSystem::RequestCallback> callbacks_;
+    std::map<std::string, ServiceClientSystem::RequestCallback*> callbacks_;
 
     std::map<std::string, std::shared_ptr<NavigationNode> > member_tree_;
     std::map<std::string, std::string> type_to_discriminator_;
@@ -285,6 +285,9 @@ private:
             std::string, SampleIdentityComparator> reply_id_type_;
 
     std::mutex mtx_;
+
+    std::mutex matched_mtx_;
+    uint8_t pub_sub_matched_;
 
     std::map<std::thread::id, std::thread*> reception_threads_;
     bool stop_cleaner_;

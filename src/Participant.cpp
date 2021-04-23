@@ -35,28 +35,7 @@ Participant::Participant()
     : dds_participant_(nullptr)
     , logger_("is::sh::FastDDS::Participant")
 {
-    ::fastdds::dds::DomainId_t default_domain_id(0);
-    ::fastdds::dds::DomainParticipantQos participant_qos = ::fastdds::dds::PARTICIPANT_QOS_DEFAULT;
-    participant_qos.name("default_IS-FastDDS-SH_participant");
-
-    dds_participant_ = ::fastdds::dds::DomainParticipantFactory::get_instance()->create_participant(
-        default_domain_id, participant_qos, this);
-
-    if (dds_participant_)
-    {
-        logger_ << utils::Logger::Level::INFO
-                << "Created Fast DDS participant '" << participant_qos.name()
-                << "' with default QoS attributes and Domain ID: "
-                << default_domain_id << std::endl;
-    }
-    else
-    {
-        std::ostringstream err;
-        err << "Error while creating Fast DDS participant '" << participant_qos.name()
-            << "' with default QoS attributes and Domain ID: " << default_domain_id;
-
-        throw DDSMiddlewareException(logger_, err.str());
-    }
+    build_participant();
 }
 
 Participant::Participant(
@@ -69,42 +48,53 @@ Participant::Participant(
 
     if (!config.IsMap() || !config["file_path"] || !config["profile_name"])
     {
-        std::ostringstream err;
-        err << "The node 'participant' in the YAML configuration of the 'dds' system "
-            << "must be a map containing two keys: 'file_path' and 'profile_name'";
+        if (config["domain_id"])
+        {
+            const ::fastdds::dds::DomainId_t domain_id = config["domain_id"].as<uint32_t>();
+            build_participant(domain_id);
+        }
+        else
+        {
+            std::ostringstream err;
+            err << "The node 'participant' in the YAML configuration of the 'fastdds' system "
+                << "must be a map containing two keys: 'file_path' and 'profile_name'";
 
-        throw DDSMiddlewareException(logger_, err.str());
-    }
+            throw DDSMiddlewareException(logger_, err.str());
+        }
 
-    const std::string file_path = config["file_path"].as<std::string>();
-    if (XMLP_ret::XML_OK != XMLProfileManager::loadXMLFile(file_path))
-    {
-        throw DDSMiddlewareException(
-                  logger_, "Loading provided XML file in 'file_path' field was not successful");
-    }
-
-    const std::string profile_name = config["profile_name"].as<std::string>();
-
-#if (FASTRTPS_VERSION_MINOR == 0)
-    dds_participant_ = this->create_participant_with_profile(profile_name);
-#else
-    dds_participant_ = ::fastdds::dds::DomainParticipantFactory::get_instance()->
-            create_participant_with_profile(profile_name, this);
-#endif //  if (FASTRTPS_VERSION_MINOR == 0)
-
-    if (dds_participant_)
-    {
-        logger_ << utils::Logger::Level::INFO
-                << "Created Fast DDS participant '" << dds_participant_->get_qos().name()
-                << "' from profile configuration '" << profile_name << "'" << std::endl;
     }
     else
     {
-        std::ostringstream err;
-        err << "Fast DDS participant '" << dds_participant_->get_qos().name()
-            << "' from profile configuration '" << profile_name << "' creation failed";
+        const std::string file_path = config["file_path"].as<std::string>();
+        if (XMLP_ret::XML_OK != XMLProfileManager::loadXMLFile(file_path))
+        {
+            throw DDSMiddlewareException(
+                      logger_, "Loading provided XML file in 'file_path' field was not successful");
+        }
 
-        throw DDSMiddlewareException(logger_, err.str());
+        const std::string profile_name = config["profile_name"].as<std::string>();
+
+#if (FASTRTPS_VERSION_MINOR == 0)
+        dds_participant_ = this->create_participant_with_profile(profile_name);
+#else
+        dds_participant_ = ::fastdds::dds::DomainParticipantFactory::get_instance()->
+                create_participant_with_profile(profile_name);
+#endif //  if (FASTRTPS_VERSION_MINOR == 0)
+
+        if (dds_participant_)
+        {
+            logger_ << utils::Logger::Level::INFO
+                    << "Created Fast DDS participant '" << dds_participant_->get_qos().name()
+                    << "' from profile configuration '" << profile_name << "'" << std::endl;
+        }
+        else
+        {
+            std::ostringstream err;
+            err << "Fast DDS participant '" << dds_participant_->get_qos().name()
+                << "' from profile configuration '" << profile_name << "' creation failed";
+
+            throw DDSMiddlewareException(logger_, err.str());
+        }
     }
 }
 
@@ -121,15 +111,32 @@ Participant::~Participant()
                     << "Cannot delete Fast DDS participant yet: it has active entities" << std::endl;
         }
     }
+}
 
-    // for (const auto& [type_name, unused] : types_)
-    // {
-    //     dds_participant_->unregister_type(type_name);
-    // }
-    // types_.clear();
+void Participant::build_participant(
+        const ::fastdds::dds::DomainId_t& domain_id)
+{
+    ::fastdds::dds::DomainParticipantQos participant_qos = ::fastdds::dds::PARTICIPANT_QOS_DEFAULT;
+    participant_qos.name("default_IS-FastDDS-SH_participant");
 
+    dds_participant_ = ::fastdds::dds::DomainParticipantFactory::get_instance()->create_participant(
+        domain_id, participant_qos);
 
-    std::cout << "destroyed is::fastdds::Participant~ finished" << std::endl;
+    if (dds_participant_)
+    {
+        logger_ << utils::Logger::Level::INFO
+                << "Created Fast DDS participant '" << participant_qos.name()
+                << "' with default QoS attributes and Domain ID: "
+                << domain_id << std::endl;
+    }
+    else
+    {
+        std::ostringstream err;
+        err << "Error while creating Fast DDS participant '" << participant_qos.name()
+            << "' with default QoS attributes and Domain ID: " << domain_id;
+
+        throw DDSMiddlewareException(logger_, err.str());
+    }
 }
 
 ::fastdds::dds::DomainParticipant* Participant::get_dds_participant() const
@@ -176,8 +183,23 @@ void Participant::register_dynamic_type(
         if (nullptr == p_type)
         {
             dynamic_type_support.setName(type_name.c_str());
+
+            /**
+             * The following lines are added here so that a bug with UnionType in
+             * Fast DDS Dynamic Types is bypassed. This is a workaround and SHOULD
+             * be removed once this bug is solved.
+             * Until that moment, the Fast DDS SystemHandle will not be compatible with
+             * Fast DDS Dynamic Type Discovery mechanism.
+             *
+             * More information here: https://eprosima.easyredmine.com/issues/11349
+             */
+            // WORKAROUND START
+            dynamic_type_support.auto_fill_type_information(false);
+            dynamic_type_support.auto_fill_type_object(false);
+            // WORKAROUND END
+
             // Register it within the DomainParticipant
-            if (pair.second && !dds_participant_->register_type(dynamic_type_support, type_name))
+            if (pair.second && !dds_participant_->register_type(dynamic_type_support))
             {
                 std::ostringstream err;
                 err << "Dynamic type '" << type_name << "' registration failed";
@@ -240,9 +262,6 @@ fastrtps::types::DynamicData* Participant::create_dynamic_data(
 void Participant::delete_dynamic_data(
         fastrtps::types::DynamicData* data) const
 {
-    std::cout << "Participant::delete_dynamic_data: '" << data->get_name() << "', pointer: '"
-              << data << "'" << std::endl;
-
     DynamicDataFactory::get_instance()->delete_data(data);
 }
 
@@ -262,33 +281,6 @@ const std::string& Participant::get_topic_type(
         const std::string& topic) const
 {
     return topic_to_type_.at(topic);
-}
-
-void Participant::on_participant_discovery(
-        ::fastdds::dds::DomainParticipant* /*participant*/,
-        fastrtps::rtps::ParticipantDiscoveryInfo&& info)
-{
-    switch (info.status)
-    {
-        case fastrtps::rtps::ParticipantDiscoveryInfo::DISCOVERY_STATUS::DISCOVERED_PARTICIPANT:
-        {
-            logger_ << utils::Logger::Level::INFO
-                    << "Discovered participant: '" << info.info.m_participantName
-                    << "' in the DDS network" << std::endl;
-            break;
-        }
-        case fastrtps::rtps::ParticipantDiscoveryInfo::DISCOVERY_STATUS::REMOVED_PARTICIPANT:
-        {
-            logger_ << utils::Logger::Level::INFO
-                    << "Removed participant: '" << info.info.m_participantName
-                    << "' from DDS network" << std::endl;
-            break;
-        }
-        default:
-        {
-            break;
-        }
-    }
 }
 
 void Participant::associate_topic_to_dds_entity(
@@ -364,7 +356,7 @@ static void set_qos_from_attributes(
         set_qos_from_attributes(qos, attr.rtps);
 
         return ::fastdds::dds::DomainParticipantFactory::get_instance()->
-               create_participant(attr.domainId, qos, this);
+               create_participant(attr.domainId, qos);
     }
     else
     {

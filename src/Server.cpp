@@ -40,7 +40,7 @@ namespace sh {
 namespace fastdds {
 
 Server::Server(
-        std::shared_ptr<Participant> participant,
+        Participant* participant,
         const std::string& service_name,
         const ::xtypes::DynamicType& request_type,
         const ::xtypes::DynamicType& reply_type,
@@ -49,10 +49,14 @@ Server::Server(
     , service_name_(service_name)
     , request_entities_(request_type)
     , reply_entities_(reply_type)
+    , matched_mtx_()
+    , pub_sub_matched_(0)
     , stop_cleaner_(false)
     , cleaner_thread_(&Server::cleaner_function, this)
     , logger_("is::sh::FastDDS::Server")
 {
+    mtx_.lock(); // Lock mtx_ until datareader and datawriter have matched
+
     add_config(config);
 
     // Create DynamicData
@@ -485,13 +489,21 @@ void Server::on_publication_matched(
         ::fastdds::dds::DataWriter* /*writer*/,
         const ::fastdds::dds::PublicationMatchedStatus& info)
 {
+    std::unique_lock<std::mutex> lock(matched_mtx_);
     if (1 == info.current_count_change)
     {
+        pub_sub_matched_++;
+        if (2 == pub_sub_matched_)
+        {
+            mtx_.unlock();
+        }
+
         logger_ << utils::Logger::Level::INFO
                 << "Publisher for topic '" << service_name_ << "_Request' matched" << std::endl;
     }
     else if (-1 == info.current_count_change)
     {
+        pub_sub_matched_--;
         logger_ << utils::Logger::Level::INFO
                 << "Publisher for topic '" << service_name_ << "_Request' unmatched" << std::endl;
     }
@@ -501,13 +513,21 @@ void Server::on_subscription_matched(
         ::fastdds::dds::DataReader* /*reader*/,
         const ::fastdds::dds::SubscriptionMatchedStatus& info)
 {
+    std::unique_lock<std::mutex> lock(matched_mtx_);
     if (1 == info.current_count_change)
     {
+        pub_sub_matched_++;
+        if (2 == pub_sub_matched_)
+        {
+            mtx_.unlock();
+        }
+
         logger_ << utils::Logger::Level::INFO
                 << "Subscriber for topic '" << service_name_ << "_Reply' matched" << std::endl;
     }
     else if (-1 == info.current_count_change)
     {
+        pub_sub_matched_--;
         logger_ << utils::Logger::Level::INFO
                 << "Subscriber for topic '" << service_name_ << "_Reply' unmatched" << std::endl;
     }

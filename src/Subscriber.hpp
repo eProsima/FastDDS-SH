@@ -76,10 +76,10 @@ public:
      * @throws DDSMiddlewareException if some error occurs while creating the Fast DDS subscriber.
      */
     Subscriber(
-            std::shared_ptr<Participant> participant,
+            Participant* participant,
             const std::string& topic_name,
             const xtypes::DynamicType& message_type,
-            TopicSubscriberSystem::SubscriptionCallback is_callback);
+            TopicSubscriberSystem::SubscriptionCallback* is_callback);
 
     // TODO(@jamoralp): Create subscriber based on XML profiles?
 
@@ -144,7 +144,7 @@ private:
     /**
      * Class members.
      */
-    std::shared_ptr<Participant> participant_;
+    Participant* participant_;
     ::fastdds::dds::Subscriber* dds_subscriber_;
     ::fastdds::dds::Topic* dds_topic_;
     ::fastdds::dds::DataReader* dds_datareader_;
@@ -155,7 +155,7 @@ private:
     const std::string topic_name_;
     const xtypes::DynamicType& message_type_;
 
-    TopicSubscriberSystem::SubscriptionCallback is_callback_;
+    TopicSubscriberSystem::SubscriptionCallback* is_callback_;
 
     std::map<std::thread::id, std::thread*> reception_threads_;
     bool stop_cleaner_;

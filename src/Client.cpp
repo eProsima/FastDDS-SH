@@ -39,20 +39,24 @@ namespace sh {
 namespace fastdds {
 
 Client::Client(
-        std::shared_ptr<Participant> participant,
+        Participant* participant,
         const std::string& service_name,
         const ::xtypes::DynamicType& request_type,
         const ::xtypes::DynamicType& reply_type,
-        ServiceClientSystem::RequestCallback callback,
+        ServiceClientSystem::RequestCallback* callback,
         const YAML::Node& config)
     : participant_(participant)
     , service_name_(service_name)
     , request_entities_(request_type)
     , reply_entities_(reply_type)
+    , matched_mtx_()
+    , pub_sub_matched_(0)
     , stop_cleaner_{false}
     , cleaner_thread_{&Client::cleaner_function, this}
     , logger_("is::sh::FastDDS::Client")
 {
+    mtx_.lock(); // Lock mtx_ until datareader and datawriter have matched
+
     add_config(config, callback);
 
     // Create DynamicData
@@ -319,7 +323,7 @@ void Client::add_member(
 
 bool Client::add_config(
         const YAML::Node& config,
-        ServiceClientSystem::RequestCallback callback)
+        ServiceClientSystem::RequestCallback* callback)
 {
     bool callback_set = false;
     // Map discriminator to type from config
@@ -404,7 +408,7 @@ bool Client::add_config(
 
                     logger_ << utils::Logger::Level::DEBUG
                             << "Member '" << disc << "' has reply type '"
-                            << req << "'" << std::endl;
+                            << member_type.name() << "'" << std::endl;
 
                     add_member(reply_entities_.type, disc);
                 }
@@ -478,13 +482,21 @@ void Client::on_publication_matched(
         ::fastdds::dds::DataWriter* /*writer*/,
         const ::fastdds::dds::PublicationMatchedStatus& info)
 {
+    std::unique_lock<std::mutex> lock(matched_mtx_);
     if (1 == info.current_count_change)
     {
+        pub_sub_matched_++;
+        if (2 == pub_sub_matched_)
+        {
+            mtx_.unlock();
+        }
+
         logger_ << utils::Logger::Level::INFO
                 << "Publisher for topic '" << service_name_ << "_Reply' matched" << std::endl;
     }
     else if (-1 == info.current_count_change)
     {
+        pub_sub_matched_--;
         logger_ << utils::Logger::Level::INFO
                 << "Publisher for topic '" << service_name_ << "_Reply' unmatched" << std::endl;
     }
@@ -494,13 +506,21 @@ void Client::on_subscription_matched(
         ::fastdds::dds::DataReader* /*reader*/,
         const ::fastdds::dds::SubscriptionMatchedStatus& info)
 {
+    std::unique_lock<std::mutex> lock(matched_mtx_);
     if (1 == info.current_count_change)
     {
+        pub_sub_matched_++;
+        if (2 == pub_sub_matched_)
+        {
+            mtx_.unlock();
+        }
+
         logger_ << utils::Logger::Level::INFO
                 << "Subscriber for topic '" << service_name_ << "_Request' matched" << std::endl;
     }
     else if (-1 == info.current_count_change)
     {
+        pub_sub_matched_--;
         logger_ << utils::Logger::Level::INFO
                 << "Subscriber for topic '" << service_name_ << "_Request' unmatched" << std::endl;
     }
@@ -575,7 +595,7 @@ void Client::receive(
 
             if (callbacks_.count(message.type().name()))
             {
-                callbacks_[message.type().name()](
+                (*callbacks_[message.type().name()])(
                     message,
                     *this, std::make_shared<fastrtps::rtps::SampleIdentity>(sample_id));
             }

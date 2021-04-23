@@ -71,15 +71,16 @@ public:
         {
             if (configuration["participant"])
             {
-                participant_ = std::make_shared<Participant>(configuration["participant"]);
+                participant_ = std::make_unique<Participant>(configuration["participant"]);
             }
             else
             {
                 logger_ << utils::Logger::Level::WARN
                         << "Participant not provided in configuration file. "
-                        << "UDP default participant will be created." << std::endl;
+                        << "A participant using the default transport locators "
+                        << "and Domain ID 0 will be created." << std::endl;
 
-                participant_ = std::make_shared<Participant>();
+                participant_ = std::make_unique<Participant>();
             }
         }
         catch (DDSMiddlewareException& e)
@@ -108,13 +109,13 @@ public:
     bool subscribe(
             const std::string& topic_name,
             const xtypes::DynamicType& message_type,
-            SubscriptionCallback callback,
+            SubscriptionCallback* callback,
             const YAML::Node& /* configuration */) override
     {
         try
         {
             auto subscriber = std::make_shared<Subscriber>(
-                participant_, topic_name, message_type, callback);
+                participant_.get(), topic_name, message_type, callback);
 
             subscribers_.emplace_back(std::move(subscriber));
 
@@ -139,7 +140,7 @@ public:
         try
         {
             auto publisher = std::make_shared<Publisher>(
-                participant_, topic_name, message_type, configuration);
+                participant_.get(), topic_name, message_type, configuration);
             publishers_.emplace_back(std::move(publisher));
 
             logger_ << utils::Logger::Level::INFO
@@ -158,7 +159,7 @@ public:
     bool create_client_proxy(
             const std::string& service_name,
             const xtypes::DynamicType& type,
-            RequestCallback callback,
+            RequestCallback* callback,
             const YAML::Node& configuration) override
     {
         return create_client_proxy(service_name, type, type, callback, configuration);
@@ -168,7 +169,7 @@ public:
             const std::string& service_name,
             const xtypes::DynamicType& request_type,
             const xtypes::DynamicType& reply_type,
-            RequestCallback callback,
+            RequestCallback* callback,
             const YAML::Node& configuration) override
     {
         if (clients_.count(service_name) == 0)
@@ -176,7 +177,7 @@ public:
             try
             {
                 auto client = std::make_shared<Client>(
-                    participant_,
+                    participant_.get(),
                     service_name,
                     request_type,
                     reply_type,
@@ -222,7 +223,7 @@ public:
             try
             {
                 auto server = std::make_shared<Server>(
-                    participant_,
+                    participant_.get(),
                     service_name,
                     request_type,
                     reply_type,
@@ -256,7 +257,7 @@ public:
 
 private:
 
-    std::shared_ptr<Participant> participant_;
+    std::unique_ptr<Participant> participant_;
     std::vector<std::shared_ptr<Publisher> > publishers_;
     std::vector<std::shared_ptr<Subscriber> > subscribers_;
     std::map<std::string, std::shared_ptr<Client> > clients_;

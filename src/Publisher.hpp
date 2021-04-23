@@ -77,7 +77,7 @@ public:
      * @throws DDSMiddlewareException if some error occurs while creating the Fast DDS publisher.
      */
     Publisher(
-            std::shared_ptr<Participant> participant,
+            Participant* participant,
             const std::string& topic_name,
             const xtypes::DynamicType& message_type,
             const YAML::Node& config);
@@ -131,7 +131,7 @@ private:
     /**
      * Class members.
      */
-    std::shared_ptr<Participant> participant_;
+    Participant* participant_;
     ::fastdds::dds::Publisher* dds_publisher_;
     ::fastdds::dds::Topic* dds_topic_;
     ::fastdds::dds::DataWriter* dds_datawriter_;
