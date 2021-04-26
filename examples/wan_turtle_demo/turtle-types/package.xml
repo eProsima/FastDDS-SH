@@ -3,7 +3,7 @@
 <package format="3">
   <name>is_fastdds_turtle_types</name>
   <version>0.0.0</version>
-  <description>SOSS-ROS2 turtle messages.</description>
+  <description>ROS2 turtle messages.</description>
   <maintainer email="luisgasco@eprosima.com">Luis Gasco</maintainer>
   <license>Apache License 2.0</license>
 
