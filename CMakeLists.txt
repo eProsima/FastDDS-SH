@@ -216,15 +216,6 @@ is_install_middleware_plugin(
         is-fastdds
     )
 
-install(
-    FILES
-        ${PROJECT_SOURCE_DIR}/examples/tcp/config.xml
-    DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/../sample/tcp
-    COMPONENT
-        is-fastdds
-    )
-
 ###################################################################################
 # Add the Integration Service Fast DDS SystemHandle testing subdirectory
 ###################################################################################
