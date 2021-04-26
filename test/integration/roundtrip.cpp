@@ -689,7 +689,7 @@ void roundtrip_client(
     response = response_future.get();
 }
 
-TEST(FastDDS, Transmit_to_and_receive_from_dds__basic_type_udp)
+TEST(FastDDS, Transmit_to_and_receive_from_dds__basic_type_default_transport)
 {
     const std::string topic_type = "dds_test_string";
 
@@ -744,7 +744,7 @@ TEST(FastDDS, Transmit_to_and_receive_from_dds__basic_type_tcp_tunnel)
     const std::string client_to_server_topic = "client_to_server_topic";
     const std::string server_to_client_topic = "server_to_client_topic";
 
-    const std::string profile_name_server = "soss_profile_server";
+    const std::string profile_name_server = "is_profile_server";
     is::core::InstanceHandle server_instance = create_instance(
         topic_type,
         server_to_client_topic,
@@ -755,7 +755,7 @@ TEST(FastDDS, Transmit_to_and_receive_from_dds__basic_type_tcp_tunnel)
 
     ASSERT_TRUE(server_instance);
 
-    const std::string profile_name_client = "soss_profile_client";
+    const std::string profile_name_client = "is_profile_client";
     is::core::InstanceHandle client_instance = create_instance(
         topic_type,
         client_to_server_topic,

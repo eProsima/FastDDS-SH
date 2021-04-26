@@ -10,4 +10,4 @@ sed -r -i 's+<address>.*</address>+<address>'"$1"'</address>+g' wan_config.xml
 sed -r -i 's+<port>.*</port>+<port>'"$2"'</port>+g' wan_config.xml
 sed -r -i 's+<physical_port>.*</physical_port>+<physical_port>'"$2"'</physical_port>+g' wan_config.xml
 
-soss $3
+integration-service $3

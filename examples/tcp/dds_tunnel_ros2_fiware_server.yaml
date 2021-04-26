@@ -11,8 +11,8 @@ systems:
     dds:
       type: dds
       participant:
-        file_path: "install/soss-dds/sample/tcp/config.xml"
-        profile_name: soss_profile_server
+        file_path: "install/is-fastdds/sample/tcp/config.xml"
+        profile_name: is_profile_server
 
 routes:
     fiware_to_dds: { from: fiware, to: dds }

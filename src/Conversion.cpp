@@ -1263,50 +1263,50 @@ void Conversion::set_sequence_data(
             case ::xtypes::TypeKind::ARRAY_TYPE:
             {
                 DynamicData* array = from->loan_value(id);
-                ::xtypes::DynamicData soss_array(type.content_type());
-                set_array_data(array, soss_array.ref(), std::vector<uint32_t>());
+                ::xtypes::DynamicData xtypes_array(type.content_type());
+                set_array_data(array, xtypes_array.ref(), std::vector<uint32_t>());
                 from->return_loaned_value(array);
-                to.push(soss_array);
+                to.push(xtypes_array);
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
             case ::xtypes::TypeKind::SEQUENCE_TYPE:
             {
                 DynamicData* seq = from->loan_value(id);
-                ::xtypes::DynamicData soss_seq(type.content_type());
-                set_sequence_data(seq, soss_seq.ref());
+                ::xtypes::DynamicData xtypes_seq(type.content_type());
+                set_sequence_data(seq, xtypes_seq.ref());
                 from->return_loaned_value(seq);
-                to.push(soss_seq);
+                to.push(xtypes_seq);
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
             case ::xtypes::TypeKind::MAP_TYPE:
             {
                 DynamicData* seq = from->loan_value(id);
-                ::xtypes::DynamicData soss_seq(type.content_type());
-                set_map_data(seq, soss_seq.ref());
+                ::xtypes::DynamicData xtypes_seq(type.content_type());
+                set_map_data(seq, xtypes_seq.ref());
                 from->return_loaned_value(seq);
-                to.push(soss_seq);
+                to.push(xtypes_seq);
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
             case ::xtypes::TypeKind::STRUCTURE_TYPE:
             {
                 DynamicData* st = from->loan_value(id);
-                ::xtypes::DynamicData soss_st(type.content_type());
-                set_struct_data(st, soss_st.ref());
+                ::xtypes::DynamicData xtypes_st(type.content_type());
+                set_struct_data(st, xtypes_st.ref());
                 from->return_loaned_value(st);
-                to.push(soss_st);
+                to.push(xtypes_st);
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
             case ::xtypes::TypeKind::UNION_TYPE:
             {
                 DynamicData* st = from->loan_value(id);
-                ::xtypes::DynamicData soss_st(type.content_type());
-                set_union_data(st, soss_st.ref());
+                ::xtypes::DynamicData xtypes_st(type.content_type());
+                set_union_data(st, xtypes_st.ref());
                 from->return_loaned_value(st);
-                to.push(soss_st);
+                to.push(xtypes_st);
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
@@ -1470,50 +1470,50 @@ void Conversion::set_map_data(
             case ::xtypes::TypeKind::ARRAY_TYPE:
             {
                 DynamicData* array = from->loan_value(key_id);
-                ::xtypes::DynamicData soss_array(key_type);
-                set_array_data(array, soss_array.ref(), std::vector<uint32_t>());
+                ::xtypes::DynamicData xtypes_array(key_type);
+                set_array_data(array, xtypes_array.ref(), std::vector<uint32_t>());
                 from->return_loaned_value(array);
-                key_data = soss_array;
+                key_data = xtypes_array;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
             case ::xtypes::TypeKind::SEQUENCE_TYPE:
             {
                 DynamicData* seq = from->loan_value(key_id);
-                ::xtypes::DynamicData soss_seq(key_type);
-                set_sequence_data(seq, soss_seq.ref());
+                ::xtypes::DynamicData xtypes_seq(key_type);
+                set_sequence_data(seq, xtypes_seq.ref());
                 from->return_loaned_value(seq);
-                key_data = soss_seq;
+                key_data = xtypes_seq;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
             case ::xtypes::TypeKind::MAP_TYPE:
             {
                 DynamicData* seq = from->loan_value(key_id);
-                ::xtypes::DynamicData soss_seq(key_type);
-                set_map_data(seq, soss_seq.ref());
+                ::xtypes::DynamicData xtypes_seq(key_type);
+                set_map_data(seq, xtypes_seq.ref());
                 from->return_loaned_value(seq);
-                key_data = soss_seq;
+                key_data = xtypes_seq;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
             case ::xtypes::TypeKind::STRUCTURE_TYPE:
             {
                 DynamicData* st = from->loan_value(key_id);
-                ::xtypes::DynamicData soss_st(key_type);
-                set_struct_data(st, soss_st.ref());
+                ::xtypes::DynamicData xtypes_st(key_type);
+                set_struct_data(st, xtypes_st.ref());
                 from->return_loaned_value(st);
-                key_data = soss_st;
+                key_data = xtypes_st;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
             case ::xtypes::TypeKind::UNION_TYPE:
             {
                 DynamicData* st = from->loan_value(key_id);
-                ::xtypes::DynamicData soss_st(key_type);
-                set_union_data(st, soss_st.ref());
+                ::xtypes::DynamicData xtypes_st(key_type);
+                set_union_data(st, xtypes_st.ref());
                 from->return_loaned_value(st);
-                key_data = soss_st;
+                key_data = xtypes_st;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
@@ -1650,50 +1650,50 @@ void Conversion::set_map_data(
             case ::xtypes::TypeKind::ARRAY_TYPE:
             {
                 DynamicData* array = from->loan_value(value_id);
-                ::xtypes::DynamicData soss_array(value_type);
-                set_array_data(array, soss_array.ref(), std::vector<uint32_t>());
+                ::xtypes::DynamicData xtypes_array(value_type);
+                set_array_data(array, xtypes_array.ref(), std::vector<uint32_t>());
                 from->return_loaned_value(array);
-                value_data = soss_array;
+                value_data = xtypes_array;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
             case ::xtypes::TypeKind::SEQUENCE_TYPE:
             {
                 DynamicData* seq = from->loan_value(value_id);
-                ::xtypes::DynamicData soss_seq(value_type);
-                set_sequence_data(seq, soss_seq.ref());
+                ::xtypes::DynamicData xtypes_seq(value_type);
+                set_sequence_data(seq, xtypes_seq.ref());
                 from->return_loaned_value(seq);
-                value_data = soss_seq;
+                value_data = xtypes_seq;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
             case ::xtypes::TypeKind::MAP_TYPE:
             {
                 DynamicData* seq = from->loan_value(value_id);
-                ::xtypes::DynamicData soss_seq(value_type);
-                set_map_data(seq, soss_seq.ref());
+                ::xtypes::DynamicData xtypes_seq(value_type);
+                set_map_data(seq, xtypes_seq.ref());
                 from->return_loaned_value(seq);
-                value_data = soss_seq;
+                value_data = xtypes_seq;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
             case ::xtypes::TypeKind::STRUCTURE_TYPE:
             {
                 DynamicData* st = from->loan_value(value_id);
-                ::xtypes::DynamicData soss_st(value_type);
-                set_struct_data(st, soss_st.ref());
+                ::xtypes::DynamicData xtypes_st(value_type);
+                set_struct_data(st, xtypes_st.ref());
                 from->return_loaned_value(st);
-                value_data = soss_st;
+                value_data = xtypes_st;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
             case ::xtypes::TypeKind::UNION_TYPE:
             {
                 DynamicData* st = from->loan_value(value_id);
-                ::xtypes::DynamicData soss_st(value_type);
-                set_union_data(st, soss_st.ref());
+                ::xtypes::DynamicData xtypes_st(value_type);
+                set_union_data(st, xtypes_st.ref());
                 from->return_loaned_value(st);
-                value_data = soss_st;
+                value_data = xtypes_st;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
@@ -1871,9 +1871,9 @@ void Conversion::set_array_data(
             break;
             case ::xtypes::TypeKind::ARRAY_TYPE:
             {
-                ::xtypes::DynamicData soss_array(type.content_type());
-                set_array_data(from, soss_array.ref(), new_indexes);
-                to[idx] = soss_array;
+                ::xtypes::DynamicData xtypes_array(type.content_type());
+                set_array_data(from, xtypes_array.ref(), new_indexes);
+                to[idx] = xtypes_array;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
@@ -1881,10 +1881,10 @@ void Conversion::set_array_data(
             {
                 id = from->get_array_index(new_indexes);
                 DynamicData* seq = from->loan_value(id);
-                ::xtypes::DynamicData soss_seq(type.content_type());
-                set_sequence_data(seq, soss_seq.ref());
+                ::xtypes::DynamicData xtypes_seq(type.content_type());
+                set_sequence_data(seq, xtypes_seq.ref());
                 from->return_loaned_value(seq);
-                to[idx] = soss_seq;
+                to[idx] = xtypes_seq;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
@@ -1892,10 +1892,10 @@ void Conversion::set_array_data(
             {
                 id = from->get_array_index(new_indexes);
                 DynamicData* seq = from->loan_value(id);
-                ::xtypes::DynamicData soss_seq(type.content_type());
-                set_map_data(seq, soss_seq.ref());
+                ::xtypes::DynamicData xtypes_seq(type.content_type());
+                set_map_data(seq, xtypes_seq.ref());
                 from->return_loaned_value(seq);
-                to[idx] = soss_seq;
+                to[idx] = xtypes_seq;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
@@ -1903,10 +1903,10 @@ void Conversion::set_array_data(
             {
                 id = from->get_array_index(new_indexes);
                 DynamicData* st = from->loan_value(id);
-                ::xtypes::DynamicData soss_st(type.content_type());
-                set_struct_data(st, soss_st.ref());
+                ::xtypes::DynamicData xtypes_st(type.content_type());
+                set_struct_data(st, xtypes_st.ref());
                 from->return_loaned_value(st);
-                to[idx] = soss_st;
+                to[idx] = xtypes_st;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
@@ -1914,10 +1914,10 @@ void Conversion::set_array_data(
             {
                 id = from->get_array_index(new_indexes);
                 DynamicData* st = from->loan_value(id);
-                ::xtypes::DynamicData soss_st(type.content_type());
-                set_union_data(st, soss_st.ref());
+                ::xtypes::DynamicData xtypes_st(type.content_type());
+                set_union_data(st, xtypes_st.ref());
                 from->return_loaned_value(st);
-                to[idx] = soss_st;
+                to[idx] = xtypes_st;
                 ret = ResponseCode::RETCODE_OK;
                 break;
             }
@@ -2144,11 +2144,9 @@ bool Conversion::set_struct_data(
                     case types::TK_STRUCTURE:
                     {
                         DynamicData* nested_msg_dds = input->loan_value(id);
-                        //::xtypes::DynamicData nested_msg_soss = output[descriptor.get_name()][id];
 
                         if (nested_msg_dds != nullptr)
                         {
-                            //if (set_struct_data(nested_msg_dds, nested_msg_soss.ref()))
                             if (set_struct_data(nested_msg_dds, output[descriptor.get_name()]))
                             {
                                 ret = ResponseCode::RETCODE_OK;
@@ -2352,11 +2350,9 @@ bool Conversion::set_union_data(
             case types::TK_STRUCTURE:
             {
                 DynamicData* nested_msg_dds = input->loan_value(id);
-                //::xtypes::DynamicData nested_msg_soss = output[descriptor.get_name()][id];
 
                 if (nested_msg_dds != nullptr)
                 {
-                    //if (set_struct_data(nested_msg_dds, nested_msg_soss.ref()))
                     if (set_struct_data(nested_msg_dds, output[descriptor.get_name()]))
                     {
                         ret = ResponseCode::RETCODE_OK;

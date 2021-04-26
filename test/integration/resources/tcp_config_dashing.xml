@@ -17,7 +17,7 @@
         </transport_descriptor>
     </transport_descriptors>
 
-    <participant profile_name="soss_profile_server">
+    <participant profile_name="is_profile_server">
         <rtps>
             <userTransports>
                 <transport_id>tcp_transport_server</transport_id>
@@ -33,7 +33,7 @@
         </rtps>
     </participant>
 
-    <participant profile_name="soss_profile_client">
+    <participant profile_name="is_profile_client">
         <rtps>
             <userTransports>
                 <transport_id>tcp_transport_client</transport_id>

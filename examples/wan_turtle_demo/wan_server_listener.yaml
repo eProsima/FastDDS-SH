@@ -6,7 +6,7 @@ systems:
       types-from: ros2
       participant:
         file_path: "wan_config.xml"
-        profile_name: soss_profile_server
+        profile_name: is_profile_server
 
 routes:
     dds_to_ros2: { from: dds, to: ros2 }

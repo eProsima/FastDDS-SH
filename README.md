@@ -1,152 +1,49 @@
-# SOSS System Handle for ROS 2
+# Integration Service System Handle for Fast DDS
 
-System handle to connect [*SOSS*][soss] to *eProsima*'s open-source implementation of the
-[DDS protocol][dds], [Fast-DDS][fast].
+## Introduction
 
-## Installation
+*System Handle* that connects any protocol supported by the [*the eProsima Integration Service*][integrationservice]
+to *eProsima*'s open-source implementation of the [DDS protocol][dds], [Fast-DDS][fast].
 
-To install this package, just clone this repository into a workspace already containing SOSS and build it:
-```
-$ cd <soss workspace folder>
+This *System Handle* can be used for three main purposes:
+
+* Connection between a *DDS* application and an application running over a different middleware implementation.
+  This is the classic usage approach for the *Integration Service*.
+
+* Connecting two *DDS* applications running under different Domain IDs.
+
+* Creating a *TCP tunnel*, by means of running an *Integration Service* instance on each of the
+  machines we want to establish a communication between. You can find an example about this
+  in the [examples](#Examples) section.
+
+## Build and installation process
+
+### System Handle
+
+To install this package, just clone this repository into a workspace already containing the *Integration Service* and build it:
+
+```bash
+$ cd <IS workspace folder>
 $ git clone https://github.com/eProsima/FastDDS-SH.git src/fastdds-sh
 
-$ colcon build --packages-up-to soss-dds
+$ colcon build --packages-up-to is-fastdds
+
 ```
 
-## Example - Connecting with ROS2
+If your working environment already provides with an installed version of *Fast DDS*, this one will be used.
+Notice that you need a version above **2.0.0** for the *eProsima Integration Service Fast DDS System Handle* to work.
 
-1. Create a [colcon workspace](https://index.ros.org/doc/ros2/Tutorials/Colcon-Tutorial/#create-a-workspace).
-    ```
-    $ mkdir -p soss_wp/src && cd soss_wp
-    ```
+If that is not the case, *Fast DDS* will be automatically downloaded and compiled for you.
+A specific version has been proved to be compatible and should be updated periodically once in a while,
+when newer *Fast DDS* versions become available; right now, it is **v2.3.0**.
 
-2. Clone the soss project into the source subfolder.
-    ```
-    $ git clone https://github.com/eProsima/soss.git src/soss
-    ```
+### Tests
 
-3. Clone this project into the subfolder.
-    ```
-    $ git clone https://github.com/eProsima/FastDDS-SH.git src/fastdds-sh
-    ```
+If you want to build unitary and integration tests, then compile de project using `BUILD_TESTING` CMake flag:
 
-    The workspace layout should look like this:
-    ```
-        soss_wp
-        └── src
-            ├── soss (repo)
-            │   └── ... (other soss project subfolders)
-            │   └── packages
-            │       │── soss-ros2 (ROS2 system handle)
-            │       │── soss-ros2-test
-            │       └── ... (other packages)
-            └── fastdds-sh (repo)
-                    ├── dds (soss-dds colcon pkg)
-                    └── dds-test (soss-dds-test colcon pkg)
-    ```
-
-5. Source a colcon environment in which ROS2 has been built (soss-ros2 uses rclcpp package).
-    ```
-    $ source path/to/ros2/ws/install/local_setup.bash
-    ```
-
-6. In the workspace folder, execute colcon:
-    ```
-    $ colcon build --packages-up-to soss-dds soss-ros2
-    ```
-   Note: If you are going to use ros2 types used in soss-ros2-test (as std_msgs/String),
-   you can compile with `soss-ros2-test`.
-
-7. Source the current environment
-    ```
-    $ source install/local_setup.bash
-    ```
-
-## Usage
-
-This system handle is mainly used to connect any system with the DDS protocol.
-There are two communication modes of *SOSS DDS plugin`:
-- Connection through *UDP* to a DDS cloud.
-- Connection through *TCP* to others DDS participants.
-This could be used as a tunnel between two SOSS.
-See [TCP tunnel](#tcp-tunnel) for more information.
-
-### Configuration
-
-SOSS must be configured with a YAML file, which tells the program everything it needs to know
-in order to establish the connection between two or more systems that the user wants.
-An example of a YAML configuration file to connect ROS2 to DDS could be the following:
-
-```YAML
-types:
-systems:
-    ros2: { type: ros2 }
-    dds:
-      type: dds
-      types-from: ros2  #includes the types loaded by the ros2 middleware
-      participant: # Optional
-        file_path: "path/to/dds_config_file.xml"
-        profile_name: "participant profile name"
-
-routes:
-    ros2_to_dds: { from: ros2, to: dds }
-    dds_to_ros2: { from: dds, to: ros2 }
-
-
-# The type with '/' is modified with '__' by soss-dds
-topics:
-    hello_ros2: { type: "std_msgs/String", route: dds_to_ros2 }
-    hello_dds: { type: "std_msgs/String", route: ros2_to_dds }
+```bash
+$ colcon build --packages-up-to is-fastdds --cmake-args -DBUILD_TESTING=ON
 ```
-
-To see how general SOSS systems, users and topics are configured, please refer to [SOSS' documentation][soss].
-
-**The DDS standard does not allow certain characters in its names**.
-For this reason, if a type defined in the topics section of the configuration file has in its name a `/`,
-the dds system handle will map that character into two underscores.
-That's why the type inside the dynamic types map is `std_msgs__String`,
-while the type inside the topics section is `std_msgs/String`.
-This is **something important to notice when connecting to ROS2**,
-because in ROS2 most of the types have a `/` in their names.
-Also, notice that **in the DDS system, the message will be published with a type name with two
-underscores instead of a slash**.
-
-* The `participant` map *(optional)* tells to the dds system handle where it can
-find the configuration file for the DDS profle,
-and what profile must be used from the many that can be defined in that XML.
-This profile is used to set the DDS quality of services' parameters.
-A guide on how this XML files are configured can be found in
-[Fast-DDS' documentation](https://fast-dds.docs.eprosima.com/en/latest/fastdds/xml_configuration/xml_configuration.html?highlight=xml#xml-profiles).
-An example of an XML configuration file can be found [in this repository](examples/tcp/config.xml).
-Notice that this example file has two participant profiles defined in it,
-one to be used in the client side and other for the server side,
-so the YAML file used to configure SOSS in the server computer must change the `profile_name` in the example above
-from `soss_profile_client` to `soss_profile_server`.
-
-The `participant` map is optional. If it is not given, the dds system handle will create a default UDP profile.
-
-### TCP tunnel
-
-Besides connecting any system to DDS, this system handle can also be used to create a TCP tunnel connecting
-two SOSS instances.
-That way, a user can connect two ROS2 systems through TCP,
-or connect any system supported by soss with other system that is not in its LAN.
-
-For the TCP tunnel, two instances of SOSS are going to be used, one in each of the computers that
-are going to be communicated.
-Each of those instances will have a system handle for the system they want to communicate in the WAN network,
-and other to communicate with Fast-DDS' DDS implementation.
-
-You can see the YAML's configuration files related to TCP tunnel configuration in the [examples folder](examples/tcp).
-
-If we take as an example the communication between ROS2 and FIWARE, the communication scheme will look like this:
-
-![](doc/images/ROS2_TCP_tunnel.png)
-
-### More information
-
-- You can have a look at the [internal design](doc/design.md)
-- For a fast usage, you can use the [`Dockerfile`](Dockerfile)
 
 ## Changelog
 
@@ -161,7 +58,7 @@ If we take as an example the communication between ROS2 and FIWARE, the communic
 - Integration tests
 
  [fast]: https://github.com/eProsima/Fast-DDS
- [soss]: https://github.com/eProsima/soss
+ [integrationservice]: https://github.com/eProsima/Integration-Service
  [dds]: https://en.wikipedia.org/wiki/Data_Distribution_Service
 
 ---
@@ -173,7 +70,7 @@ If we take as an example the communication between ROS2 and FIWARE, the communic
 
 <a href="http://rosin-project.eu">
   <img src="http://rosin-project.eu/wp-content/uploads/rosin_ack_logo_wide.png"
-       alt="rosin_logo" height="60" >
+       alt="rosin_logo" height="45" align="left" >
 </a>
 
 Supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
