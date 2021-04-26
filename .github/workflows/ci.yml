@@ -1,0 +1,42 @@
+name: CI for Integration Service Fast DDS SystemHandle
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  fastdds-sh_CI:
+    runs-on: ubuntu-20.04
+    container: ubuntu:focal
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: src/fastdds-sh
+
+      - name: Download required dependencies
+        run: |
+          apt update
+          DEBIAN_FRONTEND=noninteractive apt install -y cmake gcc g++ git libboost-dev libboost-program-options-dev libyaml-cpp-dev
+
+      - name: Install colcon
+        run: |
+          apt install -y python3-pip
+          pip3 install -U colcon-common-extensions
+
+      - name: Download the Integration Service Core
+        run: |
+          git clone -b feature/soss-core-to-is-core --recursive https://github.com/eProsima/soss src/is-core
+
+      - name: Build
+        run: |
+          colcon build --packages-up-to is-fastdds --cmake-args -DBUILD_TESTING=ON --event-handlers console_direct+
+
+      - name: Test
+        run: |
+          . install/local_setup.sh && colcon test --packages-up-to is-fastdds --event-handlers console_direct+
+          colcon test-result

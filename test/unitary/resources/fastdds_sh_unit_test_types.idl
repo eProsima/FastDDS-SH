@@ -1,0 +1,76 @@
+enum MyEnum
+{
+    A,
+    B,
+    C
+};
+
+struct BasicStruct
+{
+    boolean my_bool;
+    octet my_octet;
+    int16 my_int16;
+    int32 my_int32;
+    int64 my_int64;
+    uint16 my_uint16;
+    uint32 my_uint32;
+    uint64 my_uint64;
+    float my_float32;
+    double my_float64;
+    long double my_float128;
+    char my_char;
+    wchar my_wchar;
+    string my_string;
+    wstring my_wstring;
+    MyEnum my_enum;
+};
+
+struct NestedSequence
+{
+    sequence<sequence<int32, 2>, 3> my_seq_seq;
+};
+
+struct NestedArray
+{
+    string my_arr_arr[4][5];
+};
+
+struct MixedStruct
+{
+    sequence<BasicStruct, 3> my_basic_seq;
+    sequence<NestedSequence, 4> my_stseq_seq;
+    sequence<NestedArray, 5> my_starr_seq;
+    BasicStruct my_basic_arr[3];
+    NestedSequence my_stseq_arr[4];
+    NestedArray my_starr_arr[5];
+};
+
+typedef BasicStruct AliasBasicStruct;
+
+union MyUnion switch (uint8)
+{
+    case 0: float my_float32;
+    case 1:
+    case 2: string my_string;
+    case 3: AliasBasicStruct abs;
+};
+
+struct MyUnionStruct
+{
+    MyUnion my_union;
+    map<string, AliasBasicStruct> my_map;
+};
+
+module fastdds_sh
+{
+    module unit_test
+    {
+        module types
+        {
+            struct NamespacedType
+            {
+                BasicStruct basic;
+            };
+        };
+    };
+};

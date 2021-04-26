@@ -9,19 +9,18 @@ project(std_msgs_ros1)
 # Find requirements
 
 # Generate mix
-find_package(soss-core REQUIRED)
-find_package(soss-genmsg REQUIRED)
-find_package(soss-ros1 REQUIRED)
+find_package(is-core REQUIRED)
+find_package(is-ros1-genmsg REQUIRED)
+find_package(is-ros1 REQUIRED)
 
-find_package(soss-rosidl REQUIRED)
+find_package(is-ros2-rosidl REQUIRED)
 find_package(std_msgs REQUIRED)
 
-# Use C++14 standard. Required for soss_rosidl_mix
 if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 17)
 endif()
 
-soss_genmsg_mix(
+is_ros1_genmsg_mix(
     PACKAGES std_msgs
     MIDDLEWARES ros1
 )

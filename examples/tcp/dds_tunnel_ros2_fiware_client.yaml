@@ -4,8 +4,8 @@ systems:
       type: dds
       types-from: ros2
       participant:
-        file_path: "install/soss-dds/sample/tcp/config.xml"
-        profile_name: soss_profile_client
+        file_path: "install/is-fastdds/sample/tcp/config.xml"
+        profile_name: is_profile_client
 
 routes:
     ros2_to_dds: { from: ros2, to: dds }

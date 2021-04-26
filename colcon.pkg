@@ -1,0 +1,6 @@
+{
+    "name": "is-fastdds",
+    "type": "cmake",
+    "dependencies": ["fastrtps", "is-core", "is-mock", "xtypes"]
+}
+
