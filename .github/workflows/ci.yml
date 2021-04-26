@@ -28,9 +28,9 @@ jobs:
           apt install -y python3-pip
           pip3 install -U colcon-common-extensions
 
-      - name: Download the Integration Service Core
+      - name: Download the Integration Service
         run: |
-          git clone -b feature/soss-core-to-is-core --recursive https://github.com/eProsima/soss src/is-core
+          git clone --recursive https://github.com/eProsima/Integration-Service src/integration-service
 
       - name: Build
         run: |
