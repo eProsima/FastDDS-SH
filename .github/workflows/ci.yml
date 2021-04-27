@@ -34,7 +34,7 @@ jobs:
 
       - name: Build
         run: |
-          colcon build --packages-up-to is-fastdds --cmake-args -DBUILD_TESTING=ON --event-handlers console_direct+
+          colcon build --cmake-args -DBUILD_FASTDDS_TESTS=ON --event-handlers console_direct+
 
       - name: Test
         run: |

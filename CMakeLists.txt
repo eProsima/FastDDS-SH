@@ -221,6 +221,6 @@ is_install_middleware_plugin(
 ###################################################################################
 include(CTest)
 
-if(BUILD_TESTING)
+if(BUILD_TESTS OR BUILD_FASTDDS_TESTS)
     add_subdirectory(test)
 endif()
