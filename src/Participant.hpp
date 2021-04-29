@@ -185,7 +185,6 @@ public:
 
 private:
 
-#if (FASTRTPS_VERSION_MINOR == 0)
     /**
      * @brief Create a Fast DDS DomainParticipant using a certain profile.
      *
@@ -200,8 +199,6 @@ private:
      */
     ::fastdds::dds::DomainParticipant* create_participant_with_profile(
         const std::string& profile_name);
-
-#endif //  if (FASTRTPS_VERSION_MINOR == 0)
 
 
     /**
