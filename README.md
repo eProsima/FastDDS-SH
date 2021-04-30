@@ -79,16 +79,16 @@ in the project's [main source code repository]([https://](https://github.com/ePr
 
 Some of these examples, where the *Fast DDS System Handle* plays a different role in each of them, are introduced here.
 
-### Intercommunication between a Fast DDS publisher and a ROS 2 subscriber
+### Publisher/subscriber intercommunication between Fast DDS and ROS 2
 
 The configuration file for this example can be found
 [here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds_ros2__helloworld.yaml).
 
 Below, a high level diagram is presented, showing which entities will *Integration Service* create
 to transmit data coming from a Fast DDS publisher into the ROS 2 data space, so that it can be
-consumed by a ROS 2 subscriber on the same topic:
+consumed by a ROS 2 subscriber on the same topic; and viceversa:
 
-![DDS_pub_to_ROS2_sub](docs/images/dds_ros2_pub_sub_example.png)
+![DDS_ROS2_pub_sub](docs/images/dds_ros2_pub_sub_example.png)
 
 For a detailed step by step guide on how to build and test this example, please refer to the
 [official documentation](<!-- TODO: link to example -->).
