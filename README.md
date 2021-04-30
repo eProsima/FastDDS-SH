@@ -1,4 +1,4 @@
-<a href="http://www.eprosima.com"><img src="docs/images/logo.png" hspace="8" vspace="2" height="100" ></a>
+<a href="http://www.eprosima.com"><img src="https://github.com/eProsima/Integration-Service/blob/docs/readme_rework/docs/images/logo.png?raw=true" hspace="8" vspace="2" height="100" ></a>
 
 # Fast DDS System Handle
 
