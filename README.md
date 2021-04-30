@@ -88,7 +88,7 @@ Below, a high level diagram is presented, showing which entities will *Integrati
 to transmit data coming from a Fast DDS publisher into the ROS 2 data space, so that it can be
 consumed by a ROS 2 subscriber on the same topic:
 
-![DDS_pub_to_ROS2_sub](<!-- TODO: add diagram -->)
+![DDS_pub_to_ROS2_sub](docs/images/dds_ros2_pub_sub_example.png)
 
 For a detailed step by step guide on how to build and test this example, please refer to the
 [official documentation](<!-- TODO: link to example -->).
