@@ -74,12 +74,7 @@ Participant::Participant(
 
         const std::string profile_name = config["profile_name"].as<std::string>();
 
-#if (FASTRTPS_VERSION_MINOR == 0)
         dds_participant_ = this->create_participant_with_profile(profile_name);
-#else
-        dds_participant_ = ::fastdds::dds::DomainParticipantFactory::get_instance()->
-                create_participant_with_profile(profile_name);
-#endif //  if (FASTRTPS_VERSION_MINOR == 0)
 
         if (dds_participant_)
         {
@@ -118,6 +113,12 @@ void Participant::build_participant(
 {
     ::fastdds::dds::DomainParticipantQos participant_qos = ::fastdds::dds::PARTICIPANT_QOS_DEFAULT;
     participant_qos.name("default_IS-FastDDS-SH_participant");
+
+    // By default use UDPv4 due to communication failures between dockers sharing the network with the host
+    // When it is solved in Fast-DDS delete the following lines and use the default builtin transport.
+    participant_qos.transport().use_builtin_transports = false;
+    auto udp_transport = std::make_shared<::fastdds::rtps::UDPv4TransportDescriptor>();
+    participant_qos.transport().user_transports.push_back(udp_transport);
 
     dds_participant_ = ::fastdds::dds::DomainParticipantFactory::get_instance()->create_participant(
         domain_id, participant_qos);
@@ -321,8 +322,6 @@ bool Participant::dissociate_topic_from_dds_entity(
     }
 }
 
-#if (FASTRTPS_VERSION_MINOR == 0)
-
 static void set_qos_from_attributes(
         ::fastdds::dds::DomainParticipantQos& qos,
         const eprosima::fastrtps::rtps::RTPSParticipantAttributes& attr)
@@ -337,8 +336,21 @@ static void set_qos_from_attributes(
     qos.wire_protocol().throughput_controller = attr.throughputController;
     qos.wire_protocol().default_unicast_locator_list = attr.defaultUnicastLocatorList;
     qos.wire_protocol().default_multicast_locator_list = attr.defaultMulticastLocatorList;
-    qos.transport().user_transports = attr.userTransports;
-    qos.transport().use_builtin_transports = attr.useBuiltinTransports;
+
+    if (attr.useBuiltinTransports)
+    {
+        // By default use UDPv4 due to communication failures between dockers sharing the network with the host
+        // When it is solved in Fast-DDS delete the following lines and use the default builtin transport.
+        qos.transport().use_builtin_transports = false;
+        auto udp_transport = std::make_shared<::fastdds::rtps::UDPv4TransportDescriptor>();
+        qos.transport().user_transports.push_back(udp_transport);
+    }
+    else
+    {
+        qos.transport().user_transports = attr.userTransports;
+        qos.transport().use_builtin_transports = attr.useBuiltinTransports;
+    }
+    
     qos.transport().send_socket_buffer_size = attr.sendSocketBufferSize;
     qos.transport().listen_socket_buffer_size = attr.listenSocketBufferSize;
     qos.name() = attr.getName();
@@ -367,8 +379,6 @@ static void set_qos_from_attributes(
         throw DDSMiddlewareException(logger_, err.str());
     }
 }
-
-#endif //  if (FASTRTPS_VERSION_MINOR == 0)
 
 } //  namespace fastdds
 } //  namespace sh
