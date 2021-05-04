@@ -164,6 +164,6 @@ whole *Integration Service* product suite, there are some specific flags which a
 
 This repository is open-sourced under the *Apache-2.0* license. See the [LICENSE](LICENSE) file for more details.
 
-# Getting help
+## Getting help
 
 If you need support you can reach us by mail at `support@eProsima.com` or by phone at `+34 91 804 34 48`.
