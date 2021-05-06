@@ -113,38 +113,30 @@ which will process them and produce a reply message which will be transmited bac
 For a detailed step by step guide on how to build and test this example, please refer to the
 [official documentation](TODO: link).
 -->
-
-<!-- TODO: add YAML and basic DDS applications using different domain IDs.
-An even better option would be to modify the existing DDShelloworld to accept a different domain ID from the
-console options
 ### Bridging communication between two DDS data spaces under different Domain IDs
 
+In this example, the *Integration Service* uses the *Fast DDS System Handle*
+to forward the messages sent from a DDS publisher hosted on a participant with domain ID **5** to
+a subscriber created under domain ID **3**.
+
 The configuration file for this example can be found
-[here](TODO).
-
-Below, a high level diagram is presented, showing which entities will *Integration Service* create
-to forward the messages sent from a DDS publisher hosted on a participant with domain ID **2** to
-a subscriber created under domain ID **4**:
-
-![DDS_domain_2_to_4](TODO)
+[here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds__domain_id_change.yaml).
 
 For a detailed step by step guide on how to build and test this example, please refer to the
-[official documentation](TODO: link).
--->
+[official documentation](<!--TODO: link-->).
 
-<!--### Using Fast DDS TCP WAN tunneling to communicate two applications running on different networks
+### Using Fast DDS TCP WAN tunneling to communicate two applications running on different networks
+
+The last examples depicts how the *Integration Service*, along with this *Fast DDS System Handle*, could be useful
+to forward the messages coming from a ROS 2 node running on a certain machine to another ROS 2
+node running on another machine, which are connected to two separate WAN networks, thanks to the
+WAN capabilities of *Fast DDS*.
 
 The configuration files for this example can be found
 [here](https://github.com/eProsima/Integration-Service/tree/main/examples/wan_tunneling).
 
-Below, a high level diagram is presented, showing which entities will *Integration Service* create
-to forward the messages coming from a ROS 2 node running on a certain machine to another ROS 2
-node running on another machine, which are connected to two separate WAN networks:
-
-)
-
 For a detailed step by step guide on how to build and test this example, please refer to the
-[official documentation](< TODO: link to example ).-->
+[official documentation](<!-- TODO: link to example-->).
 
 ## Compilation flags
 
