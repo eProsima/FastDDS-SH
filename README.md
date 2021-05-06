@@ -127,7 +127,7 @@ For a detailed step by step guide on how to build and test this example, please 
 
 ### Using Fast DDS TCP WAN tunneling to communicate two applications running on different networks
 
-The last examples depicts how the *Integration Service*, along with this *Fast DDS System Handle*, could be useful
+The last example depicts how the *Integration Service*, along with this *Fast DDS System Handle*, could be useful
 to forward the messages coming from a ROS 2 node running on a certain machine to another ROS 2
 node running on another machine, which are connected to two separate WAN networks, thanks to the
 WAN capabilities of *Fast DDS*.
