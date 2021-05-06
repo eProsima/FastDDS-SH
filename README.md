@@ -10,7 +10,7 @@
 A [System Handle](<!--TODO: add link-->) is a plugin that allows a certain middleware
 or communication protocol to speak the same language used by the [eProsima Integration Service](https://github.com/eProsima/Integration-Service),
 that is, *Extensible and Dynamic Topic Types for DDS* (**xTypes**);
-specifically, the *Integration Service* bases its intercommunication abilities on eProsima's open source
+specifically, *Integration Service* bases its intercommunication abilities on eProsima's open source
 implementation for the *xTypes* protocol, that is, [eProsima xTypes](https://github.com/eProsima/xtypes).
 
 ![System Handle Architecture](docs/images/system-handle-architecture.png)
@@ -27,23 +27,23 @@ This *System Handle* can be used for three main purposes:
 
 
 * Connection between a *DDS* application and an application running over a different middleware implementation.
-  This is the classic usage approach for the *Integration Service*.
+  This is the classic use-case approach for *Integration Service*.
 
 * Connecting two *DDS* applications running under different Domain IDs.
 
-* Creating a *TCP tunnel*, by means of running an *Integration Service* instance on each of the
-  machines we want to establish a communication between.
+* Creating a *TCP tunnel*, by running an *Integration Service* instance on each of the
+  machines you want to establish a communication between.
 
 ## Configuration
 
-The *Integration Service* is configured by means of a YAML configuration file, which specifies
-the middlewares, topics and/or services involved in the intercommunication process; as well as
-their topic/service type and the data exchange flow. This configuration file is loaded during
+*Integration Service* is configured by means of a YAML configuration file, which specifies
+the middlewares, topics and/or services involved in the intercommunication process, as well as
+their topic/service types and the data exchange flow. This configuration file is loaded at
 runtime, so there is no need to recompile any package before switching to a whole new
 intercommunication architecture.
 
-To get a more precise idea on how these YAML files are written and which files do they require
-in order to succesfully configure and launch the *Integration Service*, please refer to the
+To get a more precise idea on how these YAML files have to be filled and which fields they require
+in order to succesfully configure and launch an *Integration Service* project, please refer to the
 dedicated [configuration](<!-- TODO: add link -->) section of the official documentation.
 An illustrative explanation is also presented in the *Readme* `Configuration` section of the
 [general project repository](https://github.com/eProsima/Integration-Service).
@@ -67,7 +67,7 @@ five sections described in the *Configuration* chapter of the *Integration Servi
 
   * `participant`: Allows to add specific configuration for the [Fast DDS DomainParticipant](https://fast-dds.docs.eprosima.com/en/latest/fastdds/dds_layer/domain/domainParticipant/domainParticipant.html):
 
-    * `domain_id`: Provides with an easy way to change the *Domain ID* of the DDS entities created
+    * `domain_id`: Provides an easy way to change the *Domain ID* of the DDS entities created
       by the *Fast DDS System Handle*.
 
     * `file_path`: Path to an XML file, containing a configuration profile for the System Handle
@@ -86,11 +86,11 @@ Some of these examples, where the *Fast DDS System Handle* plays a different rol
 
 ### Publisher/subscriber intercommunication between Fast DDS and ROS 2
 
-In this example, the *Integration Service* uses both this *Fast DDS System Handle* and the *ROS 2 System Handle*
+In this example, *Integration Service* uses both this *Fast DDS System Handle* and the *ROS 2 System Handle*
 to transmit data coming from a Fast DDS publisher into the ROS 2 data space, so that it can be
 consumed by a ROS 2 subscriber on the same topic, and viceversa.
 
-The configuration file used by the *Integration Service* for this example can be found
+The configuration file used by *Integration Service* for this example can be found
 [here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds_ros2__helloworld.yaml).
 
 For a detailed step by step guide on how to build and test this example, please refer to the
@@ -113,7 +113,7 @@ For a detailed step by step guide on how to build and test this example, please 
 -->
 ### Bridging communication between two DDS data spaces under different Domain IDs
 
-In this example, the *Integration Service* uses the *Fast DDS System Handle*
+In this example, *Integration Service* uses the *Fast DDS System Handle*
 to forward the messages sent from a DDS publisher hosted on a participant with domain ID **5** to
 a subscriber created under domain ID **3**.
 
@@ -125,7 +125,7 @@ For a detailed step by step guide on how to build and test this example, please 
 
 ### Using Fast DDS TCP WAN tunneling to communicate two applications running on different networks
 
-The last example depicts how the *Integration Service*, along with this *Fast DDS System Handle*, could be useful
+The last example depicts how *Integration Service*, along with the *Fast DDS System Handle*, could be useful
 to forward the messages coming from a ROS 2 node running on a certain machine to another ROS 2
 node running on another machine, which are connected to two separate WAN networks, thanks to the
 WAN capabilities of *Fast DDS*.
