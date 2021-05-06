@@ -53,7 +53,7 @@ for the DDS middleware. All of these parameters are optional, and fall as subopt
 five sections described in the *Configuration* chapter of the *Integration Service* repository:
 
 * `systems`: The system `type` must be `fastdds`. In addition to the `type` and `types-from` fields,
-  the *Fast DDS System Handle*.
+  the *Fast DDS System Handle* accepts the following specific configuration fields:
 
   ```yaml
   systems:
@@ -64,8 +64,6 @@ five sections described in the *Configuration* chapter of the *Integration Servi
         file_path: <path_to_xml_profiles_file>.xml
         profile_name: fastdds-sh-participant-profile
   ```
-
-   This section accepts the following specific configuration fields for the *Fast DDS System Handle*:
 
   * `participant`: Allows to add specific configuration for the [Fast DDS DomainParticipant](https://fast-dds.docs.eprosima.com/en/latest/fastdds/dds_layer/domain/domainParticipant/domainParticipant.html):
 
