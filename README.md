@@ -3,6 +3,8 @@
 # Fast DDS System Handle
 
 ## Introduction
+
+### What is a System Handle?
 [![FastDDS SH CI Status](https://github.com/eProsima/FastDDS-SH/actions/workflows/ci.yml/badge.svg)](https://github.com/eProsima/FastDDS-SH/actions)
 
 A [System Handle](<!--TODO: add link-->) is a plugin that allows a certain middleware
@@ -13,11 +15,16 @@ implementation for the *xTypes* protocol, that is, [eProsima xTypes](https://git
 
 ![System Handle Architecture](docs/images/system-handle-architecture.png)
 
+### The Fast DDS SystemHandle
+
+<a href="https://fast-dds.docs.eprosima.com/"><img src="docs/images/fastdds_logo.png" align="left" hspace="8" vspace="2" width="120"></a>
+
 This repository contains the source code of the *Integration Service* **System Handle**
 for eProsima's open source implementation of the [DDS](https://www.omg.org/omg-dds-portal/) protocol,
 that is, [Fast DDS](https://github.com/eProsima/Fast-DDS).
 
 This *System Handle* can be used for three main purposes:
+
 
 * Connection between a *DDS* application and an application running over a different middleware implementation.
   This is the classic usage approach for the *Integration Service*.
