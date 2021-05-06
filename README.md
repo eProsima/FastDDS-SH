@@ -88,14 +88,12 @@ Some of these examples, where the *Fast DDS System Handle* plays a different rol
 
 ### Publisher/subscriber intercommunication between Fast DDS and ROS 2
 
-The configuration file for this example can be found
-[here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds_ros2__helloworld.yaml).
-
-Below, a high level diagram is presented, showing which entities will *Integration Service* create
+In this example, the *Integration Service* uses both this *Fast DDS System Handle* and the *ROS 2 System Handle*
 to transmit data coming from a Fast DDS publisher into the ROS 2 data space, so that it can be
-consumed by a ROS 2 subscriber on the same topic; and viceversa:
+consumed by a ROS 2 subscriber on the same topic, and viceversa.
 
-![DDS_ROS2_pub_sub](docs/images/dds_ros2_pub_sub_example.png)
+The configuration file used by the *Integration Service* for this example can be found
+[here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds_ros2__helloworld.yaml).
 
 For a detailed step by step guide on how to build and test this example, please refer to the
 [official documentation](<!-- TODO: link to example -->).
@@ -134,7 +132,7 @@ For a detailed step by step guide on how to build and test this example, please 
 [official documentation](TODO: link).
 -->
 
-### Using Fast DDS TCP WAN tunneling to communicate two applications running on different networks
+<!--### Using Fast DDS TCP WAN tunneling to communicate two applications running on different networks
 
 The configuration files for this example can be found
 [here](https://github.com/eProsima/Integration-Service/tree/main/examples/wan_tunneling).
@@ -143,10 +141,10 @@ Below, a high level diagram is presented, showing which entities will *Integrati
 to forward the messages coming from a ROS 2 node running on a certain machine to another ROS 2
 node running on another machine, which are connected to two separate WAN networks:
 
-![ROS2_to_ROS2_over_WAN_DDS](<!-- TODO: DIAGRAM -->)
+)
 
 For a detailed step by step guide on how to build and test this example, please refer to the
-[official documentation](<!-- TODO: link to example -->).
+[official documentation](< TODO: link to example ).-->
 
 ## Compilation flags
 
