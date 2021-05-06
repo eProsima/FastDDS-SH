@@ -145,7 +145,7 @@ whole *Integration Service* product suite, there are some specific flags which a
 * `BUILD_FASTDDS_TESTS`: Allows to specifically compile the *Fast DDS System Handle* unitary and
   integration tests; this is useful to avoid compiling each *System Handle's* test suite present
   in the `colcon` workspace, which is what would happen if using the `BUILD_TESTS` flag; and thus,
-  minimizing the building time; to use it, prior to making sure that the *Fast DDS System Handle*
+  minimizing the building time; to use it,after making sure that the *Fast DDS System Handle*
   is present in the `colcon` workspace, the following command must be executed:
   ```bash
   ~/is_ws$ colcon build --cmake-args -DBUILD_FASTDDS_TESTS=ON
