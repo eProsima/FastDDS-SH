@@ -14,25 +14,27 @@ that is, *Extensible and Dynamic Topic Types for DDS* (**xTypes**);
 specifically, *Integration Service* bases its intercommunication abilities on eProsima's open source
 implementation for the *xTypes* protocol, that is, [eProsima xTypes](https://github.com/eProsima/xtypes).
 
-![System Handle Architecture](docs/images/system-handle-architecture.png)
+<p align="center">
+  <a href="https://integration-service.docs.eprosima.com/en/latest/sh.html"><img src="docs/images/system-handle-architecture.png"></a>
+</p>
 
 ### The Fast DDS SystemHandle
 
 <a href="https://fast-dds.docs.eprosima.com/"><img src="docs/images/fastdds_logo.png" align="left" hspace="8" vspace="2" width="120"></a>
 
 This repository contains the source code of the *Integration Service* **System Handle**
-for eProsima's open source implementation of the [DDS](https://www.omg.org/omg-dds-portal/) protocol,
+for eProsima's open source implementation of the [DDS](https://www.dds-foundation.org/omg-dds-standard/) protocol,
 that is, [Fast DDS](https://github.com/eProsima/Fast-DDS).
 
 This *System Handle* can be used for three main purposes:
 
 
-* Connection between a *DDS* application and an application running over a different middleware implementation.
+1. Connection between a *DDS* application and an application running over a different middleware implementation.
   This is the classic use-case approach for *Integration Service*.
 
-* Connecting two *DDS* applications running under different Domain IDs.
+1. Connecting two *DDS* applications running under different Domain IDs.
 
-* Creating a *TCP tunnel*, by running an *Integration Service* instance on each of the
+1. Creating a *TCP tunnel*, by running an *Integration Service* instance on each of the
   machines you want to establish a communication between.
 
 ## Configuration
@@ -149,7 +151,7 @@ WAN capabilities of *Fast DDS*.
 </p>
 
 The configuration files for this example can be found
-[here](https://github.com/eProsima/Integration-Service/tree/main/examples/wan_tunneling).
+[here](https://github.com/eProsima/Integration-Service/tree/main/examples/wan_tunneling/ros2__wan_helloworld).
 
 For a detailed step by step guide on how to build and test this example, please refer to the
 [dedicated section](https://integration-service.docs.eprosima.com/en/latest/wan.html) in the official documentation.
