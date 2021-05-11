@@ -143,6 +143,10 @@ to forward the messages coming from a ROS 2 node running on a certain machine to
 node running on another machine, which are connected to two separate WAN networks, thanks to the
 WAN capabilities of *Fast DDS*.
 
+<p align="center">
+  <a href="https://integration-service.docs.eprosima.com/en/latest/wan.html"><img src="docs/images/tcp_wan_dds.png" width="600"></a>
+</p>
+
 The configuration files for this example can be found
 [here](https://github.com/eProsima/Integration-Service/tree/main/examples/wan_tunneling).
 
