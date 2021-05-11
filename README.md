@@ -2,10 +2,11 @@
 
 # Fast DDS System Handle
 
+[![FastDDS SH CI Status](https://github.com/eProsima/FastDDS-SH/actions/workflows/ci.yml/badge.svg)](https://github.com/eProsima/FastDDS-SH/actions)
+
 ## Introduction
 
 ### What is a System Handle?
-[![FastDDS SH CI Status](https://github.com/eProsima/FastDDS-SH/actions/workflows/ci.yml/badge.svg)](https://github.com/eProsima/FastDDS-SH/actions)
 
 A [System Handle](https://integration-service.docs.eprosima.com/en/latest/sh.html) is a plugin that allows a certain middleware
 or communication protocol to speak the same language used by the [eProsima Integration Service](https://github.com/eProsima/Integration-Service),
