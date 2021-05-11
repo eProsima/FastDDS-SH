@@ -207,7 +207,7 @@ target_include_directories(${PROJECT_NAME}
     )
 
 ###################################################################################
-# Install the Integration Service WebSocket SystemHandle library
+# Install the Integration Service FastDDS SystemHandle library
 ###################################################################################
 is_install_middleware_plugin(
     MIDDLEWARE

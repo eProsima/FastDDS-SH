@@ -1,83 +1,184 @@
-# Integration Service System Handle for Fast DDS
+<a href="https://integration-service.docs.eprosima.com/"><img src="https://github.com/eProsima/Integration-Service/blob/main/docs/images/logo.png?raw=true" hspace="8" vspace="2" height="100" ></a>
+
+# Fast DDS System Handle
+
+[![FastDDS SH CI Status](https://github.com/eProsima/FastDDS-SH/actions/workflows/ci.yml/badge.svg)](https://github.com/eProsima/FastDDS-SH/actions)
 
 ## Introduction
 
-*System Handle* that connects any protocol supported by the [*the eProsima Integration Service*][integrationservice]
-to *eProsima*'s open-source implementation of the [DDS protocol][dds], [Fast-DDS][fast].
+### What is a System Handle?
+
+A [System Handle](https://integration-service.docs.eprosima.com/en/latest/sh.html) is a plugin that allows a certain middleware
+or communication protocol to speak the same language used by the [eProsima Integration Service](https://github.com/eProsima/Integration-Service),
+that is, *Extensible and Dynamic Topic Types for DDS* (**xTypes**);
+specifically, *Integration Service* bases its intercommunication abilities on eProsima's open source
+implementation for the *xTypes* protocol, that is, [eProsima xTypes](https://github.com/eProsima/xtypes).
+
+<p align="center">
+  <a href="https://integration-service.docs.eprosima.com/en/latest/sh.html"><img src="docs/images/system-handle-architecture.png"></a>
+</p>
+
+### The Fast DDS SystemHandle
+
+<a href="https://fast-dds.docs.eprosima.com/"><img src="docs/images/fastdds_logo.png" align="left" hspace="8" vspace="2" width="120"></a>
+
+This repository contains the source code of the *Integration Service* **System Handle**
+for eProsima's open source implementation of the [DDS](https://www.dds-foundation.org/omg-dds-standard/) protocol,
+that is, [Fast DDS](https://github.com/eProsima/Fast-DDS).
 
 This *System Handle* can be used for three main purposes:
 
-* Connection between a *DDS* application and an application running over a different middleware implementation.
-  This is the classic usage approach for the *Integration Service*.
 
-* Connecting two *DDS* applications running under different Domain IDs.
+1. Connection between a *DDS* application and an application running over a different middleware implementation.
+  This is the classic use-case approach for *Integration Service*.
 
-* Creating a *TCP tunnel*, by means of running an *Integration Service* instance on each of the
-  machines we want to establish a communication between. You can find an example about this
-  in the [examples](#Examples) section.
+1. Connecting two *DDS* applications running under different Domain IDs.
 
-## Build and installation process
+1. Creating a *TCP tunnel*, by running an *Integration Service* instance on each of the
+  machines you want to establish a communication between.
 
-### System Handle
+## Configuration
 
-To install this package, just clone this repository into a workspace already containing the *Integration Service* and build it:
+*Integration Service* is configured by means of a YAML configuration file, which specifies
+the middlewares, topics and/or services involved in the intercommunication process, as well as
+their topic/service types and the data exchange flow. This configuration file is loaded at
+runtime, so there is no need to recompile any package before switching to a whole new
+intercommunication architecture.
 
-```bash
-$ cd <IS workspace folder>
-$ git clone https://github.com/eProsima/FastDDS-SH.git src/fastdds-sh
+To get a more precise idea on how these YAML files have to be filled and which fields they require
+in order to succesfully configure and launch an *Integration Service* project, please refer to the
+[dedicated configuration section](https://integration-service.docs.eprosima.com/en/latest/yaml_config.html) of the official documentation.
 
-$ colcon build --packages-up-to is-fastdds
+Regarding the *Fast DDS System Handle*, there are several specific parameters which can be configured
+for the DDS middleware. All of these parameters are optional, and fall as suboptions of the main
+five sections described in the *Configuration* chapter of the *Integration Service* repository:
 
-```
+* `systems`: The system `type` must be `fastdds`. In addition to the `type` and `types-from` fields,
+  the *Fast DDS System Handle* accepts the following specific configuration fields:
 
-If your working environment already provides with an installed version of *Fast DDS*, this one will be used.
-Notice that you need a version above **2.0.0** for the *eProsima Integration Service Fast DDS System Handle* to work.
+  ```yaml
+  systems:
+    dds:
+      type: fastdds
+      participant:
+        domain_id: 3
+        file_path: <path_to_xml_profiles_file>.xml
+        profile_name: fastdds-sh-participant-profile
+  ```
 
-If that is not the case, *Fast DDS* will be automatically downloaded and compiled for you.
-A specific version has been proved to be compatible and should be updated periodically once in a while,
-when newer *Fast DDS* versions become available; right now, it is **v2.3.0**.
+  * `participant`: Allows to add specific configuration for the [Fast DDS DomainParticipant](https://fast-dds.docs.eprosima.com/en/latest/fastdds/dds_layer/domain/domainParticipant/domainParticipant.html):
 
-### Tests
+    * `domain_id`: Provides an easy way to change the *Domain ID* of the DDS entities created
+      by the *Fast DDS System Handle*.
 
-If you want to build unitary and integration tests, then compile de project using `BUILD_TESTING` CMake flag:
+    * `file_path`: Path to an XML file, containing a configuration profile for the System Handle
+      participant. More information about Fast DDS XML profiles and how to fully customize the
+      properties of DDS entities through them is available [here](https://fast-dds.docs.eprosima.com/en/latest/fastdds/xml_configuration/xml_configuration.html).
 
-```bash
-$ colcon build --packages-up-to is-fastdds --cmake-args -DBUILD_TESTING=ON
-```
+    * `profile_name`: Within the provided XML file, the name of the XML profile associated to the
+      *Integration Service Fast DDS System Handle* participant.
 
-## Changelog
+## Examples
 
-### v1.0.0
-- Updated to work with xTypes support.
-- Support several Fast-DDS versions, used in Crystal, Dashing and Eloquent.
+There are several *Integration Service* examples using the *Fast DDS System Handle* available
+in the project's [main source code repository](https://github.com/eProsima/Integration-Service/tree/main/examples).
 
-### v0.1.0
+Some of these examples, where the *Fast DDS System Handle* plays a different role in each of them, are introduced here.
 
-- DDS communication in both directions based on topic
-- TCP tunnel support
-- Integration tests
+<a href="https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
 
- [fast]: https://github.com/eProsima/Fast-DDS
- [integrationservice]: https://github.com/eProsima/Integration-Service
- [dds]: https://en.wikipedia.org/wiki/Data_Distribution_Service
+### DDS - ROS 2 bridge  (publisher -> subscriber)
 
----
+In this example, *Integration Service* uses both this *Fast DDS System Handle* and the *ROS 2 System Handle*
+to transmit data coming from a Fast DDS publisher into the ROS 2 data space, so that it can be
+consumed by a ROS 2 subscriber on the same topic, and viceversa.
 
-<!--
-    ROSIN acknowledgement from the ROSIN press kit
-    @ https://github.com/rosin-project/press_kit
+<p align="center">
+  <a href="https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html"><img src="docs/images/dds_ros2_pubsub_example.png" width="500"></a>
+</p>
+
+The configuration file used by *Integration Service* for this example can be found
+[here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds_ros2__helloworld.yaml).
+
+For a detailed step by step guide on how to build and test this example, please refer to the
+[dedicated section](https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html) in the official documentation.
+
+<!-- TODO: add YAML and applications for DDS and ROS2 to test this
+### Fast DDS service server addressing petitions coming from a ROS 2 service client
+
+The configuration file for this example can be found
+[here](TODO).
+
+Below, a high level diagram is presented, showing which entities will *Integration Service* create
+to forward the petitions requested from a ROS 2 client application to a DDS service server application,
+which will process them and produce a reply message which will be transmited back to the ROS 2 client:
+
+![DDS_server_and_ROS2_client](TODO)
+
+For a detailed step by step guide on how to build and test this example, please refer to the
+[official documentation](TODO: link).
 -->
 
-<a href="http://rosin-project.eu">
-  <img src="http://rosin-project.eu/wp-content/uploads/rosin_ack_logo_wide.png"
-       alt="rosin_logo" height="45" align="left" >
-</a>
+<a href="https://integration-service.docs.eprosima.com/en/latest/dds_change_domain.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
 
-Supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
-More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
+### DDS Domain ID change
 
-<img src="http://rosin-project.eu/wp-content/uploads/rosin_eu_flag.jpg"
-     alt="eu_flag" height="45" align="left" >
+In this example, *Integration Service* uses the *Fast DDS System Handle*
+to forward the messages sent from a DDS publisher hosted on a participant with domain ID **5** to
+a subscriber created under domain ID **3**.
 
-This project has received funding from the European Union’s Horizon 2020
-research and innovation programme under grant agreement no. 732287.
+<p align="center">
+  <a href="https://integration-service.docs.eprosima.com/en/latest/dds_change_domain.html"><img src="docs/images/dds_domain_id_change.png" width="600"></a>
+</p>
+
+The configuration file for this example can be found
+[here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds__domain_id_change.yaml).
+
+For a detailed step by step guide on how to build and test this example, please refer to the
+[dedicated section](https://integration-service.docs.eprosima.com/en/latest/dds_change_domain.html) in the official documentation.
+
+<a href="https://integration-service.docs.eprosima.com/en/latest/wan.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
+
+### WAN-TCP tunneling over DDS
+
+The last example depicts how *Integration Service*, along with the *Fast DDS System Handle*, could be useful
+to forward the messages coming from a ROS 2 node running on a certain machine to another ROS 2
+node running on another machine, which are connected to two separate WAN networks, thanks to the
+WAN capabilities of *Fast DDS*.
+
+<p align="center">
+  <a href="https://integration-service.docs.eprosima.com/en/latest/wan.html"><img src="docs/images/tcp_wan_dds.png" width="600"></a>
+</p>
+
+The configuration files for this example can be found
+[here](https://github.com/eProsima/Integration-Service/tree/main/examples/wan_tunneling/ros2__wan_helloworld).
+
+For a detailed step by step guide on how to build and test this example, please refer to the
+[dedicated section](https://integration-service.docs.eprosima.com/en/latest/wan.html) in the official documentation.
+
+## Compilation flags
+
+Besides the [global compilation flags](https://integration-service.docs.eprosima.com/en/latest/installation.html#global-compilation-flags) available for the
+whole *Integration Service* product suite, there are some specific flags which apply only to the
+*Fast DDS System Handle*; they are listed below:
+
+* `BUILD_FASTDDS_TESTS`: Allows to specifically compile the *Fast DDS System Handle* unitary and
+  integration tests; this is useful to avoid compiling each *System Handle's* test suite present
+  in the `colcon` workspace, which is what would happen if using the `BUILD_TESTS` flag; and thus,
+  minimizing the building time; to use it,after making sure that the *Fast DDS System Handle*
+  is present in the `colcon` workspace, the following command must be executed:
+  ```bash
+  ~/is_ws$ colcon build --cmake-args -DBUILD_FASTDDS_TESTS=ON
+  ```
+
+<!-- TODO: complete when it is uploaded to read the docs
+## API Reference
+-->
+
+## License
+
+This repository is open-sourced under the *Apache-2.0* license. See the [LICENSE](LICENSE) file for more details.
+
+## Getting help
+
+If you need support you can reach us by mail at `support@eProsima.com` or by phone at `+34 91 804 34 48`.
