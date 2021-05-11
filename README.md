@@ -7,7 +7,7 @@
 ### What is a System Handle?
 [![FastDDS SH CI Status](https://github.com/eProsima/FastDDS-SH/actions/workflows/ci.yml/badge.svg)](https://github.com/eProsima/FastDDS-SH/actions)
 
-A [System Handle](<!--TODO: add link-->) is a plugin that allows a certain middleware
+A [System Handle](https://integration-service.docs.eprosima.com/en/latest/sh.html) is a plugin that allows a certain middleware
 or communication protocol to speak the same language used by the [eProsima Integration Service](https://github.com/eProsima/Integration-Service),
 that is, *Extensible and Dynamic Topic Types for DDS* (**xTypes**);
 specifically, *Integration Service* bases its intercommunication abilities on eProsima's open source
@@ -44,7 +44,7 @@ intercommunication architecture.
 
 To get a more precise idea on how these YAML files have to be filled and which fields they require
 in order to succesfully configure and launch an *Integration Service* project, please refer to the
-dedicated [configuration](<!-- TODO: add link -->) section of the official documentation.
+dedicated [configuration](https://integration-service.docs.eprosima.com/en/latest/yaml_config.html) section of the official documentation.
 An illustrative explanation is also presented in the *Readme* `Configuration` section of the
 [general project repository](https://github.com/eProsima/Integration-Service).
 
@@ -94,7 +94,7 @@ The configuration file used by *Integration Service* for this example can be fou
 [here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds_ros2__helloworld.yaml).
 
 For a detailed step by step guide on how to build and test this example, please refer to the
-[official documentation](<!-- TODO: link to example -->).
+[dedicated section](https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html) in the official documentation.
 
 <!-- TODO: add YAML and applications for DDS and ROS2 to test this
 ### Fast DDS service server addressing petitions coming from a ROS 2 service client
@@ -121,7 +121,7 @@ The configuration file for this example can be found
 [here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds__domain_id_change.yaml).
 
 For a detailed step by step guide on how to build and test this example, please refer to the
-[official documentation](<!--TODO: link-->).
+[dedicated section](https://integration-service.docs.eprosima.com/en/latest/dds_change_domain.html) in the official documentation.
 
 ### Using Fast DDS TCP WAN tunneling to communicate two applications running on different networks
 
@@ -134,11 +134,11 @@ The configuration files for this example can be found
 [here](https://github.com/eProsima/Integration-Service/tree/main/examples/wan_tunneling).
 
 For a detailed step by step guide on how to build and test this example, please refer to the
-[official documentation](<!-- TODO: link to example-->).
+[dedicated section](https://integration-service.docs.eprosima.com/en/latest/wan.html) in the official documentation.
 
 ## Compilation flags
 
-Besides the [global compilation flags](<!-- TODO: link to IS readme section-->) available for the
+Besides the [global compilation flags](https://integration-service.docs.eprosima.com/en/latest/installation.html#global-compilation-flags) available for the
 whole *Integration Service* product suite, there are some specific flags which apply only to the
 *Fast DDS System Handle*; they are listed below:
 
