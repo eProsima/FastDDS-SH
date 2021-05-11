@@ -44,9 +44,7 @@ intercommunication architecture.
 
 To get a more precise idea on how these YAML files have to be filled and which fields they require
 in order to succesfully configure and launch an *Integration Service* project, please refer to the
-dedicated [configuration](https://integration-service.docs.eprosima.com/en/latest/yaml_config.html) section of the official documentation.
-An illustrative explanation is also presented in the *Readme* `Configuration` section of the
-[general project repository](https://github.com/eProsima/Integration-Service).
+[dedicated configuration section](https://integration-service.docs.eprosima.com/en/latest/yaml_config.html) of the official documentation.
 
 Regarding the *Fast DDS System Handle*, there are several specific parameters which can be configured
 for the DDS middleware. All of these parameters are optional, and fall as suboptions of the main
@@ -80,7 +78,7 @@ five sections described in the *Configuration* chapter of the *Integration Servi
 ## Examples
 
 There are several *Integration Service* examples using the *Fast DDS System Handle* available
-in the project's [main source code repository]([https://](https://github.com/eProsima/Integration-Service/tree/main/examples)).
+in the project's [main source code repository](https://github.com/eProsima/Integration-Service/tree/main/examples).
 
 Some of these examples, where the *Fast DDS System Handle* plays a different role in each of them, are introduced here.
 
