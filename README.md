@@ -82,14 +82,16 @@ in the project's [main source code repository](https://github.com/eProsima/Integ
 
 Some of these examples, where the *Fast DDS System Handle* plays a different role in each of them, are introduced here.
 
-### Publisher/subscriber intercommunication between Fast DDS and ROS 2
+<a href="https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
+
+### DDS - ROS 2 bridge  (publisher -> subscriber)
 
 In this example, *Integration Service* uses both this *Fast DDS System Handle* and the *ROS 2 System Handle*
 to transmit data coming from a Fast DDS publisher into the ROS 2 data space, so that it can be
 consumed by a ROS 2 subscriber on the same topic, and viceversa.
 
 <p align="center">
-  <a href="https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html"><img src="docs/images/dds_ros2_pubsub_example.png" style="display: block; margin-left: auto; margin-right: auto;" width="500"></a>
+  <a href="https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html"><img src="docs/images/dds_ros2_pubsub_example.png" width="500"></a>
 </p>
 
 The configuration file used by *Integration Service* for this example can be found
@@ -113,7 +115,10 @@ which will process them and produce a reply message which will be transmited bac
 For a detailed step by step guide on how to build and test this example, please refer to the
 [official documentation](TODO: link).
 -->
-### Bridging communication between two DDS data spaces under different Domain IDs
+
+<a href="https://integration-service.docs.eprosima.com/en/latest/dds_change_domain.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
+
+### DDS Domain ID change
 
 In this example, *Integration Service* uses the *Fast DDS System Handle*
 to forward the messages sent from a DDS publisher hosted on a participant with domain ID **5** to
@@ -125,7 +130,9 @@ The configuration file for this example can be found
 For a detailed step by step guide on how to build and test this example, please refer to the
 [dedicated section](https://integration-service.docs.eprosima.com/en/latest/dds_change_domain.html) in the official documentation.
 
-### Using Fast DDS TCP WAN tunneling to communicate two applications running on different networks
+<a href="https://integration-service.docs.eprosima.com/en/latest/wan.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
+
+### WAN-TCP tunneling over DDS
 
 The last example depicts how *Integration Service*, along with the *Fast DDS System Handle*, could be useful
 to forward the messages coming from a ROS 2 node running on a certain machine to another ROS 2
