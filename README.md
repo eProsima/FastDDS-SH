@@ -88,7 +88,9 @@ In this example, *Integration Service* uses both this *Fast DDS System Handle* a
 to transmit data coming from a Fast DDS publisher into the ROS 2 data space, so that it can be
 consumed by a ROS 2 subscriber on the same topic, and viceversa.
 
-<a href="https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html"><img src="docs/images/dds_ros2_pubsub_example.png" style="display: block; margin-left: auto; margin-right: auto;" width="500"></a>
+<p align="center">
+  <a href="https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html"><img src="docs/images/dds_ros2_pubsub_example.png" style="display: block; margin-left: auto; margin-right: auto;" width="500"></a>
+</p>
 
 The configuration file used by *Integration Service* for this example can be found
 [here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds_ros2__helloworld.yaml).
