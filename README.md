@@ -124,6 +124,10 @@ In this example, *Integration Service* uses the *Fast DDS System Handle*
 to forward the messages sent from a DDS publisher hosted on a participant with domain ID **5** to
 a subscriber created under domain ID **3**.
 
+<p align="center">
+  <a href="https://integration-service.docs.eprosima.com/en/latest/dds_change_domain.html"><img src="docs/images/dds_domain_id_change.png" width="600"></a>
+</p>
+
 The configuration file for this example can be found
 [here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds__domain_id_change.yaml).
 
