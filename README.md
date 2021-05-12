@@ -87,7 +87,7 @@ Some of these examples, where the *Fast DDS System Handle* plays a different rol
 
 <a href="https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
 
-### DDS - ROS 2 bridge  (publisher -> subscriber)
+### DDS - ROS 2 bridge  (publisher - subscriber)
 
 In this example, *Integration Service* uses both this *Fast DDS System Handle* and the *ROS 2 System Handle*
 to transmit data coming from a Fast DDS publisher into the ROS 2 data space, so that it can be
