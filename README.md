@@ -8,14 +8,14 @@
 
 ### What is a System Handle?
 
-A [System Handle](https://integration-service.docs.eprosima.com/en/latest/sh.html) is a plugin that allows a certain middleware
+A [System Handle](https://integration-service.docs.eprosima.com/en/latest/user_manual/systemhandle/sh.html) is a plugin that allows a certain middleware
 or communication protocol to speak the same language used by the [eProsima Integration Service](https://github.com/eProsima/Integration-Service),
 that is, *Extensible and Dynamic Topic Types for DDS* (**xTypes**);
 specifically, *Integration Service* bases its intercommunication abilities on eProsima's open source
 implementation for the *xTypes* protocol, that is, [eProsima xTypes](https://github.com/eProsima/xtypes).
 
 <p align="center">
-  <a href="https://integration-service.docs.eprosima.com/en/latest/sh.html"><img src="docs/images/system-handle-architecture.png"></a>
+  <a href="https://integration-service.docs.eprosima.com/en/latest/user_manual/systemhandle/sh.html"><img src="docs/images/system-handle-architecture.png"></a>
 </p>
 
 ### The Fast DDS SystemHandle
@@ -47,7 +47,7 @@ intercommunication architecture.
 
 To get a more precise idea on how these YAML files have to be filled and which fields they require
 in order to succesfully configure and launch an *Integration Service* project, please refer to the
-[dedicated configuration section](https://integration-service.docs.eprosima.com/en/latest/yaml_config.html) of the official documentation.
+[dedicated configuration section](https://integration-service.docs.eprosima.com/en/latest/user_manual/yaml_config.html) of the official documentation.
 
 Regarding the *Fast DDS System Handle*, there are several specific parameters which can be configured
 for the DDS middleware. All of these parameters are optional, and fall as suboptions of the main
@@ -85,7 +85,7 @@ in the project's [main source code repository](https://github.com/eProsima/Integ
 
 Some of these examples, where the *Fast DDS System Handle* plays a different role in each of them, are introduced here.
 
-<a href="https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
+<a href="https://integration-service.docs.eprosima.com/en/latest/examples/different_protocols/pubsub/dds-ros2.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
 
 ### DDS - ROS 2 bridge  (publisher - subscriber)
 
@@ -94,14 +94,14 @@ to transmit data coming from a Fast DDS publisher into the ROS 2 data space, so 
 consumed by a ROS 2 subscriber on the same topic, and viceversa.
 
 <p align="center">
-  <a href="https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html"><img src="docs/images/dds_ros2_pubsub_example.png" width="500"></a>
+  <a href="https://integration-service.docs.eprosima.com/en/latest/examples/different_protocols/pubsub/dds-ros2.html"><img src="docs/images/dds_ros2_pubsub_example.png" width="500"></a>
 </p>
 
 The configuration file used by *Integration Service* for this example can be found
 [here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds_ros2__helloworld.yaml).
 
 For a detailed step by step guide on how to build and test this example, please refer to the
-[dedicated section](https://integration-service.docs.eprosima.com/en/latest/dds-ros2.html) in the official documentation.
+[dedicated section](https://integration-service.docs.eprosima.com/en/latest/examples/different_protocols/pubsub/dds-ros2.html) in the official documentation.
 
 <!-- TODO: add YAML and applications for DDS and ROS2 to test this
 ### Fast DDS service server addressing petitions coming from a ROS 2 service client
@@ -119,7 +119,7 @@ For a detailed step by step guide on how to build and test this example, please 
 [official documentation](TODO: link).
 -->
 
-<a href="https://integration-service.docs.eprosima.com/en/latest/dds_change_domain.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
+<a href="https://integration-service.docs.eprosima.com/en/latest/examples/same_protocol/dds_change_domain.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
 
 ### DDS Domain ID change
 
@@ -128,16 +128,16 @@ to forward the messages sent from a DDS publisher hosted on a participant with d
 a subscriber created under domain ID **3**.
 
 <p align="center">
-  <a href="https://integration-service.docs.eprosima.com/en/latest/dds_change_domain.html"><img src="docs/images/dds_domain_id_change.png" width="600"></a>
+  <a href="https://integration-service.docs.eprosima.com/en/latest/examples/same_protocol/dds_change_domain.html"><img src="docs/images/dds_domain_id_change.png" width="600"></a>
 </p>
 
 The configuration file for this example can be found
 [here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds__domain_id_change.yaml).
 
 For a detailed step by step guide on how to build and test this example, please refer to the
-[dedicated section](https://integration-service.docs.eprosima.com/en/latest/dds_change_domain.html) in the official documentation.
+[dedicated section](https://integration-service.docs.eprosima.com/en/latest/examples/same_protocol/dds_change_domain.html) in the official documentation.
 
-<a href="https://integration-service.docs.eprosima.com/en/latest/wan.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
+<a href="https://integration-service.docs.eprosima.com/en/latest/examples/wan_communication/wan_tcp_dds.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
 
 ### WAN-TCP tunneling over DDS
 
@@ -147,18 +147,18 @@ node running on another machine, which are connected to two separate WAN network
 WAN capabilities of *Fast DDS*.
 
 <p align="center">
-  <a href="https://integration-service.docs.eprosima.com/en/latest/wan.html"><img src="docs/images/tcp_wan_dds.png" width="600"></a>
+  <a href="https://integration-service.docs.eprosima.com/en/latest/examples/wan_communication/wan_tcp_dds.html"><img src="docs/images/tcp_wan_dds.png" width="600"></a>
 </p>
 
 The configuration files for this example can be found
 [here](https://github.com/eProsima/Integration-Service/tree/main/examples/wan_tunneling/ros2__wan_helloworld).
 
 For a detailed step by step guide on how to build and test this example, please refer to the
-[dedicated section](https://integration-service.docs.eprosima.com/en/latest/wan.html) in the official documentation.
+[dedicated section](https://integration-service.docs.eprosima.com/en/latest/examples/wan_communication/wan_tcp_dds.html) in the official documentation.
 
 ## Compilation flags
 
-Besides the [global compilation flags](https://integration-service.docs.eprosima.com/en/latest/installation.html#global-compilation-flags) available for the
+Besides the [global compilation flags](https://integration-service.docs.eprosima.com/en/latest/installation_manual/installation.html#global-compilation-flags) available for the
 whole *Integration Service* product suite, there are some specific flags which apply only to the
 *Fast DDS System Handle*; they are listed below:
 
