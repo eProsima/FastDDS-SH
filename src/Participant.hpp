@@ -50,7 +50,7 @@ namespace fastdds {
  *          This class inherits from
  *          <a href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/dds_layer/domain/domainParticipantListener/domainParticipantListener.html">
  *          Fast DDS DomainParticipantListener</a> class to scan for state changes on the DDS
- *          participant created by this *Integration Service* SystemHandle.
+ *          participant created by this *Integration Service* is::SystemHandle.
  */
 class Participant
 {
