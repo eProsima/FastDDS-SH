@@ -34,7 +34,7 @@ jobs:
 
       - name: Build
         run: |
-          colcon build --cmake-args -DBUILD_FASTDDS_TESTS=ON --event-handlers console_direct+
+          colcon build --cmake-args -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_FASTDDS_TESTS=ON --event-handlers console_direct+
 
       - name: Test
         run: |
