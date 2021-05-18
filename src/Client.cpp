@@ -41,8 +41,8 @@ namespace fastdds {
 Client::Client(
         Participant* participant,
         const std::string& service_name,
-        const ::xtypes::DynamicType& request_type,
-        const ::xtypes::DynamicType& reply_type,
+        const xtypes::DynamicType& request_type,
+        const xtypes::DynamicType& reply_type,
         ServiceClientSystem::RequestCallback* callback,
         const YAML::Node& config)
     : participant_(participant)

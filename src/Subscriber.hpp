@@ -43,7 +43,7 @@ class Participant;
 
 /**
  * @class Subscriber
- *        This class represents a <a href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/dds_layer/subscriber/subscriber.html"
+ *        This class represents a <a href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/dds_layer/subscriber/subscriber.html">
  *        Fast DDS Subscriber</a> within the *Integration Service* framework.
  *
  *        Its topic type definition and data instances are represented by means

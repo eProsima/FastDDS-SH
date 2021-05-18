@@ -45,7 +45,7 @@ class Participant;
 /**
  * @class Server
  *        This class represents a DDS Server, built over the publisher/subscriber layer of Fast DDS
- *        using the <a href="https://www.omg.org/spec/DDS-RPC/About-DDS-RPC/" DDS-RPC</a>
+ *        using the <a href="https://www.omg.org/spec/DDS-RPC/About-DDS-RPC/"> DDS-RPC</a>
  *        paradigm, within the *Integration Service* framework.
  *
  *        It is composed of a Fast DDS Publisher, to send the request to the DDS dataspace; plus a
@@ -93,7 +93,7 @@ public:
      * @throws DDSMiddlewareExeption if some error occurs while creating the Fast DDS entities.
      */
     Server(
-            Participant* participant,
+            eprosima::is::sh::fastdds::Participant* participant,
             const std::string& service_name,
             const xtypes::DynamicType& request_type,
             const xtypes::DynamicType& reply_type,
