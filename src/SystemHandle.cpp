@@ -35,11 +35,11 @@ namespace fastdds {
 
 /**
  * @class SystemHandle
- *        This class represents a full *Integration Service* system handle or plugin for the DDS
+ *        This class represents a full *Integration Service* system handle or plugin for the *DDS*
  *        middleware, using eProsima's implementation, <a href="https://fast-dds.docs.eprosima.com/en/latest/">
  *        Fast DDS</a>.
  *
- *        This class inherits from FullSystem, so to implement publisher, subscriber, and server/
+ *        This class inherits from is::FullSystem, so to implement publisher, subscriber, and server/
  *        client operations for the *Integration Service*.
  *
  */

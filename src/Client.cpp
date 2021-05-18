@@ -327,105 +327,111 @@ bool Client::add_config(
 {
     bool callback_set = false;
     // Map discriminator to type from config
+
+    auto add_member_config = [&](
+        const YAML::Node& request_config,
+        std::string& req,
+        bool is_request) -> bool
+            {
+                const std::string disc = request_config.as<std::string>();
+
+                const ::xtypes::DynamicType& member_type = Conversion::resolve_discriminator_type(
+                    is_request ? request_entities_.type : reply_entities_.type, disc);
+
+                std::string type_name;
+                if (member_type.name().find("::") == 0)
+                {
+                    type_name = member_type.name().substr(2);
+                }
+                else
+                {
+                    type_name = member_type.name();
+                }
+
+                type_to_discriminator_[type_name] = disc;
+                member_types_.push_back(type_name);
+
+                if (is_request)
+                {
+                    callbacks_[type_name] = callback;
+                    callback_set = true;
+                    req = type_name;
+                }
+                else
+                {
+                    if (req.empty())
+                    {
+                        logger_ << utils::Logger::Level::ERROR
+                                << "Adding config for service '" << service_name_
+                                << "': request type cannot be empty" << std::endl;
+                        return false;
+                    }
+                    request_reply_[req] = type_name;
+                }
+
+                logger_ << utils::Logger::Level::DEBUG
+                        << "Member '" << disc << "' has "
+                        << (is_request ? "request" : "reply") << " type '"
+                        << req << "'" << std::endl;
+
+                add_member(is_request ? request_entities_.type : reply_entities_.type, disc);
+
+                return true;
+            };
+
     if (config["remap"])
     {
         if (config["remap"]["dds"]) // Or name...
         {
             if (config["remap"]["dds"]["type"])
             {
-                std::string req;
-                std::string disc = config["remap"]["dds"]["type"].as<std::string>();
-                const ::xtypes::DynamicType& member_type =
-                        Conversion::resolve_discriminator_type(request_entities_.type, disc);
-
-                if (member_type.name().find("::") == 0)
-                {
-                    req = member_type.name().substr(2);
-                }
-                else
-                {
-                    req = member_type.name();
-                }
-
-                type_to_discriminator_[req] = disc;
-                callbacks_[req] = callback;
-                callback_set  = true;
-                member_types_.push_back(req);
-
-                logger_ << utils::Logger::Level::DEBUG
-                        << "Member '" << disc << "' has type '"
-                        << req << "'" << std::endl;
-
-                add_member(request_entities_.type, disc);
+                std::string unused;
+                add_member_config(config["remap"]["dds"]["type"], unused, true);
             }
             else
             {
                 std::string req;
                 if (config["remap"]["dds"]["request_type"])
                 {
-                    std::string disc = config["remap"]["dds"]["request_type"].as<std::string>();
-                    const ::xtypes::DynamicType& member_type =
-                            Conversion::resolve_discriminator_type(request_entities_.type, disc);
-
-                    if (member_type.name().find("::") == 0)
-                    {
-                        req = member_type.name().substr(2);
-                    }
-                    else
-                    {
-                        req = member_type.name();
-                    }
-
-                    type_to_discriminator_[req] = disc;
-                    callbacks_[req] = callback;
-                    callback_set  = true;
-                    member_types_.push_back(req);
-
-                    logger_ << utils::Logger::Level::DEBUG
-                            << "Member '" << disc << "' has request type '"
-                            << req << "'" << std::endl;
-
-                    add_member(request_entities_.type, disc);
+                    add_member_config(config["remap"]["dds"]["request_type"], req, true);
                 }
                 if (config["remap"]["dds"]["reply_type"])
                 {
-                    std::string disc = config["remap"]["dds"]["reply_type"].as<std::string>();
-                    const ::xtypes::DynamicType& member_type =
-                            Conversion::resolve_discriminator_type(reply_entities_.type, disc);
-
-                    if (member_type.name().find("::") == 0)
+                    if (!add_member_config(config["remap"]["dds"]["reply_type"], req, false))
                     {
-                        type_to_discriminator_[member_type.name().substr(2)] = disc;
-                        member_types_.push_back(member_type.name().substr(2));
-                        request_reply_[req] = member_type.name().substr(2);
+                        return false;
                     }
-                    else
-                    {
-                        type_to_discriminator_[member_type.name()] = disc;
-                        member_types_.push_back(member_type.name());
-                        request_reply_[req] = member_type.name();
-                    }
-
-                    logger_ << utils::Logger::Level::DEBUG
-                            << "Member '" << disc << "' has reply type '"
-                            << member_type.name() << "'" << std::endl;
-
-                    add_member(reply_entities_.type, disc);
                 }
             }
         }
     }
-    if (!callback_set && config["type"])
-    {
-        std::string req = config["type"].as<std::string>();
-        if (req.find("::") == 0)
-        {
-            req = req.substr(2);
-        }
 
-        callbacks_[req] = callback;
+    if (!callback_set)
+    {
+        if (config["type"])
+        {
+            std::string unused;
+            add_member_config(config["type"], unused, true);
+        }
+        else
+        {
+            std::string req;
+            if (config["request_type"])
+            {
+                add_member_config(config["request_type"], req, true);
+            }
+
+            if (config["reply_type"])
+            {
+                if (!add_member_config(config["reply_type"], req, false))
+                {
+                    return false;
+                }
+            }
+        }
     }
-    return true;
+
+    return callback_set;
 }
 
 void Client::receive_response(

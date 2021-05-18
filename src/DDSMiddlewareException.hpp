@@ -30,7 +30,7 @@ namespace fastdds {
 /**
  * @class DDSMiddlewareException
  *        Launches a runtime error every time an unexpected behaviour occurs
- *        related to *Fast DDS* middleware, when configuring or using this SystemHandle.
+ *        related to *Fast DDS* middleware, when configuring or using this is::SystemHandle.
  */
 class DDSMiddlewareException : public std::runtime_error
 {
