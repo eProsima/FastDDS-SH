@@ -168,7 +168,7 @@ public:
     /**
      * @brief Register a topic into the topics map.
      *
-     * @note This method is a workaround until fastdds::dds::DomainParticipant::find_topic gets implemented.
+     * @note This method is a workaround until `fastdds::dds::DomainParticipant::find_topic` gets implemented.
      *
      * @param[in] topic The name of the topic to register.
      *
@@ -182,7 +182,7 @@ public:
     /**
      * @brief Unregister a topic from the topics map.
      *
-     * @note This method is a workaround until fastdds::dds::DomainParticipant::find_topic gets implemented.
+     * @note This method is a workaround until `fastdds::dds::DomainParticipant::find_topic` gets implemented.
      *
      * @param[in] topic The name of the topic to unregister.
      *
@@ -198,8 +198,8 @@ private:
     /**
      * @brief Create a *Fast DDS DomainParticipant* using a certain profile.
      *
-     * @note This method is a workaround due to v2.0.X versions of *Fast DDS* not including
-     *        this method inside the DomainParticipantFactory class.
+     * @note This method is a workaround due to `v2.0.X` versions of *Fast DDS* not including
+     *        this method inside the *DomainParticipantFactory* class.
      *
      * @param[in] profile_name The XML profile name for the participant.
      *
