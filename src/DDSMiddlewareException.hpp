@@ -30,7 +30,7 @@ namespace fastdds {
 /**
  * @class DDSMiddlewareException
  *        Launches a runtime error every time an unexpected behaviour occurs
- *        related to Fast DDS middleware, when configuring or using this SystemHandle.
+ *        related to *Fast DDS* middleware, when configuring or using this SystemHandle.
  */
 class DDSMiddlewareException : public std::runtime_error
 {
@@ -38,6 +38,8 @@ public:
 
     /**
      * @brief Construct a new DDSMiddlewareException object.
+     *
+     * @param[in] logger The logging tool.
      *
      * @param[in] message The message to throw the runtime error with.
      */

@@ -42,8 +42,8 @@ namespace fastdds {
 Server::Server(
         Participant* participant,
         const std::string& service_name,
-        const ::xtypes::DynamicType& request_type,
-        const ::xtypes::DynamicType& reply_type,
+        const xtypes::DynamicType& request_type,
+        const xtypes::DynamicType& reply_type,
         const YAML::Node& config)
     : participant_(participant)
     , service_name_(service_name)

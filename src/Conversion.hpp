@@ -42,7 +42,7 @@ namespace sh {
 namespace fastdds {
 
 /**
- * TODO(@jamoralp): Remove this workaround once get_union_id() is added to DynamicData class.
+ * TODO(jamoralp): Remove this workaround once get_union_id() is added to DynamicData class.
  * PR: https://github.com/eProsima/Fast-DDS/pull/1903
  */
 class UnionDynamicData : public DynamicData
@@ -167,12 +167,12 @@ private:
 
     // xtypes Dynamic Data -> FastDDS Dynamic Data
     static void set_sequence_data(
-            xtypes::ReadableDynamicDataRef from,
+            ::xtypes::ReadableDynamicDataRef from,
             DynamicData* to);
 
     // xtypes Dynamic Data -> FastDDS Dynamic Data
     static void set_map_data(
-            xtypes::ReadableDynamicDataRef from,
+            ::xtypes::ReadableDynamicDataRef from,
             DynamicData* to);
 
     // xtypes Dynamic Data -> FastDDS Dynamic Data
@@ -183,28 +183,28 @@ private:
 
     // xtypes Dynamic Data -> FastDDS Dynamic Data
     static bool set_struct_data(
-            xtypes::ReadableDynamicDataRef input,
+            ::xtypes::ReadableDynamicDataRef input,
             DynamicData* output);
 
     // xtypes Dynamic Data -> FastDDS Dynamic Data
     static bool set_union_data(
-            xtypes::ReadableDynamicDataRef input,
+            ::xtypes::ReadableDynamicDataRef input,
             DynamicData* output);
 
     // FastDDS Dynamic Data -> xtypes Dynamic Data
     static void set_sequence_data(
             const DynamicData* from,
-            xtypes::WritableDynamicDataRef to);
+            ::xtypes::WritableDynamicDataRef to);
 
     // FastDDS Dynamic Data -> xtypes Dynamic Data
     static void set_map_data(
             const DynamicData* from,
-            xtypes::WritableDynamicDataRef to);
+            ::xtypes::WritableDynamicDataRef to);
 
     // FastDDS Dynamic Data -> xtypes Dynamic Data
     static void set_array_data(
             const DynamicData* from,
-            xtypes::WritableDynamicDataRef to,
+            ::xtypes::WritableDynamicDataRef to,
             const std::vector<uint32_t>& indexes);
 
     // FastDDS Dynamic Data -> xtypes Dynamic Data

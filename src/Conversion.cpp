@@ -421,7 +421,7 @@ void Conversion::set_primitive_data(
 }
 
 void Conversion::set_array_data(
-        ::xtypes::ReadableDynamicDataRef from,
+        xtypes::ReadableDynamicDataRef from,
         DynamicData* to,
         const std::vector<uint32_t>& indexes)
 {

@@ -72,7 +72,7 @@ public:
      *
      *            - `file_path`: Specifies the path to the XML profile that will be used to configure the
      *              *DomainParticipant*. More information on how to write these XML profiles can be found
-     *              <a href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/xml_configuration/xml_configuration.html"
+     *              <a href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/xml_configuration/xml_configuration.html">
      *              here</a>.
      *
      *            - `profile_name`: Provide a name to search for within the profiles defined in the XML
@@ -91,7 +91,7 @@ public:
     virtual ~Participant();
 
     /**
-     * @brief Construct a Fast DDS DomainParticipant, given its DDS domain ID.
+     * @brief Construct a *Fast DDS DomainParticipant*, given its DDS domain ID.
      *
      * @param[in] domain_id The DDS domain ID for this participant.
      *
@@ -156,7 +156,7 @@ public:
             const std::string& name) const;
 
     /**
-     * @brief Get the type' name associated to a certain topic.
+     * @brief Get the type name associated to a certain topic.
      *
      * @param[in] topic The topic whose type is wanted to be retrieved.
      *
@@ -168,16 +168,26 @@ public:
     /**
      * @brief Register a topic into the topics map.
      *
-     * @notes This method is a workaround until fastdds::dds::DomainParticipant::find_topic gets implemented.
+     * @note This method is a workaround until fastdds::dds::DomainParticipant::find_topic gets implemented.
      *
-     * @param[in] topic_name The name of the topic to register.
+     * @param[in] topic The name of the topic to register.
      *
-     * @param[in] topic A pointer to the pointer to be registered
+     * @param[in] entity A pointer to the entity to be registered.
      */
 
     void associate_topic_to_dds_entity(
             ::fastdds::dds::Topic* topic,
             ::fastdds::dds::DomainEntity* entity);
+
+    /**
+     * @brief Unregister a topic from the topics map.
+     *
+     * @note This method is a workaround until fastdds::dds::DomainParticipant::find_topic gets implemented.
+     *
+     * @param[in] topic The name of the topic to unregister.
+     *
+     * @param[in] entity A pointer to the entity to be unregistered.
+     */
 
     bool dissociate_topic_from_dds_entity(
             ::fastdds::dds::Topic* topic,
@@ -186,9 +196,9 @@ public:
 private:
 
     /**
-     * @brief Create a Fast DDS DomainParticipant using a certain profile.
+     * @brief Create a *Fast DDS DomainParticipant* using a certain profile.
      *
-     * @notes This method is a workaround due to v2.0.X versions of Fast DDS not including
+     * @note This method is a workaround due to v2.0.X versions of *Fast DDS* not including
      *        this method inside the DomainParticipantFactory class.
      *
      * @param[in] profile_name The XML profile name for the participant.
