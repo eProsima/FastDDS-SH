@@ -49,8 +49,8 @@ class Participant;
  *        Its topic type definition and data instances are represented by means
  *        of the <a href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/dynamic_types/dynamic_types.html">
  *        Fast DDS Dynamic Types</a> API, which allows to get rid of
- *        typesupport for each used type and eases users the task of defining and using their own custom
- *        types on the go, by means of a valid IDL definition.
+ *        TypeSupport for each used type and eases users the task of defining and using their own custom
+ *        types on the go, by means of a valid *IDL* definition.
  *
  *        This class inherits from <a href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/dds_layer/subscriber/dataReaderListener/dataReaderListener.html">
  *        Fast DDS Data Reader Listener</a> for reacting to datareader events,
@@ -73,7 +73,7 @@ public:
      * @param[in] is_callback Callback function signature defined by the *Integration Service*,
      *            triggered each time a new data arrives to the DDS Subscriber.
      *
-     * @throws DDSMiddlewareException if some error occurs while creating the Fast DDS subscriber.
+     * @throws DDSMiddlewareException if some error occurs while creating the *Fast DDS* subscriber.
      */
     Subscriber(
             Participant* participant,

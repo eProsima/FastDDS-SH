@@ -46,19 +46,19 @@ class Participant;
 
 /**
  * @class Client
- *        This class represents a DDS Client, built over the publisher/subscriber layer of Fast DDS
+ *        This class represents a DDS Client, built over the publisher/subscriber layer of *Fast DDS*
  *        using the <a href="https://www.omg.org/spec/DDS-RPC/About-DDS-RPC/"> DDS-RPC</a>
  *        paradigm, within the *Integration Service* framework.
  *
- *        It is composed of a Fast DDS Subscriber, to listen for requests coming from the DDS
- *        dataspace; plus a Fast DDS Publisher, to send replies from the *Integration Service* back
+ *        It is composed of a *Fast DDS* Subscriber, to listen for requests coming from the DDS
+ *        dataspace; plus a *Fast DDS* Publisher, to send replies from the *Integration Service* back
  *        to the DDS service client application.
  *
  *        Its topic type definition and data instances for request and reply types are represented by means
  *        of the <a href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/dynamic_types/dynamic_types.html">
  *        Fast DDS Dynamic Types</a> API, which allows to get rid of
- *        typesupport for each used type and eases users the task of defining and using their own custom
- *        types on the go, by means of a valid IDL definition.
+ *        TypeSupport for each used type and eases users the task of defining and using their own custom
+ *        types on the go, by means of a valid *IDL* definition.
  *
  *        This class inherits from <a href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/dds_layer/subscriber/dataReaderListener/dataReaderListener.html">
  *        Fast DDS Data Reader Listener</a> and from <a href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/dds_layer/publisher/dataWriterListener/dataWriterListener.html">
@@ -146,7 +146,7 @@ public:
      *        It allows to resolve complex type remappings, which remap to a specific type member,
      *        for example, an UnionType member, by means of the dot `.` operator.
      *
-     * @param[in] configuration The YAML configuration containing the remapping to be applied.
+     * @param[in] configuration The *YAML* configuration containing the remapping to be applied.
      *
      * @param[in] callback The callback that gets triggered when a client has made a request.
      */

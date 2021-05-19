@@ -47,8 +47,8 @@ class Participant;
  *        Its topic type definition and data instances are represented by means
  *        of the <a href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/dynamic_types/dynamic_types.html">
  *        Fast DDS Dynamic Types</a> API, which allows to get rid of
- *        typesupport for each used type and eases users the task of defining and using their own custom
- *        types on the go, by means of a valid IDL definition.
+ *        TypeSupport for each used type and eases users the task of defining and using their own custom
+ *        types on the go, by means of a valid *IDL* definition.
  *
  *        This class inherits from <a href="https://fast-dds.docs.eprosima.com/en/latest/fastdds/dds_layer/publisher/dataWriterListener/dataWriterListener.html">
  *        Fast DDS Data Writer Listener</a> for reacting to datawriter events,
@@ -70,11 +70,11 @@ public:
      *
      * @param[in] message_type A dynamic type definition of the topic's type.
      *
-     * @param[in] config Specific configuration regarding this publisher, in YAML format.
+     * @param[in] config Specific configuration regarding this publisher, in *YAML* format.
      *            Allowed fields are:
      *            - `service_instance_name`: Specify the DDS RPC service instance name property.
      *
-     * @throws DDSMiddlewareException if some error occurs while creating the Fast DDS publisher.
+     * @throws DDSMiddlewareException if some error occurs while creating the *Fast DDS* publisher.
      */
     Publisher(
             Participant* participant,
