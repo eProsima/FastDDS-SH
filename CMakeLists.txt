@@ -239,7 +239,6 @@ if(BUILD_API_REFERENCE)
 
     set(IS_FASTDDS_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/src")
     file(GLOB_RECURSE HPP_FILES "${IS_FASTDDS_INCLUDE_DIR}/*.h*")
-    message(WARNING "HPP FILES ${HPP_FILES}")
 
     # Doxygen related variables
     set(DOXYGEN_INPUT_DIR "${IS_FASTDDS_INCLUDE_DIR}/")

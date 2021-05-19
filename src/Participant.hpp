@@ -65,10 +65,10 @@ public:
 
     /**
      * @brief Construct a new Participant object with the user-provided parameters
-     *        in the YAML configuration file.
+     *        in the *YAML* configuration file.
      *
      * @param[in] config The configuration provided by the user.
-     *            It must contain two keys in the YAML map:
+     *            It must contain two keys in the *YAML* map:
      *
      *            - `file_path`: Specifies the path to the XML profile that will be used to configure the
      *              *DomainParticipant*. More information on how to write these XML profiles can be found
