@@ -115,7 +115,7 @@ public:
     /**
      * @brief Handle the receiving of a new message from the DDS dataspace.
      *
-     * @param[in] dds_message The incomming message.
+     * @param[in] dds_message The incoming message.
      */
     void receive(
             const fastrtps::types::DynamicData* dds_message);
