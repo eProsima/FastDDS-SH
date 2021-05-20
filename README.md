@@ -103,21 +103,23 @@ The configuration file used by *Integration Service* for this example can be fou
 For a detailed step by step guide on how to build and test this example, please refer to the
 [dedicated section](https://integration-service.docs.eprosima.com/en/latest/examples/different_protocols/pubsub/dds-ros2.html) in the official documentation.
 
-<!-- TODO: add YAML and applications for DDS and ROS2 to test this
-### Fast DDS service server addressing petitions coming from a ROS 2 service client
+<a href="https://integration-service.docs.eprosima.com/en/latest/examples/different_protocols/services/dds-server.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
 
-The configuration file for this example can be found
-[here](TODO).
+### DDS service server
 
-Below, a high level diagram is presented, showing which entities will *Integration Service* create
-to forward the petitions requested from a ROS 2 client application to a DDS service server application,
-which will process them and produce a reply message which will be transmited back to the ROS 2 client:
+In this example, the *Fast DDS System Handle* tackles the task of bridging a DDS server with one or more client applications,
+playing the role of a service server capable of processing incoming requests from several middlewares (*ROS1*, *ROS2*,
+*WebSocket*) and producing an appropriate answer for them.
 
-![DDS_server_and_ROS2_client](TODO)
+<p align="center">
+  <a href="https://integration-service.docs.eprosima.com/en/latest/examples/different_protocols/services/dds-server.html"><img src="docs/images/dds_services_example.png" width="600"></a>
+</p>
+
+The configuration file used by *Integration Service* for this example can be found
+[here](https://github.com/eProsima/Integration-Service/blob/main/examples/basic/fastdds_server__addtwoints.yaml).
 
 For a detailed step by step guide on how to build and test this example, please refer to the
-[official documentation](TODO: link).
--->
+[dedicated section](https://integration-service.docs.eprosima.com/en/latest/examples/different_protocols/services/dds-server.html) in the official documentation.
 
 <a href="https://integration-service.docs.eprosima.com/en/latest/examples/same_protocol/dds_change_domain.html"><img align="left" width="15" height="38" src="https://via.placeholder.com/15/40c15d/000000?text=+" alt="Green icon"></a>
 
@@ -171,9 +173,14 @@ whole *Integration Service* product suite, there are some specific flags which a
   ~/is_ws$ colcon build --cmake-args -DBUILD_FASTDDS_TESTS=ON
   ```
 
-<!-- TODO: complete when it is uploaded to read the docs
-## API Reference
--->
+## Documentation
+
+The official documentation for the *Fast DDS System Handle* is included within the official *Integration Service*
+documentation, hosted by [Read the Docs](https://integration-service.docs.eprosima.com/), and comprises the following sections:
+
+* [Installation Manual](https://integration-service.docs.eprosima.com/en/latest/installation_manual/installation_manual.html)
+* [User Manual](https://integration-service.docs.eprosima.com/en/latest/user_manual/systemhandle/fastdds_sh.html)
+* [API Reference](https://integration-service.docs.eprosima.com/en/latest/api_reference/fastdds_sh/api_is_fastdds_sh.html)
 
 ## License
 
