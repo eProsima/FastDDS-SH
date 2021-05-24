@@ -36,6 +36,12 @@ This *System Handle* can be used for three main purposes:
 
 1. Creating a *TCP tunnel*, by running an *Integration Service* instance on each of the
   machines you want to establish a communication between.
+  
+## Dependencies
+
+This section provides a list of the dependencies needed in order to compile *FastDDS System Handle*. 
+
+* [FastDDS](https://github.com/eProsima/Fast-DDS#installation-guide): eProsima C++ implementation for *DDS*.
 
 ## Configuration
 
