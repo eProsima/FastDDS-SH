@@ -3,6 +3,7 @@
 # Fast DDS System Handle
 
 [![FastDDS SH CI Status](https://github.com/eProsima/FastDDS-SH/actions/workflows/ci.yml/badge.svg)](https://github.com/eProsima/FastDDS-SH/actions)
+&nbsp;&nbsp;[![Have an issue?](https://img.shields.io/badge/-Open%20an%20issue-orange)](https://github.com/eProsima/Integration-Service/issues)
 
 ## Introduction
 
