@@ -4,9 +4,15 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   pull_request:
     branches:
       - '**'
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
 
 jobs:
   fastdds-sh_CI:
