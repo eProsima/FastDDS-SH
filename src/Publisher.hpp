@@ -119,6 +119,13 @@ public:
     bool publish(
             const xtypes::DynamicData& message) override;
 
+    /**
+     * @brief Get the dds instancehandle object TODO docs
+     *
+     * @returns
+     */
+    const fastrtps::rtps::InstanceHandle_t get_dds_instance_handle() const;
+
 private:
 
     /**

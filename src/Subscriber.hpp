@@ -25,6 +25,7 @@
 #include <is/utils/Log.hpp>
 
 #include <fastdds/dds/subscriber/Subscriber.hpp>
+#include <fastdds/dds/subscriber/SampleInfo.hpp>
 
 #include <thread>
 #include <condition_variable>
@@ -118,7 +119,8 @@ public:
      * @param[in] dds_message The incoming message.
      */
     void receive(
-            const fastrtps::types::DynamicData* dds_message);
+            const fastrtps::types::DynamicData* dds_message,
+            ::fastdds::dds::SampleInfo sample_info);
 
 private:
 

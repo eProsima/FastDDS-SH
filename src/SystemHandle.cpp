@@ -132,6 +132,25 @@ public:
         }
     }
 
+    bool is_internal_message(
+            void* filter_handle)
+    {
+        ::fastdds::dds::SampleInfo* sample_info = static_cast<::fastdds::dds::SampleInfo*>(filter_handle);
+
+        for (const auto& publisher : publishers_)
+        {
+            if (sample_info->publication_handle == publisher->get_dds_instance_handle())
+            {
+                logger_ << utils::Logger::Level::WARN
+                        << "Received internal message in the subscriber. Ignore it..." << std::endl;
+                // This is a message published FROM Integration Service. Discard it.
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     std::shared_ptr<TopicPublisher> advertise(
             const std::string& topic_name,
             const xtypes::DynamicType& message_type,
