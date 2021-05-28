@@ -137,15 +137,15 @@ public:
     {
         ::fastdds::dds::SampleInfo* sample_info = static_cast<::fastdds::dds::SampleInfo*>(filter_handle);
 
-        for (const auto& publisher : publishers_)
+        auto sample_writer_guid = fastrtps::rtps::iHandle2GUID(sample_info->publication_handle);
+
+        if (sample_writer_guid.guidPrefix == participant_->get_dds_participant()->guid().guidPrefix)
+
         {
-            if (sample_info->publication_handle == publisher->get_dds_instance_handle())
-            {
-                logger_ << utils::Logger::Level::WARN
-                        << "Received internal message in the subscriber. Ignore it..." << std::endl;
-                // This is a message published FROM Integration Service. Discard it.
-                return true;
-            }
+            logger_ << utils::Logger::Level::WARN
+                    << "Received internal message in the subscriber. Ignore it..." << std::endl;
+            // This is a message published FROM Integration Service. Discard it.
+            return true;
         }
 
         return false;
