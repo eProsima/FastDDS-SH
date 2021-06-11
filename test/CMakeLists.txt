@@ -124,12 +124,6 @@ else()
         )
 endif()
 
-configure_file(
-    integration/resources/test_service.idl
-    ${PROJECT_BINARY_DIR}/test/test_service.idl
-    COPYONLY
-    )
-
 add_gtest(${PROJECT_NAME}-integration-test
     SOURCES
         integration/roundtrip.cpp
