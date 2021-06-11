@@ -19,8 +19,12 @@
 #include <is/core/Instance.hpp>
 
 #include "../../src/DDSMiddlewareException.hpp"
+#include "../../src/Conversion.hpp"
 
 #include <fastrtps/fastrtps_all.h>
+
+#include <fastrtps/types/DynamicDataFactory.h>
+#include <fastrtps/types/MemberDescriptor.h>
 
 #include <fastdds/dds/domain/DomainParticipantFactory.hpp>
 #include <fastdds/dds/domain/DomainParticipantListener.hpp>
@@ -33,8 +37,6 @@
 #include <fastdds/dds/subscriber/DataReader.hpp>
 #include <fastdds/dds/subscriber/qos/DataReaderQos.hpp>
 #include <fastdds/dds/subscriber/SampleInfo.hpp>
-
-#include "resources/test_service/test_servicePubSubTypes.h"
 
 #include <gtest/gtest.h>
 
@@ -55,27 +57,139 @@ namespace sh {
 namespace fastdds {
 namespace test {
 
-class FastDDSTest
+static const std::string service_request_idl =
+        R"(
+    struct Method0_In // If the data is "TEST", then success will be true.
+    {
+        string data;
+    };
+
+    struct Method1_In // a + b = result
+    {
+        int32 a;
+        int32 b;
+    };
+
+    struct Method2_In
+    {
+        float data; // Echoes data
+    };
+
+    union TestService_Call switch (uint32)
+    {
+        case 0: Method0_In method0;
+        case 1: Method1_In method1;
+        case 2: Method2_In method2;
+    };
+
+    struct TestService_Request
+    {
+        TestService_Call data;
+    };)";
+
+static const std::string service_reply_idl =
+        R"(
+    struct Method0_Result // If the data is "TEST", then success will be true.
+    {
+        boolean success;
+    };
+    struct Method1_Result
+    {
+        int32 result; // a + b = result
+    };
+    struct Method2_Result
+    {
+        float data; // Echoes data
+    };
+    union TestService_Return switch (int32)
+    {
+        case 0: Method0_Result method0;
+        case 1: Method1_Result method1;
+        case 2: Method2_Result method2;
+    };
+
+    struct TestService_Reply
+    {
+        TestService_Return reply;
+    };)";
+
+class FastDDSServicesTest
     : public ::fastdds::dds::DataWriterListener
 {
 public:
 
-    FastDDSTest(
+    FastDDSServicesTest(
             bool server,
             std::mutex& mtx)
         : ::fastdds::dds::DataWriterListener()
         , participant_factory_(::fastdds::dds::DomainParticipantFactory::get_instance())
-        , tsType_req_(new TestService_RequestPubSubType())
-        , tsType_rep_(new TestService_ReplyPubSubType())
         , server_(server)
         , mutex_(mtx)
         , matched_mutex_()
     {
+        auto create_typesupport =
+                [&](
+            const std::string& type_name,
+            const std::string& idl,
+            fastrtps::types::DynamicPubSubType& dynamic_typesupport)
+                {
+                    xtypes::idl::Context context = xtypes::idl::parse(idl);
+                    if (!context.success)
+                    {
+                        throw DDSMiddlewareException(
+                                  logger, "IDL definition for type " + type_name + " is incorrect");
+                    }
+
+                    xtypes::DynamicType::Ptr type = context.module().type(type_name);
+                    if (nullptr == type.get())
+                    {
+                        throw DDSMiddlewareException(logger, "Could not retrieve service type '"
+                                      + type_name + "' from the IDL definition");
+                    }
+
+                    fastrtps::types::DynamicTypeBuilder* builder =
+                            Conversion::create_builder(*type);
+                    if (!builder)
+                    {
+                        throw DDSMiddlewareException(
+                                  logger, "Cannot create builder for type " + type_name);
+                    }
+
+                    fastrtps::types::DynamicType_ptr dtptr = builder->build();
+                    if (!dtptr)
+                    {
+                        throw DDSMiddlewareException(
+                                  logger, "Could not build DynamicType_ptr for type " + type_name);
+                    }
+
+                    dynamic_typesupport = fastrtps::types::DynamicPubSubType(dtptr);
+                    dynamic_typesupport.setName(type_name.c_str());
+                    /**
+                     * The following lines are added here so that a bug with UnionType in
+                     * Fast DDS Dynamic Types is bypassed. This is a workaround and SHOULD
+                     * be removed once this bug is solved.
+                     * Until that moment, the Fast DDS SystemHandle will not be compatible with
+                     * Fast DDS Dynamic Type Discovery mechanism.
+                     *
+                     * More information here: https://eprosima.easyredmine.com/issues/11349
+                     */
+                    // WORKAROUND START
+                    dynamic_typesupport.auto_fill_type_information(false);
+                    dynamic_typesupport.auto_fill_type_object(false);
+                    // WORKAROUND END
+                };
+
+        // Parse IDL and generate dynamic typesupport for service request type
+        create_typesupport("TestService_Request", service_request_idl, tsType_req_);
+
+        // Parse IDL and generate dynamic typesupport for service reply type
+        create_typesupport("TestService_Reply", service_reply_idl, tsType_rep_);
+
         // Create participant
         ::fastdds::dds::DomainId_t default_domain_id(3);
         ::fastdds::dds::DomainParticipantQos participant_qos = ::fastdds::dds::PARTICIPANT_QOS_DEFAULT;
 
-        participant_qos.name(server ? "FastDDSTestServer" : "FastDDSTestClient");
+        participant_qos.name(server ? "FastDDSServicesTestServer" : "FastDDSServicesTestClient");
 
         participant_ = participant_factory_->create_participant(
             default_domain_id, participant_qos);
@@ -92,7 +206,6 @@ public:
         // Register types
         participant_->register_type(tsType_req_);
         participant_->register_type(tsType_rep_);
-
         // Create publisher entities
         publisher_ = participant_->create_publisher(::fastdds::dds::PUBLISHER_QOS_DEFAULT);
 
@@ -103,7 +216,7 @@ public:
 
         pub_topic_ = participant_->create_topic(
             server ? "TestService_Reply" : "TestService_Request",
-            server ? tsType_rep_.get_type_name() : tsType_req_.get_type_name(),
+            server ? tsType_rep_.getName() : tsType_req_.getName(),
             ::fastdds::dds::TOPIC_QOS_DEFAULT);
 
         if (!pub_topic_)
@@ -141,7 +254,7 @@ public:
 
         sub_topic_ = participant_->create_topic(
             server ? "TestService_Request" : "TestService_Reply",
-            server ? tsType_req_.get_type_name() : tsType_rep_.get_type_name(),
+            server ? tsType_req_.getName() : tsType_rep_.getName(),
             ::fastdds::dds::TOPIC_QOS_DEFAULT);
 
         if (!sub_topic_)
@@ -168,11 +281,11 @@ public:
         }
     }
 
-    ~FastDDSTest()
+    ~FastDDSServicesTest()
     {
         // Unregister types
-        participant_->unregister_type(tsType_req_.get_type_name());
-        participant_->unregister_type(tsType_rep_.get_type_name());
+        participant_->unregister_type(tsType_req_.getName());
+        participant_->unregister_type(tsType_rep_.getName());
 
         // Delete subscriber entities
         subscriber_->delete_datareader(datareader_);
@@ -191,29 +304,59 @@ public:
     std::future<eprosima::xtypes::DynamicData> request(
             const eprosima::xtypes::DynamicData& data)
     {
-        TestService_Request request;
+        const fastrtps::types::DynamicType_ptr& req_type = tsType_req_.GetDynamicType();
+        fastrtps::types::DynamicData* req_msg =
+                fastrtps::types::DynamicDataFactory::get_instance()->create_data(req_type);
+        fastrtps::types::MemberId req_id = req_msg->get_member_id_by_name("data");
+        fastrtps::types::DynamicData* request = req_msg->loan_value(req_id);
 
-        if (data.type().name() == "Method0_In")
+        if ("Method0_In" == data.type().name())
         {
-            Method0_In in;
-            in.data(data["data"]);
-            request.data().method0(in);
-        }
-        else if (data.type().name() == "Method1_In")
-        {
-            Method1_In in;
-            in.a(data["a"]);
-            in.b(data["b"]);
-            request.data().method1(in);
-        }
-        else if (data.type().name() == "Method2_In")
-        {
-            Method2_In in;
-            in.data(data["data"]);
-            request.data().method2(in);
-        }
+            fastrtps::types::MemberId u_req_id = request->get_member_id_by_name("method0");
+            fastrtps::types::DynamicData* method0_in = request->loan_value(u_req_id);
 
-        datawriter_->write(static_cast<void*>(&request));
+            if (!Conversion::xtypes_to_fastdds(data, method0_in))
+            {
+                throw DDSMiddlewareException(
+                          logger, "Error converting from xTypes to FastDDS DynamicData for type"
+                          + data.type().name());
+            }
+            request->return_loaned_value(method0_in);
+        }
+        else if ("Method1_In" == data.type().name())
+        {
+            fastrtps::types::MemberId u_req_id = request->get_member_id_by_name("method1");
+            fastrtps::types::DynamicData* method1_in = request->loan_value(u_req_id);
+
+            if (!Conversion::xtypes_to_fastdds(data, method1_in))
+            {
+                throw DDSMiddlewareException(
+                          logger, "Error converting from xTypes to FastDDS DynamicData for type"
+                          + data.type().name());
+            }
+            request->return_loaned_value(method1_in);
+        }
+        else if ("Method2_In" == data.type().name())
+        {
+            fastrtps::types::MemberId u_req_id = request->get_member_id_by_name("method2");
+            fastrtps::types::DynamicData* method2_in = request->loan_value(u_req_id);
+
+            if (!Conversion::xtypes_to_fastdds(data, method2_in))
+            {
+                throw DDSMiddlewareException(
+                          logger, "Error converting from xTypes to FastDDS DynamicData for type"
+                          + data.type().name());
+            }
+            request->return_loaned_value(method2_in);
+        }
+        else
+        {
+            throw DDSMiddlewareException(
+                      logger, "DDS Client: invalid request type: " + data.type().name());
+        }
+        req_msg->return_loaned_value(request);
+
+        datawriter_->write(static_cast<void*>(request));
         delete promise_;
         promise_ = new std::promise<eprosima::xtypes::DynamicData>();
         return promise_->get_future();
@@ -244,8 +387,8 @@ private:
     ::fastdds::dds::Topic* pub_topic_;
     ::fastdds::dds::DataWriter* datawriter_;
 
-    ::fastdds::dds::TypeSupport tsType_req_;
-    ::fastdds::dds::TypeSupport tsType_rep_;
+    fastrtps::types::DynamicPubSubType tsType_req_;
+    fastrtps::types::DynamicPubSubType tsType_rep_;
 
     std::promise<eprosima::xtypes::DynamicData>* promise_ = nullptr;
     bool server_;
@@ -258,12 +401,12 @@ private:
     private:
 
         ::fastdds::dds::DataWriter* datawriter_;
-        FastDDSTest* test_;
+        FastDDSServicesTest* test_;
 
     public:
 
         void publisher(
-                FastDDSTest* test,
+                FastDDSServicesTest* test,
                 ::fastdds::dds::DataWriter* datawriter)
         {
             test_ = test;
@@ -276,11 +419,13 @@ private:
         {
             if (1 == info.current_count_change)
             {
-                std::cout << "Subscriber for Request matched" << std::endl;
+                logger << utils::Logger::Level::INFO
+                       << "Subscriber for Request matched" << std::endl;
             }
             else if (-1 == info.current_count_change)
             {
-                std::cout << "Subscriber for Request unmatched" << std::endl;
+                logger << utils::Logger::Level::INFO
+                       << "Subscriber for Request unmatched" << std::endl;
             }
 
             std::unique_lock<std::mutex> lock(test_->matched_mutex_);
@@ -295,11 +440,17 @@ private:
                 ::fastdds::dds::DataReader* reader) override
         {
             ::fastdds::dds::SampleInfo info;
-            TestService_Request req_msg;
-            TestService_Reply rep_msg;
+
+            const fastrtps::types::DynamicType_ptr& req_type = test_->tsType_req_.GetDynamicType();
+            fastrtps::types::DynamicData* req_msg =
+                    fastrtps::types::DynamicDataFactory::get_instance()->create_data(req_type);
+
+            const fastrtps::types::DynamicType_ptr& rep_type = test_->tsType_rep_.GetDynamicType();
+            fastrtps::types::DynamicData* rep_msg =
+                    fastrtps::types::DynamicDataFactory::get_instance()->create_data(rep_type);
 
             if (fastrtps::types::ReturnCode_t::RETCODE_OK ==
-                    reader->take_next_sample(&req_msg, &info))
+                    reader->take_next_sample(req_msg, &info))
             {
 #if FASTRTPS_VERSION_MINOR < 2
                 if (::fastdds::dds::InstanceStateKind::ALIVE == info.instance_state)
@@ -307,45 +458,94 @@ private:
                 if (::fastdds::dds::InstanceStateKind::ALIVE_INSTANCE_STATE == info.instance_state)
 #endif //  if FASTRTPS_VERSION_MINOR < 2
                 {
-                    const TestService_Call& request = req_msg.data();
-                    TestService_Return& reply = rep_msg.reply();
+                    fastrtps::types::MemberId req_id = req_msg->get_member_id_by_name("data");
+                    fastrtps::types::DynamicData* request = req_msg->loan_value(req_id);
+
+                    fastrtps::types::MemberId rep_id = rep_msg->get_member_id_by_name("reply");
+                    fastrtps::types::DynamicData* reply = rep_msg->loan_value(rep_id);
+
                     fastrtps::rtps::WriteParams params;
                     params.related_sample_identity(info.sample_identity);
 
-                    switch (request._d())
+                    // Get active member
+                    UnionDynamicData* u_request = static_cast<UnionDynamicData*>(request);
+                    fastrtps::types::MemberId u_req_id = u_request->get_union_id();
+                    fastrtps::types::MemberDescriptor u_req_descriptor;
+                    request->get_descriptor(u_req_descriptor, u_req_id);
+
+                    if ("method0" == u_req_descriptor.get_name())
                     {
-                        case 0: // If the data is "TEST", then success will be true.
+                        fastrtps::types::DynamicData* method0_in = request->loan_value(u_req_id);
+                        fastrtps::types::MemberId u_rep_id = reply->get_member_id_by_name("method0");
+                        fastrtps::types::DynamicData* method0_result = reply->loan_value(u_rep_id);
+
+                        std::string data;
+                        fastrtps::types::MemberId method0_in_data_id =
+                                method0_in->get_member_id_by_name("data");
+                        method0_in->get_string_value(data, method0_in_data_id);
+                        request->return_loaned_value(method0_in);
+
+                        fastrtps::types::MemberId method0_result_success_id =
+                                method0_result->get_member_id_by_name("success");
+                        if ("TEST" == data)
                         {
-                            const Method0_In& input = request.method0();
-                            Method0_Result output;
-                            output.success(false);
-                            if (input.data() == "TEST")
-                            {
-                                output.success(true);
-                            }
-                            reply.method0(output);
-                            datawriter_->write(&rep_msg, params);
-                            break;
+                            method0_result->set_bool_value(true, method0_result_success_id);
                         }
-                        case 1: // a + b = result
+                        else
                         {
-                            const Method1_In& input = request.method1();
-                            Method1_Result output;
-                            output.result(input.a() + input.b());
-                            reply.method1(output);
-                            datawriter_->write(&rep_msg, params);
-                            break;
+                            method0_result->set_bool_value(false, method0_result_success_id);
                         }
-                        case 2: // Echoes data
-                        {
-                            const Method2_In& input = request.method2();
-                            Method2_Result output;
-                            output.data(input.data());
-                            reply.method2(output);
-                            datawriter_->write(&rep_msg, params);
-                            break;
-                        }
+                        reply->return_loaned_value(method0_result);
                     }
+                    else if ("method1" == u_req_descriptor.get_name())
+                    {
+                        fastrtps::types::DynamicData* method1_in = request->loan_value(u_req_id);
+                        fastrtps::types::MemberId u_rep_id = reply->get_member_id_by_name("method1");
+                        fastrtps::types::DynamicData* method1_result = reply->loan_value(u_rep_id);
+
+                        int32_t a;
+                        int32_t b;
+                        fastrtps::types::MemberId method1_in_a_id =
+                                method1_in->get_member_id_by_name("a");
+                        fastrtps::types::MemberId method1_in_b_id =
+                                method1_in->get_member_id_by_name("b");
+                        method1_in->get_int32_value(a, method1_in_a_id);
+                        method1_in->get_int32_value(b, method1_in_b_id);
+                        request->return_loaned_value(method1_in);
+
+                        fastrtps::types::MemberId method1_result_result_id =
+                                method1_result->get_member_id_by_name("result");
+                        method1_result->set_int32_value(a + b, method1_result_result_id);
+                        reply->return_loaned_value(method1_result);
+                    }
+                    else if ("method2" == u_req_descriptor.get_name())
+                    {
+                        fastrtps::types::DynamicData* method2_in = request->loan_value(u_req_id);
+                        fastrtps::types::MemberId u_rep_id = reply->get_member_id_by_name("method2");
+                        fastrtps::types::DynamicData* method2_result = reply->loan_value(u_rep_id);
+
+                        float data;
+                        fastrtps::types::MemberId method2_in_data_id =
+                                method2_in->get_member_id_by_name("data");
+                        method2_in->get_float32_value(data, method2_in_data_id);
+                        request->return_loaned_value(method2_in);
+
+                        fastrtps::types::MemberId method2_result_data_id =
+                                method2_result->get_member_id_by_name("data");
+                        method2_result->set_float32_value(data, method2_result_data_id);
+                        reply->return_loaned_value(method2_result);
+                    }
+                    else
+                    {
+                        throw DDSMiddlewareException(logger,
+                                      "DDS Server: received request with invalid member name" +
+                                      u_req_descriptor.get_name());
+                    }
+
+                    req_msg->return_loaned_value(request);
+                    rep_msg->return_loaned_value(reply);
+
+                    datawriter_->write(rep_msg, params);
                 }
             }
         }
@@ -358,7 +558,7 @@ private:
     {
     private:
 
-        FastDDSTest* test_;
+        FastDDSServicesTest* test_;
         eprosima::xtypes::DynamicType::Ptr method0_reply_type;
         eprosima::xtypes::DynamicType::Ptr method1_reply_type;
         eprosima::xtypes::DynamicType::Ptr method2_reply_type;
@@ -366,7 +566,7 @@ private:
     public:
 
         void publisher(
-                FastDDSTest* test)
+                FastDDSServicesTest* test)
         {
             test_ = test;
 
@@ -406,10 +606,12 @@ private:
                 ::fastdds::dds::DataReader* reader) override
         {
             ::fastdds::dds::SampleInfo info;
-            TestService_Reply rep_msg;
+            const fastrtps::types::DynamicType_ptr& rep_type = test_->tsType_rep_.GetDynamicType();
+            fastrtps::types::DynamicData* rep_msg =
+                    fastrtps::types::DynamicDataFactory::get_instance()->create_data(rep_type);
 
             if (fastrtps::types::ReturnCode_t::RETCODE_OK ==
-                    reader->take_next_sample(&rep_msg, &info))
+                    reader->take_next_sample(rep_msg, &info))
             {
 #if FASTRTPS_VERSION_MINOR < 2
                 if (::fastdds::dds::InstanceStateKind::ALIVE == info.instance_state)
@@ -417,31 +619,68 @@ private:
                 if (::fastdds::dds::InstanceStateKind::ALIVE_INSTANCE_STATE == info.instance_state)
 #endif //  if FASTRTPS_VERSION_MINOR < 2
                 {
-                    switch (rep_msg.reply()._d())
+                    fastrtps::types::MemberId rep_id = rep_msg->get_member_id_by_name("reply");
+                    fastrtps::types::DynamicData* reply = rep_msg->loan_value(rep_id);
+
+                    // Get active member
+                    UnionDynamicData* u_reply = static_cast<UnionDynamicData*>(reply);
+                    fastrtps::types::MemberId u_rep_id = u_reply->get_union_id();
+                    fastrtps::types::MemberDescriptor u_rep_descriptor;
+                    reply->get_descriptor(u_rep_descriptor, u_rep_id);
+
+                    if ("method0" == u_rep_descriptor.get_name())
                     {
-                        case 0:
-                        {
-                            eprosima::xtypes::DynamicData reply(*method0_reply_type);
-                            reply["success"] = rep_msg.reply().method0().success();
-                            test_->promise_->set_value(std::move(reply));
-                            return;
-                        }
-                        case 1:
-                        {
-                            eprosima::xtypes::DynamicData reply(*method1_reply_type);
-                            reply["result"] = rep_msg.reply().method1().result();
-                            test_->promise_->set_value(std::move(reply));
-                            return;
-                        }
-                        case 2:
-                        {
-                            eprosima::xtypes::DynamicData reply(*method2_reply_type);
-                            reply["data"] = rep_msg.reply().method2().data();
-                            test_->promise_->set_value(std::move(reply));
-                            return;
-                        }
+                        fastrtps::types::MemberId u_rep_id = reply->get_member_id_by_name("method0");
+                        fastrtps::types::DynamicData* method0_result = reply->loan_value(u_rep_id);
+                        fastrtps::types::MemberId method0_result_success_id =
+                                method0_result->get_member_id_by_name("success");
+
+                        xtypes::DynamicData xtypes_reply(*method0_reply_type);
+                        bool success;
+                        method0_result->get_bool_value(success, method0_result_success_id);
+                        reply->return_loaned_value(method0_result);
+                        xtypes_reply["success"] = success;
+                        test_->promise_->set_value(std::move(xtypes_reply));
                     }
+                    else if ("method1" == u_rep_descriptor.get_name())
+                    {
+                        fastrtps::types::MemberId u_rep_id = reply->get_member_id_by_name("method1");
+                        fastrtps::types::DynamicData* method1_result = reply->loan_value(u_rep_id);
+                        fastrtps::types::MemberId method1_result_result_id =
+                                method1_result->get_member_id_by_name("result");
+
+                        xtypes::DynamicData xtypes_reply(*method1_reply_type);
+                        int32_t result;
+                        method1_result->get_int32_value(result, method1_result_result_id);
+                        reply->return_loaned_value(method1_result);
+                        xtypes_reply["result"] = result;
+                        test_->promise_->set_value(std::move(xtypes_reply));
+                    }
+                    else if ("method2" == u_rep_descriptor.get_name())
+                    {
+                        fastrtps::types::MemberId u_rep_id = reply->get_member_id_by_name("method2");
+                        fastrtps::types::DynamicData* method2_result = reply->loan_value(u_rep_id);
+                        fastrtps::types::MemberId method2_result_data_id =
+                                method2_result->get_member_id_by_name("data");
+
+                        xtypes::DynamicData xtypes_reply(*method2_reply_type);
+                        float data;
+                        method2_result->get_float32_value(data, method2_result_data_id);
+                        reply->return_loaned_value(method2_result);
+                        xtypes_reply["data"] = data;
+                        test_->promise_->set_value(std::move(xtypes_reply));
+                    }
+                    else
+                    {
+                        throw DDSMiddlewareException(logger,
+                                      "DDS Client: received reply with invalid member name" +
+                                      u_rep_descriptor.get_name());
+                    }
+
+                    rep_msg->return_loaned_value(reply);
+                    return;
                 }
+
             }
 
             test_->promise_->set_value(
@@ -679,7 +918,7 @@ void roundtrip_server(
 
 void roundtrip_client(
         const eprosima::xtypes::DynamicData& message,
-        std::shared_ptr<FastDDSTest> fastdds,
+        std::shared_ptr<FastDDSServicesTest> fastdds,
         eprosima::xtypes::DynamicData& response)
 {
     // DDS->MOCK->DDS
@@ -721,7 +960,7 @@ TEST(FastDDS, Transmit_to_and_receive_from_dds__basic_type_default_transport)
     // Road: [mock -> dds -> dds -> mock]
     const is::TypeRegistry& dds_types = *instance.type_registry("dds");
     eprosima::xtypes::DynamicData msg_to_recv(*dds_types.at(topic_type));
-    roundtrip(topic_sent, topic_recv, msg_to_sent, msg_to_recv);
+    ASSERT_NO_THROW(roundtrip(topic_sent, topic_recv, msg_to_sent, msg_to_recv));
 
     ASSERT_EQ(msg_to_sent, msg_to_recv);
     ASSERT_EQ(0, instance.quit().wait_for(1s));
@@ -775,11 +1014,11 @@ TEST(FastDDS, Transmit_to_and_receive_from_dds__basic_type_tcp_tunnel)
     // Road: [mock -> dds-client] -> [dds-server -> mock]
     const is::TypeRegistry& dds_types = *server_instance.type_registry("dds");
     eprosima::xtypes::DynamicData msg_to_recv(*dds_types.at(topic_type));
-    roundtrip(client_to_server_topic, client_to_server_topic, msg_to_sent, msg_to_recv);
+    ASSERT_NO_THROW(roundtrip(client_to_server_topic, client_to_server_topic, msg_to_sent, msg_to_recv));
     ASSERT_EQ(msg_to_sent, msg_to_recv);
 
     // Road: [mock <- dds-client] <- [dds-server <- mock]
-    roundtrip(server_to_client_topic, server_to_client_topic, msg_to_sent, msg_to_recv);
+    ASSERT_NO_THROW(roundtrip(server_to_client_topic, server_to_client_topic, msg_to_sent, msg_to_recv));
     ASSERT_EQ(msg_to_sent, msg_to_recv);
 
     ASSERT_EQ(0, client_instance.quit().wait_for(1s));
@@ -808,8 +1047,8 @@ TEST(FastDDS, Request_to_and_reply_from_dds_server_to_mock_client)
     std::mutex disc_mutex;
     disc_mutex.lock();
 
-    std::shared_ptr<FastDDSTest> server = nullptr;
-    ASSERT_NO_THROW(server.reset(new FastDDSTest(true, disc_mutex)));
+    std::shared_ptr<FastDDSServicesTest> server = nullptr;
+    ASSERT_NO_THROW(server.reset(new FastDDSServicesTest(true, disc_mutex)));
 
     // method0
     {
@@ -822,7 +1061,7 @@ TEST(FastDDS, Request_to_and_reply_from_dds_server_to_mock_client)
                << "Sent message: " << message_data_fail << std::endl;
 
         eprosima::xtypes::DynamicData msg_to_recv(*mock_types->at("Method0_Result"));
-        roundtrip_server("TestService_0", msg_to_sent, msg_to_recv);
+        ASSERT_NO_THROW(roundtrip_server("TestService_0", msg_to_sent, msg_to_recv));
         ASSERT_FALSE(msg_to_recv["success"].value<bool>());
 
         std::string message_data_ok = "TEST";
@@ -831,7 +1070,7 @@ TEST(FastDDS, Request_to_and_reply_from_dds_server_to_mock_client)
         logger << utils::Logger::Level::INFO
                << "Sent message: " << message_data_ok << std::endl;
 
-        roundtrip_server("TestService_0", msg_to_sent, msg_to_recv);
+        ASSERT_NO_THROW(roundtrip_server("TestService_0", msg_to_sent, msg_to_recv));
         ASSERT_TRUE(msg_to_recv["success"].value<bool>());
     }
 
@@ -846,7 +1085,7 @@ TEST(FastDDS, Request_to_and_reply_from_dds_server_to_mock_client)
                << "Sent message: " << a << " + " << b << std::endl;
 
         eprosima::xtypes::DynamicData msg_to_recv(*mock_types->at("Method1_Result"));
-        roundtrip_server("TestService_1", msg_to_sent, msg_to_recv);
+        ASSERT_NO_THROW(roundtrip_server("TestService_1", msg_to_sent, msg_to_recv));
         ASSERT_EQ(msg_to_recv["result"].value<int32_t>(), (a + b));
     }
 
@@ -860,7 +1099,7 @@ TEST(FastDDS, Request_to_and_reply_from_dds_server_to_mock_client)
                << "Sent message: " << data << std::endl;
 
         eprosima::xtypes::DynamicData msg_to_recv(*mock_types->at("Method2_Result"));
-        roundtrip_server("TestService_2", msg_to_sent, msg_to_recv);
+        ASSERT_NO_THROW(roundtrip_server("TestService_2", msg_to_sent, msg_to_recv));
         ASSERT_EQ(msg_to_recv["data"].value<float>(), data);
     }
 
@@ -898,8 +1137,8 @@ TEST(FastDDS, Request_to_and_reply_from_mock_server_to_dds_client)
     std::mutex disc_mutex;
     disc_mutex.lock();
 
-    std::shared_ptr<FastDDSTest> client = nullptr;
-    ASSERT_NO_THROW(client.reset(new FastDDSTest(false, disc_mutex)));
+    std::shared_ptr<FastDDSServicesTest> client = nullptr;
+    ASSERT_NO_THROW(client.reset(new FastDDSServicesTest(false, disc_mutex)));
 
     // Serve using mock
     is::sh::mock::serve(
@@ -941,7 +1180,7 @@ TEST(FastDDS, Request_to_and_reply_from_mock_server_to_dds_client)
                << "Sent message: " << message_data_fail << std::endl;
 
         eprosima::xtypes::DynamicData msg_to_recv(*mock_types->at("Method0_Result"));
-        roundtrip_client(msg_to_sent, client, msg_to_recv);
+        ASSERT_NO_THROW(roundtrip_client(msg_to_sent, client, msg_to_recv));
         ASSERT_FALSE(msg_to_recv["success"].value<bool>());
 
         std::string message_data_ok = "TEST";
@@ -967,7 +1206,7 @@ TEST(FastDDS, Request_to_and_reply_from_mock_server_to_dds_client)
                << "Sent message: " << a << " + " << b << std::endl;
 
         eprosima::xtypes::DynamicData msg_to_recv(*mock_types->at("Method1_Result"));
-        roundtrip_client(msg_to_sent, client, msg_to_recv);
+        ASSERT_NO_THROW(roundtrip_client(msg_to_sent, client, msg_to_recv));
 
         ASSERT_EQ(msg_to_recv["result"].value<int32_t>(), (a + b));
     }
@@ -982,7 +1221,7 @@ TEST(FastDDS, Request_to_and_reply_from_mock_server_to_dds_client)
                << "Sent message: " << data << std::endl;
 
         eprosima::xtypes::DynamicData msg_to_recv(*mock_types->at("Method2_Result"));
-        roundtrip_client(msg_to_sent, client, msg_to_recv);
+        ASSERT_NO_THROW(roundtrip_client(msg_to_sent, client, msg_to_recv));
 
         ASSERT_EQ(msg_to_recv["data"].value<float>(), data);
     }

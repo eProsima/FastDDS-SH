@@ -74,8 +74,7 @@ find_package(is-mock REQUIRED)
 
 add_executable(${PROJECT_NAME}-integration-test
     integration/roundtrip.cpp
-    integration/resources/test_service/test_service.cxx
-    integration/resources/test_service/test_servicePubSubTypes.cxx
+    ../src/Conversion.cpp
     )
 
 set_target_properties(${PROJECT_NAME}-integration-test PROPERTIES
