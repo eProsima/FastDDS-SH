@@ -57,61 +57,65 @@ namespace sh {
 namespace fastdds {
 namespace test {
 
+// Method0: If the data is "TEST", then success will be true.
+// Method1: a + b = result
+// Method2: Echoes data
 static const std::string service_request_idl =
-        R"(
-    struct Method0_In // If the data is "TEST", then success will be true.
-    {
-        string data;
-    };
+        R"(            struct Method0_In
+            {
+                string data;
+            };
 
-    struct Method1_In // a + b = result
-    {
-        int32 a;
-        int32 b;
-    };
+            struct Method1_In
+            {
+                int32 a;
+                int32 b;
+            };
 
-    struct Method2_In
-    {
-        float data; // Echoes data
-    };
+            struct Method2_In
+            {
+                float data;
+            };
 
-    union TestService_Call switch (uint32)
-    {
-        case 0: Method0_In method0;
-        case 1: Method1_In method1;
-        case 2: Method2_In method2;
-    };
+            union TestService_Call switch (uint32)
+            {
+                case 0: Method0_In method0;
+                case 1: Method1_In method1;
+                case 2: Method2_In method2;
+            };
 
-    struct TestService_Request
-    {
-        TestService_Call data;
-    };)";
+            struct TestService_Request
+            {
+                TestService_Call data;
+            };)";
 
+// Method0: If the data is "TEST", then success will be true.
+// Method1: a + b = result
+// Method2: Echoes data
 static const std::string service_reply_idl =
-        R"(
-    struct Method0_Result // If the data is "TEST", then success will be true.
-    {
-        boolean success;
-    };
-    struct Method1_Result
-    {
-        int32 result; // a + b = result
-    };
-    struct Method2_Result
-    {
-        float data; // Echoes data
-    };
-    union TestService_Return switch (int32)
-    {
-        case 0: Method0_Result method0;
-        case 1: Method1_Result method1;
-        case 2: Method2_Result method2;
-    };
+        R"(            struct Method0_Result
+            {
+                boolean success;
+            };
+            struct Method1_Result
+            {
+                int32 result;
+            };
+            struct Method2_Result
+            {
+                float data;
+            };
+            union TestService_Return switch (int32)
+            {
+                case 0: Method0_Result method0;
+                case 1: Method1_Result method1;
+                case 2: Method2_Result method2;
+            };
 
-    struct TestService_Reply
-    {
-        TestService_Return reply;
-    };)";
+            struct TestService_Reply
+            {
+                TestService_Return reply;
+            };)";
 
 class FastDDSServicesTest
     : public ::fastdds::dds::DataWriterListener
@@ -754,7 +758,9 @@ std::string gen_config_method_yaml(
     s += "types:\n";
     s += "    idls:\n";
     s += "        - >\n";
-    s += "            #include \"test_service.idl\"\n";
+    s += service_request_idl + "\n\n";
+    s += "        - >\n";
+    s += service_reply_idl + "\n\n";
 
     s += "systems:\n";
     s += "    dds:\n";
