@@ -74,8 +74,7 @@ find_package(is-mock REQUIRED)
 
 add_executable(${PROJECT_NAME}-integration-test
     integration/roundtrip.cpp
-    integration/resources/test_service/test_service.cxx
-    integration/resources/test_service/test_servicePubSubTypes.cxx
+    ../src/Conversion.cpp
     )
 
 set_target_properties(${PROJECT_NAME}-integration-test PROPERTIES
@@ -124,12 +123,6 @@ else()
         COPYONLY
         )
 endif()
-
-configure_file(
-    integration/resources/test_service.idl
-    ${PROJECT_BINARY_DIR}/test/test_service.idl
-    COPYONLY
-    )
 
 add_gtest(${PROJECT_NAME}-integration-test
     SOURCES
