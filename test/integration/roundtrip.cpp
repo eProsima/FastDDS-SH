@@ -57,6 +57,229 @@ namespace sh {
 namespace fastdds {
 namespace test {
 
+static const std::string pubsub_idl =
+        R"(            struct dds_test_string
+            {
+                string data;
+            };)";
+
+class FastDDSPubsubTest
+    : public ::fastdds::dds::DataWriterListener
+    , public ::fastdds::dds::DataReaderListener
+{
+public:
+
+    FastDDSPubsubTest(
+            std::mutex& mtx)
+        : ::fastdds::dds::DataReaderListener()
+        , participant_factory_(::fastdds::dds::DomainParticipantFactory::get_instance())
+        , mutex_(mtx)
+        , matched_mutex_()
+    {
+        {
+            const std::string type_name("dds_test_string");
+
+            // Parse IDL and generate dynamic typesupport for topic type
+            xtypes::idl::Context context = xtypes::idl::parse(pubsub_idl);
+            if (!context.success)
+            {
+                throw DDSMiddlewareException(
+                          logger, "IDL definition for type " + type_name + " is incorrect");
+            }
+
+            xtypes::DynamicType::Ptr type = context.module().type(type_name);
+            if (nullptr == type.get())
+            {
+                throw DDSMiddlewareException(logger, "Could not retrieve service type '"
+                              + type_name + "' from the IDL definition");
+            }
+
+            fastrtps::types::DynamicTypeBuilder* builder =
+                    Conversion::create_builder(*type);
+            if (!builder)
+            {
+                throw DDSMiddlewareException(
+                          logger, "Cannot create builder for type " + type_name);
+            }
+
+            fastrtps::types::DynamicType_ptr dtptr = builder->build();
+            if (!dtptr)
+            {
+                throw DDSMiddlewareException(
+                          logger, "Could not build DynamicType_ptr for type " + type_name);
+            }
+
+            tsType_ = fastrtps::types::DynamicPubSubType(dtptr);
+            tsType_.setName(type_name.c_str());
+        }
+
+        // Create participant
+        ::fastdds::dds::DomainId_t default_domain_id(0);
+        ::fastdds::dds::DomainParticipantQos participant_qos = ::fastdds::dds::PARTICIPANT_QOS_DEFAULT;
+
+        participant_qos.name("FastDDSTestPubsub");
+        participant_ = participant_factory_->create_participant(
+            default_domain_id, participant_qos);
+
+        if (!participant_)
+        {
+            std::ostringstream err;
+            err << "Error while creating participant '" << participant_qos.name()
+                << "' with default QoS attributes and Domain ID: " << default_domain_id;
+
+            throw DDSMiddlewareException(logger, err.str());
+        }
+
+        // Register type
+        participant_->register_type(tsType_);
+
+        // Create topic
+        topic_ = participant_->create_topic(
+            "mock_to_dds_topicdds_to_mock_topic",
+            tsType_.getName(),
+            ::fastdds::dds::TOPIC_QOS_DEFAULT);
+
+        if (!topic_)
+        {
+            throw DDSMiddlewareException(logger, "Error creating pubsub topic");
+        }
+
+        // Create publisher entities
+        publisher_ = participant_->create_publisher(::fastdds::dds::PUBLISHER_QOS_DEFAULT);
+
+        if (!publisher_)
+        {
+            throw DDSMiddlewareException(logger, "Publisher was not created");
+        }
+
+        datawriter_ = publisher_->create_datawriter(
+            topic_, ::fastdds::dds::DATAWRITER_QOS_DEFAULT, this);
+
+        if (!datawriter_)
+        {
+            std::ostringstream err;
+            err << "Creating datawriter for topic '" << topic_->get_name() << "' failed";
+
+            throw DDSMiddlewareException(logger, err.str());
+        }
+
+        // Create subscriber entities
+        subscriber_ = participant_->create_subscriber(::fastdds::dds::SUBSCRIBER_QOS_DEFAULT);
+
+        if (!subscriber_)
+        {
+            throw DDSMiddlewareException(logger, "Subscriber was not created");
+        }
+
+        ::fastdds::dds::DataReaderQos datareader_qos = ::fastdds::dds::DATAREADER_QOS_DEFAULT;
+        ::fastdds::dds::ReliabilityQosPolicy rel_policy;
+        rel_policy.kind = ::fastdds::dds::RELIABLE_RELIABILITY_QOS;
+        datareader_qos.reliability(rel_policy);
+
+        datareader_ = subscriber_->create_datareader(
+            topic_, datareader_qos, this);
+
+        if (!datareader_)
+        {
+            std::ostringstream err;
+            err << "Creating datareader for topic '" << topic_->get_name() << "' failed";
+
+            throw DDSMiddlewareException(logger, err.str());
+        }
+    }
+
+    ~FastDDSPubsubTest()
+    {
+        // Unregister types
+        participant_->unregister_type(tsType_.getName());
+
+        // Delete subscriber entities
+        subscriber_->delete_datareader(datareader_);
+        participant_->delete_subscriber(subscriber_);
+
+        // Delete publisher entities
+        publisher_->delete_datawriter(datawriter_);
+        participant_->delete_publisher(publisher_);
+
+        participant_->delete_topic(topic_);
+
+        // Delete participant
+        participant_factory_->delete_participant(participant_);
+    }
+
+private:
+
+    void on_publication_matched(
+            ::fastdds::dds::DataWriter* /*writer*/,
+            const ::fastdds::dds::PublicationMatchedStatus& /*info*/) override
+    {
+        std::unique_lock<std::mutex> lock(matched_mutex_);
+        pub_sub_matched_++;
+        if (4 == pub_sub_matched_)
+        {
+            mutex_.unlock();
+        }
+    }
+
+    void on_subscription_matched(
+            ::fastdds::dds::DataReader* /*datareader*/,
+            const ::fastdds::dds::SubscriptionMatchedStatus& /*info*/) override
+    {
+        std::unique_lock<std::mutex> lock(matched_mutex_);
+        pub_sub_matched_++;
+        if (4 == pub_sub_matched_)
+        {
+            mutex_.unlock();
+        }
+    }
+
+    void on_data_available(
+            ::fastdds::dds::DataReader* /*reader*/) override
+    {
+        ::fastdds::dds::SampleInfo info;
+
+        const fastrtps::types::DynamicType_ptr& type = tsType_.GetDynamicType();
+        fastrtps::types::DynamicData* msg =
+                fastrtps::types::DynamicDataFactory::get_instance()->create_data(type);
+
+        if (fastrtps::types::ReturnCode_t::RETCODE_OK ==
+                datareader_->take_next_sample(msg, &info))
+        {
+#if FASTRTPS_VERSION_MINOR < 2
+            if (::fastdds::dds::InstanceStateKind::ALIVE == info.instance_state)
+#else
+            if (::fastdds::dds::InstanceStateKind::ALIVE_INSTANCE_STATE == info.instance_state)
+#endif //  if FASTRTPS_VERSION_MINOR < 2
+            {
+                auto sample_writer_guid = fastrtps::rtps::iHandle2GUID(info.publication_handle);
+                if (sample_writer_guid.guidPrefix != participant_->guid().guidPrefix)
+                {
+                    logger << is::utils::Logger::Level::INFO
+                           << "Sending data back to the mock middleware..." << std::endl;
+                    datawriter_->write(msg);
+                }
+            }
+        }
+    }
+
+    ::fastdds::dds::DomainParticipantFactory* participant_factory_;
+    ::fastdds::dds::DomainParticipant* participant_;
+
+    ::fastdds::dds::Topic* topic_;
+
+    ::fastdds::dds::Subscriber* subscriber_;
+    ::fastdds::dds::DataReader* datareader_;
+
+    ::fastdds::dds::Publisher* publisher_;
+    ::fastdds::dds::DataWriter* datawriter_;
+
+    fastrtps::types::DynamicPubSubType tsType_;
+
+    std::mutex& mutex_;
+    std::mutex matched_mutex_;
+    uint32_t pub_sub_matched_ = 0;
+};
+
 // Method0: If the data is "TEST", then success will be true.
 // Method1: a + b = result
 // Method2: Echoes data
@@ -958,6 +1181,14 @@ TEST(FastDDS, Transmit_to_and_receive_from_dds__basic_type_default_transport)
         "");
 
     ASSERT_TRUE(instance);
+
+    std::mutex disc_mutex;
+    disc_mutex.lock();
+
+    std::unique_ptr<FastDDSPubsubTest> dds_echo = nullptr;
+    ASSERT_NO_THROW(dds_echo.reset(new FastDDSPubsubTest(disc_mutex)));
+
+    disc_mutex.lock();
 
     const is::TypeRegistry& mock_types = *instance.type_registry("mock");
     eprosima::xtypes::DynamicData msg_to_sent(*mock_types.at(topic_type));
