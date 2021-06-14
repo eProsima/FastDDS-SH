@@ -1110,7 +1110,8 @@ void roundtrip(
         const std::string& topic_sent,
         const std::string& topic_recv,
         const eprosima::xtypes::DynamicData& message,
-        eprosima::xtypes::DynamicData& result)
+        eprosima::xtypes::DynamicData& result,
+        bool must_fail = false)
 {
     std::promise<eprosima::xtypes::DynamicData> receive_msg_promise;
     ASSERT_TRUE(is::sh::mock::subscribe(
@@ -1123,9 +1124,17 @@ void roundtrip(
     is::sh::mock::publish_message(topic_sent, message);
 
     auto receive_msg_future = receive_msg_promise.get_future();
-    ASSERT_EQ(std::future_status::ready, receive_msg_future.wait_for(5s));
 
-    result = receive_msg_future.get();
+    if (must_fail)
+    {
+        ASSERT_NE(std::future_status::ready, receive_msg_future.wait_for(5s));
+    }
+    else
+    {
+        ASSERT_EQ(std::future_status::ready, receive_msg_future.wait_for(5s));
+
+        result = receive_msg_future.get();
+    }
 }
 
 void roundtrip_server(
@@ -1200,6 +1209,44 @@ TEST(FastDDS, Transmit_to_and_receive_from_dds__basic_type_default_transport)
     ASSERT_NO_THROW(roundtrip(topic_sent, topic_recv, msg_to_sent, msg_to_recv));
 
     ASSERT_EQ(msg_to_sent, msg_to_recv);
+    ASSERT_EQ(0, instance.quit().wait_for(1s));
+}
+
+TEST(FastDDS, Filter_internal_messages)
+{
+    const std::string topic_type = "dds_test_string";
+
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+    std::string message_data = "mock test message at " + ss.str();
+
+    logger << utils::Logger::Level::INFO
+           << "Message id: " << ss.str() << std::endl;
+
+    const std::string topic_sent = "mock_to_dds_topic";
+    const std::string topic_recv = "dds_to_mock_topic";
+    is::core::InstanceHandle instance = create_instance(
+        topic_type,
+        topic_sent,
+        topic_recv,
+        true,
+        "",
+        "");
+
+    ASSERT_TRUE(instance);
+
+    const is::TypeRegistry& mock_types = *instance.type_registry("mock");
+    eprosima::xtypes::DynamicData msg_to_sent(*mock_types.at(topic_type));
+    msg_to_sent["data"].value(message_data);
+
+    // Road: [mock -> dds -> dds -> mock]
+    const is::TypeRegistry& dds_types = *instance.type_registry("dds");
+    eprosima::xtypes::DynamicData msg_to_recv(*dds_types.at(topic_type));
+    ASSERT_NO_THROW(roundtrip(topic_sent, topic_recv, msg_to_sent, msg_to_recv, true));
+
+    ASSERT_NE(msg_to_sent, msg_to_recv);
     ASSERT_EQ(0, instance.quit().wait_for(1s));
 }
 

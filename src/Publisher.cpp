@@ -169,6 +169,11 @@ bool Publisher::publish(
     return success;
 }
 
+const std::string& Publisher::topic_name() const
+{
+    return topic_name_;
+}
+
 const fastrtps::rtps::InstanceHandle_t Publisher::get_dds_instance_handle() const
 {
     return dds_datawriter_->get_instance_handle();

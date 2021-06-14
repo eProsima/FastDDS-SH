@@ -140,10 +140,21 @@ public:
         auto sample_writer_guid = fastrtps::rtps::iHandle2GUID(sample_info->publication_handle);
 
         if (sample_writer_guid.guidPrefix == participant_->get_dds_participant()->guid().guidPrefix)
-
         {
-            logger_ << utils::Logger::Level::WARN
-                    << "Received internal message in the subscriber. Ignore it..." << std::endl;
+            if (utils::Logger::Level::DEBUG == logger_.get_level())
+            {
+                for (const auto& publisher : publishers_)
+                {
+                    if (sample_writer_guid == fastrtps::rtps::iHandle2GUID(publisher->get_dds_instance_handle()))
+                    {
+                        logger_ << utils::Logger::Level::DEBUG
+                                << "Received internal message from publisher '"
+                                << publisher->topic_name() << "', ignoring it..." << std::endl;
+
+                        break;
+                    }
+                }
+            }
             // This is a message published FROM Integration Service. Discard it.
             return true;
         }
