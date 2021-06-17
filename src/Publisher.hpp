@@ -119,6 +119,21 @@ public:
     bool publish(
             const xtypes::DynamicData& message) override;
 
+
+    /**
+     * @brief Get the topic name where this publisher sends data to.
+     *
+     * @returns The topic name.
+     */
+    const std::string& topic_name() const;
+
+    /**
+     * @brief Get the DDS instance handle object for the associated datawriter.
+     *
+     * @returns The datawriter instance handle.
+     */
+    const fastrtps::rtps::InstanceHandle_t get_dds_instance_handle() const;
+
 private:
 
     /**

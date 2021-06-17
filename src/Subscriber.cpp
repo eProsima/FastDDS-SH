@@ -23,7 +23,6 @@
 #include <fastdds/dds/subscriber/SubscriberListener.hpp>
 #include <fastdds/dds/subscriber/DataReader.hpp>
 #include <fastdds/dds/subscriber/qos/DataReaderQos.hpp>
-#include <fastdds/dds/subscriber/SampleInfo.hpp>
 #if FASTRTPS_VERSION_MINOR >= 2
 #include <fastdds/dds/subscriber/InstanceState.hpp>
 #endif //  if FASTRTPS_VERSION_MINOR >= 2
@@ -173,7 +172,8 @@ Subscriber::~Subscriber()
 }
 
 void Subscriber::receive(
-        const fastrtps::types::DynamicData* dds_message)
+        const fastrtps::types::DynamicData* dds_message,
+        ::fastdds::dds::SampleInfo sample_info)
 {
     logger_ << utils::Logger::Level::INFO
             << "Receiving message from DDS for topic '" << topic_name_ << "'" << std::endl;
@@ -187,7 +187,7 @@ void Subscriber::receive(
         logger_ << utils::Logger::Level::INFO
                 << "Received message: [[ " << is_message << " ]]" << std::endl;
 
-        (*is_callback_)(is_message);
+        (*is_callback_)(is_message, static_cast<void*>(&sample_info));
     }
     else
     {
@@ -224,7 +224,7 @@ void Subscriber::on_data_available(
                     << "Processing incoming data available for topic '"
                     << topic_name_ << "'" << std::endl;
 
-            std::thread* thread = new std::thread(&Subscriber::receive, this, dynamic_data_);
+            std::thread* thread = new std::thread(&Subscriber::receive, this, dynamic_data_, info);
             reception_threads_.emplace(thread->get_id(), thread);
         }
         else
