@@ -36,7 +36,7 @@ jobs:
 
       - name: Download the Integration Service
         run: |
-          git clone --recursive -b feature/infinite_loops https://github.com/eProsima/Integration-Service src/integration-service
+          git clone --recursive https://github.com/eProsima/Integration-Service src/integration-service
 
       - name: Build
         run: |
