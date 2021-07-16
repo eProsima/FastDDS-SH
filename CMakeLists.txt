@@ -210,8 +210,8 @@ if(BUILD_LIBRARY)
     message(STATUS "Configuring [${PROJECT_NAME}]...")
 
     target_include_directories(${PROJECT_NAME}
-        INTERFACE
-            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+            INTERFACE
+                $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
         )
 endif()
 
