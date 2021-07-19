@@ -16,7 +16,6 @@ on:
 
 jobs:
   fastdds-sh_CI:
-    name: FastDDS SH Tests in Ubuntu Focal
     runs-on: ubuntu-20.04
     container: ubuntu:focal
 
@@ -48,44 +47,22 @@ jobs:
           . install/local_setup.sh && colcon test --packages-up-to is-fastdds --event-handlers console_direct+
           colcon test-result
 
-  fastdds-sh_CI_ros2-foxy:
-    name: FastDDS SH Tests for ROS2 foxy container
+  fastdds-sh_CI_ros2version:
+    strategy:
+      matrix:
+        node: [foxy, galactic]
     runs-on: ubuntu-20.04
-    container: ros:foxy
+    container: ros:${{ matrix.node }}
 
     steps:
       - uses: actions/checkout@v2
         with:
           path: src/fastdds-sh
 
-      - name: Download the Integration Service
+      - name: Download required dependencies
         run: |
-          git clone --recursive https://github.com/eProsima/Integration-Service src/integration-service
-
-      - name: Build
-        run: |
-          colcon build --cmake-args -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_FASTDDS_TESTS=ON --event-handlers console_direct+
-
-      - name: Test
-        run: |
-          . install/local_setup.sh && colcon test --packages-up-to is-fastdds --event-handlers console_direct+
-          colcon test-result
-
-  fastdds-sh_CI_ros2-galactic:
-    name: FastDDS SH Tests for ROS2 galactic container
-    runs-on: ubuntu-20.04
-    container: ros:galactic
-    env:
-      RMW_IMPLEMENTATION="rmw_fastrtps_cpp"
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          path: src/fastdds-sh
-
-      - name: Install fastrtps
-        run: |
-          apt install -y ros-galactic-rmw-fastrtps-cpp
+          apt update
+          DEBIAN_FRONTEND=noninteractive apt install -y cmake gcc g++ git libboost-dev libboost-program-options-dev libyaml-cpp-dev ros-${{ matrix.node }}-fastrtps
 
       - name: Download the Integration Service
         run: |
