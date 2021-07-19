@@ -19,9 +19,6 @@ jobs:
     name: FastDDS SH Tests in Ubuntu Focal
     runs-on: ubuntu-20.04
     container: ubuntu:focal
-    strategy:
-      matrix:
-        fastddsVersion: ["2.0.x", "2.3.0"]
 
     steps:
       - uses: actions/checkout@v2
@@ -42,9 +39,57 @@ jobs:
         run: |
           git clone --recursive https://github.com/eProsima/Integration-Service src/integration-service
 
-      - name: Download FastDDS
+      - name: Build
         run: |
-          git clone -b ${matrix.fastddsVersion} https://github.com/eProsima/Fast-DDS src/fastdds
+          colcon build --cmake-args -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_FASTDDS_TESTS=ON --event-handlers console_direct+
+
+      - name: Test
+        run: |
+          . install/local_setup.sh && colcon test --packages-up-to is-fastdds --event-handlers console_direct+
+          colcon test-result
+
+  fastdds-sh_CI_ros2-foxy:
+    name: FastDDS SH Tests for ROS2 foxy container
+    runs-on: ubuntu-20.04
+    container: ros:foxy
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: src/fastdds-sh
+
+      - name: Download the Integration Service
+        run: |
+          git clone --recursive https://github.com/eProsima/Integration-Service src/integration-service
+
+      - name: Build
+        run: |
+          colcon build --cmake-args -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_FASTDDS_TESTS=ON --event-handlers console_direct+
+
+      - name: Test
+        run: |
+          . install/local_setup.sh && colcon test --packages-up-to is-fastdds --event-handlers console_direct+
+          colcon test-result
+
+  fastdds-sh_CI_ros2-galactic:
+    name: FastDDS SH Tests for ROS2 galactic container
+    runs-on: ubuntu-20.04
+    container: ros:galactic
+    env:
+      RMW_IMPLEMENTATION="rmw_fastrtps_cpp"
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          path: src/fastdds-sh
+
+      - name: Install fastrtps
+        run: |
+          apt install -y ros-galactic-rmw-fastrtps-cpp
+
+      - name: Download the Integration Service
+        run: |
+          git clone --recursive https://github.com/eProsima/Integration-Service src/integration-service
 
       - name: Build
         run: |
