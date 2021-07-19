@@ -15,34 +15,20 @@ on:
       - 'docs/**'
 
 jobs:
-  fastdds-sh_CI:
+  fastdds-sh_CI_2.0.x:
     runs-on: ubuntu-20.04
     container: ubuntu:focal
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: ./FastDDS-SH/.github/actions/ubuntu-test
         with:
-          path: src/fastdds-sh
+          fastddsVersion: "2.0.x"
 
-      - name: Download required dependencies
-        run: |
-          apt update
-          DEBIAN_FRONTEND=noninteractive apt install -y cmake gcc g++ git libboost-dev libboost-program-options-dev libyaml-cpp-dev
+ fastdds-sh_CI_2.3.0:
+    runs-on: ubuntu-20.04
+    container: ubuntu:focal
 
-      - name: Install colcon
-        run: |
-          apt install -y python3-pip
-          pip3 install -U colcon-common-extensions
-
-      - name: Download the Integration Service
-        run: |
-          git clone --recursive https://github.com/eProsima/Integration-Service src/integration-service
-
-      - name: Build
-        run: |
-          colcon build --cmake-args -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_FASTDDS_TESTS=ON --event-handlers console_direct+
-
-      - name: Test
-        run: |
-          . install/local_setup.sh && colcon test --packages-up-to is-fastdds --event-handlers console_direct+
-          colcon test-result
+    steps:
+      - uses: ./FastDDS-SH/.github/actions/ubuntu-test
+        with:
+          fastddsVersion: "2.3.0"
