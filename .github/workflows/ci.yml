@@ -44,7 +44,7 @@ jobs:
 
       - name: Download FastDDS
         run: |
-          git clone -b ${matrix.fastddsVersion} https://github.com/eProsima/Fast-DDS src/integration-service
+          git clone -b ${matrix.fastddsVersion} https://github.com/eProsima/Fast-DDS src/fastdds
 
       - name: Build
         run: |
