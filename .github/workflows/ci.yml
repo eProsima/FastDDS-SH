@@ -62,7 +62,7 @@ jobs:
       - name: Download required dependencies
         run: |
           apt update
-          DEBIAN_FRONTEND=noninteractive apt install -y curl git libboost-dev libboost-program-options-dev libyaml-cpp-dev libwebsocketpp-dev libssl-dev libcurlpp-dev libasio-dev libcurl4-openssl-dev ros-${{ matrix.node }}-fastrtps ros-${{ matrix.node }}-rmw-fastrtps-cpp
+          DEBIAN_FRONTEND=noninteractive apt install -y git libboost-dev libboost-program-options-dev libyaml-cpp-dev ros-${{ matrix.node }}-fastrtps ros-${{ matrix.node }}-rmw-fastrtps-cpp
 
       - name: Download the Integration Service
         run: |
