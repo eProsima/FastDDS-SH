@@ -83,6 +83,10 @@ public:
      *           In case of databroker type it can contain three keys in the *YAML* map:
      *
      *            - `server_id`: Specifies the Discovery Server ID in order to generate its GUID.
+     *                              It is incompatible with setting the GUID.
+     *
+     *            - `server_guid`: Specifies the Discovery Server GUID.
+     *                              It is incompatible with setting the ID.
      *
      *            - `listening_addresses`: Specifies a list of TCP listening addresses.
      *                  - `ip`: Provides the public IP where the Server will be listening.
@@ -91,7 +95,8 @@ public:
      *            - `connection_addresses`: Specifies a list of TCP connection addresses.
      *                  - `ip`: Provides the public IP of the Server to connect to.
      *                  - `port`: Provides the port of the Server to connect to.
-     *                  - `server_id`: Provides the ID of the remote Server to connect to.
+     *                  - `server_id`: Provides the ID of the remote Server to connect to [incompatible with GUID].
+     *                  - `server_guid`: Provides the GUID of the remote Server to connect to [incompatible with ID].
      *
      * @throws DDSMiddlewareException If the XML profile was incorrect and, thus, the
      *         *DomainParticipant* could not be created.

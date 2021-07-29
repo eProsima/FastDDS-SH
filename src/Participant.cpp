@@ -57,7 +57,7 @@ Participant::~Participant()
         if (fastrtps::types::ReturnCode_t::RETCODE_OK !=
                 ::fastdds::dds::DomainParticipantFactory::get_instance()->delete_participant(dds_participant_))
         {
-            logger_ << utils::Logger::Level::ERROR
+            logger_ << eprosima::is::utils::Logger::Level::ERROR
                     << "Cannot delete Fast DDS participant yet: it has active entities" << std::endl;
         }
     }
@@ -75,7 +75,7 @@ void Participant::build_participant(
         domain_id = config["domain_id"].as<uint32_t>();
     }
 
-    logger_ << utils::Logger::Level::DEBUG
+    logger_ << eprosima::is::utils::Logger::Level::DEBUG
             << "Creating Fast DDS Participant in domain " << domain_id << std::endl;
 
     // Load default XML files
@@ -135,7 +135,7 @@ void Participant::build_participant(
 
     if (dds_participant_)
     {
-        logger_ << utils::Logger::Level::INFO
+        logger_ << eprosima::is::utils::Logger::Level::INFO
                 << "Created Fast DDS participant '" << participant_name
                 << "' with Domain ID: " << domain_id << std::endl;
     }
@@ -171,7 +171,7 @@ void Participant::register_dynamic_type(
         // Type known, add the entry in the map topic->type
         topic_to_type_.emplace(topic_name, type_name);
 
-        logger_ << utils::Logger::Level::DEBUG
+        logger_ << eprosima::is::utils::Logger::Level::DEBUG
                 << "Adding type '" << type_name << "' to topic '"
                 << topic_name << "'" << std::endl;
 
@@ -220,7 +220,7 @@ void Participant::register_dynamic_type(
 
         if (pair.second)
         {
-            logger_ << utils::Logger::Level::DEBUG
+            logger_ << eprosima::is::utils::Logger::Level::DEBUG
                     << "Registered type '" << type_name << "' in topic '"
                     << topic_name << "'" << std::endl;
 
@@ -228,7 +228,7 @@ void Participant::register_dynamic_type(
         }
         else
         {
-            logger_ << utils::Logger::Level::WARN
+            logger_ << eprosima::is::utils::Logger::Level::WARN
                     << "Failed registering type '" << type_name << "' in topic '"
                     << topic_name << "'" << std::endl;
         }
@@ -352,23 +352,17 @@ eprosima::fastdds::dds::DomainParticipantQos Participant::get_databroker_qos(
     eprosima::fastdds::dds::DomainParticipantQos pqos = get_default_participant_qos();
 
     // Server id
-    uint32_t server_id = 0;
-    if (config["server_id"])
+    // Show warning if both set
+    if (config["server_id"] && config["server_guid"])
     {
-        // Conversion to int is needed so it is not treated as a char
-        server_id = config["server_id"].as<uint32_t>() % std::numeric_limits<uint8_t>::max();
-        logger_ << utils::Logger::Level::DEBUG
-                << "Server ID set to " << server_id << std::endl;
-    }
-    else
-    {
-        logger_ << utils::Logger::Level::INFO
-                << "The Server ID is not set in the configuration file. It will be set to 0." << std::endl;
+        logger_ << eprosima::is::utils::Logger::Level::WARN
+                << "Server ID and Server GUID are both set. Only GUID will be used." << std::endl;
     }
 
     // Set GUID depending on the id
-    pqos.wire_protocol().prefix = guid_server(server_id);
-    pqos.name("DataBroker_IS-FastDDS-SH_participant_" + std::to_string(server_id));
+    pqos.wire_protocol().prefix = eprosima::is::sh::fastdds::utils::guid_server(config["server_id"], config["server_guid"]);
+    pqos.name("DataBroker_IS-FastDDS-SH_participant_" +
+        eprosima::is::sh::fastdds::utils::guid_to_string(pqos.wire_protocol().prefix));
 
     // Listening addresses
     if (config["listening_addresses"])
@@ -386,7 +380,7 @@ eprosima::fastdds::dds::DomainParticipantQos Participant::get_databroker_qos(
             }
             else
             {
-                logger_ << utils::Logger::Level::WARN
+                logger_ << eprosima::is::utils::Logger::Level::WARN
                         << "The addresses in 'listening_addresses' must contain a tag 'ip'." << std::endl;
                 continue;
             }
@@ -397,7 +391,7 @@ eprosima::fastdds::dds::DomainParticipantQos Participant::get_databroker_qos(
             }
             else
             {
-                logger_ << utils::Logger::Level::WARN
+                logger_ << eprosima::is::utils::Logger::Level::WARN
                         << "The addresses in 'listening_addresses' must contain a tag 'port'. " << std::endl;
                 continue;
             }
@@ -425,13 +419,13 @@ eprosima::fastdds::dds::DomainParticipantQos Participant::get_databroker_qos(
 
             pqos.wire_protocol().builtin.metatrafficUnicastLocatorList.push_back(tcp_locator);
 
-            logger_ << utils::Logger::Level::DEBUG
+            logger_ << eprosima::is::utils::Logger::Level::DEBUG
                     << "Server listening in: " << ip << ":" << port << std::endl;
         }
     }
     else
     {
-        logger_ << utils::Logger::Level::WARN
+        logger_ << eprosima::is::utils::Logger::Level::WARN
                 << "Server has no listening address."
                 << "It will not discover or connect to other servers."
                 << std::endl;
@@ -445,7 +439,6 @@ eprosima::fastdds::dds::DomainParticipantQos Participant::get_databroker_qos(
         {
             std::string ip;
             uint16_t port;
-            uint16_t server_id;
 
             // Get address values. If not present, send error
             if (address["ip"])
@@ -454,7 +447,7 @@ eprosima::fastdds::dds::DomainParticipantQos Participant::get_databroker_qos(
             }
             else
             {
-                logger_ << utils::Logger::Level::WARN
+                logger_ << eprosima::is::utils::Logger::Level::WARN
                         << "The addresses in 'connection_addresses' must contain a tag 'ip'." << std::endl;
                 continue;
             }
@@ -465,25 +458,24 @@ eprosima::fastdds::dds::DomainParticipantQos Participant::get_databroker_qos(
             }
             else
             {
-                logger_ << utils::Logger::Level::WARN
+                logger_ << eprosima::is::utils::Logger::Level::WARN
                         << "The addresses in 'connection_addresses' must contain a tag 'port'."  << std::endl;
                 continue;
             }
 
-            if (address["server_id"])
+            if (! (address["server_id"] || address["server_guid"]))
             {
-                server_id = address["server_id"].as<std::uint16_t>();
-            }
-            else
-            {
-                logger_ << utils::Logger::Level::WARN
-                        << "The addresses in 'connection_addresses' must contain a tag 'server_id'."  << std::endl;
+                logger_ << eprosima::is::utils::Logger::Level::WARN
+                        << "The addresses in 'connection_addresses' must contain a tag 'server_id' or 'server_guid'."
+                        << std::endl;
                 continue;
             }
 
             // Set Server GUID
             eprosima::fastrtps::rtps::RemoteServerAttributes server_attr;
-            server_attr.guidPrefix = guid_server(server_id);
+            server_attr.guidPrefix = eprosima::is::sh::fastdds::utils::guid_server(
+                address["server_id"],
+                address["server_guid"]);
 
             // Discovery server locator configuration TCP
             eprosima::fastrtps::rtps::Locator_t tcp_locator;
@@ -495,14 +487,14 @@ eprosima::fastdds::dds::DomainParticipantQos Participant::get_databroker_qos(
 
             pqos.wire_protocol().builtin.discovery_config.m_DiscoveryServers.push_back(server_attr);
 
-            logger_ << utils::Logger::Level::DEBUG
+            logger_ << eprosima::is::utils::Logger::Level::DEBUG
                     << "Connecting to remote server with GUID: " << server_attr.guidPrefix
                     << " in: " << ip << ":" << port << std::endl;
         }
     }
     else
     {
-        logger_ << utils::Logger::Level::INFO
+        logger_ << eprosima::is::utils::Logger::Level::INFO
                 << "Server has no connection addresses. It will not try to connect to remote servers"
                 << std::endl;
     }
@@ -516,7 +508,7 @@ eprosima::fastdds::dds::DomainParticipantQos Participant::get_databroker_qos(
     pqos.wire_protocol().builtin.discovery_config.discoveryProtocol =
         fastrtps::rtps::DiscoveryProtocol::SERVER;
 
-    logger_ << utils::Logger::Level::DEBUG
+    logger_ << eprosima::is::utils::Logger::Level::DEBUG
             << "Databroker initialized with GUID: " << pqos.wire_protocol().prefix << std::endl;
 
     return pqos;
