@@ -70,6 +70,7 @@ jobs:
 
       - name: Build
         run: |
+          . /opt/ros/${{ matrix.node }}/setup.sh
           colcon build --cmake-args -DCMAKE_BUILD_TYPE=DEBUG -DBUILD_FASTDDS_TESTS=ON --event-handlers console_direct+
 
       - name: Test
