@@ -20,7 +20,7 @@
 ###################################################################################
 cmake_minimum_required(VERSION 3.7.0 FATAL_ERROR)
 
-project(is-fastdds VERSION "3.0.0" LANGUAGES CXX)
+project(is-fastdds VERSION "3.1.0" LANGUAGES CXX)
 
 ###################################################################################
 # Configure options
