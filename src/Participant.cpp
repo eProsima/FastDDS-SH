@@ -275,7 +275,7 @@ const fastrtps::types::DynamicType* Participant::get_dynamic_type(
         return nullptr;
     }
 
-    return static_cast<const DynamicType*>(it->second.GetDynamicType().get());
+    return static_cast<const fastrtps::types::DynamicType*>(it->second.GetDynamicType().get());
 }
 
 const std::string& Participant::get_topic_type(
